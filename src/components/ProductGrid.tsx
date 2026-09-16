@@ -23,7 +23,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
       {products.map((product) => {
         // Map Prisma product format to the format expected by useShop if needed
         const shopProduct = {
-          id: product.id,
+          productId: product.id,
           name: product.name,
           price: product.price,
           image: product.images && product.images.length > 0 ? product.images[0] : "",

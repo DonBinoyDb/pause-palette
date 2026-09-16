@@ -102,7 +102,12 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                <p className="text-[12px] tracking-wide text-gray-500 italic">
                  {product.category} {product.gender?.length > 0 ? `| ${product.gender.join(', ')}` : ''}
                </p>
-               <button onClick={() => toggleSaved(product)} className={`text-xs hover:scale-110 transition-transform ${isSaved(product.id) ? 'text-red-500' : 'text-gray-400'}`}>
+               <button onClick={() => toggleSaved({
+                 productId: product.id,
+                 name: product.name,
+                 price: product.price,
+                 image: images[0]
+               })} className={`text-xs hover:scale-110 transition-transform ${isSaved(product.id) ? 'text-red-500' : 'text-gray-400'}`}>
                  {isSaved(product.id) ? '♥' : '♡'}
                </button>
             </div>

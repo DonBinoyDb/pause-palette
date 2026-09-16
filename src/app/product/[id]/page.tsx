@@ -28,7 +28,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     images: product.images,
     category: product.collection?.name || "Uncategorized",
     hasSilhouette: product.hasSilhouette,
-    fits: product.fits,
+    fits: (product.fits as {name: string, iconUrl: string}[]) || [],
+    accordions: (product.accordions as {title: string, content: string}[]) || [],
     gender: product.gender,
     sizes: product.sizes
   };
