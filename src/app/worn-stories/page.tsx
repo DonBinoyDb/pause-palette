@@ -33,7 +33,7 @@ export default async function WornStoriesPage() {
         {/* Reviews Illustration Section (Dynamic) */}
         <div className="mb-12 relative flex justify-center -mx-6 md:-mx-12 lg:-mx-24">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-10 max-w-[2000px] w-full mx-auto px-6 lg:px-12">
-            {reviews.map((review, index) => (
+            {reviews.map((review: any, index: number) => (
               <ReviewIllustration 
                 key={review.id}
                 type={(index % 2 === 0 ? "girl" : "boy") as ReviewType}

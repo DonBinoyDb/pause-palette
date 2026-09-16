@@ -45,7 +45,7 @@ export default async function CollectionsPage() {
           </div>
         ) : (
           <div className="space-y-24">
-            {collections.map((collection) => {
+            {collections.map((collection: any) => {
               // Try to get a static image if it matches the mock, otherwise use the first product image, or a fallback.
               let imageSrc = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920&auto=format&fit=crop";
               if (collection.slug === "in-wild-bloom") imageSrc = "/images/in_wild_bloom.png";
