@@ -6,13 +6,13 @@ import { useShop } from "@/context/ShopContext";
 
 export default function Navbar({ variant = "light" }: { variant?: "light" | "dark" | "glass" }) {
   const isGlass = variant === "glass";
-  const textColor = variant === "light" ? "text-white" : "text-[#7B92A7]";
+  const textColor = variant === "light" ? "text-white" : "text-[#79A7D3]";
   const headerBg = isGlass ? "bg-white/40 backdrop-blur-md border-b border-white/50 shadow-sm" : "bg-transparent";
-  const borderColor = variant === "light" ? "border-white/20" : "border-[#7B92A7]/20";
+  const borderColor = variant === "light" ? "border-white/20" : "border-[#79A7D3]/20";
   const bgColor = variant === "light" ? "bg-white/10" : "bg-white/80";
-  const hoverBg = variant === "light" ? "hover:bg-white/20" : "hover:bg-[#7B92A7]/10";
-  const hoverTextColor = variant === "light" ? "hover:text-white" : "hover:text-[#7B92A7]";
-  const childTextColor = variant === "light" ? "text-white/80" : "text-[#7B92A7]/80";
+  const hoverBg = variant === "light" ? "hover:bg-white/20" : "hover:bg-[#79A7D3]/10";
+  const hoverTextColor = variant === "light" ? "hover:text-white" : "hover:text-[#79A7D3]";
+  const childTextColor = variant === "light" ? "text-white/80" : "text-[#79A7D3]/80";
 
   // Use the shop context for dynamic badges
   const { cart, saved } = useShop();
@@ -111,7 +111,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <Link href="/cart" suppressHydrationWarning className="hover:opacity-70 transition-opacity relative">
             <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-[#7B92A7] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
+              <span className="absolute -top-1.5 -right-2 bg-[#79A7D3] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
                 {cartItemCount}
               </span>
             )}
@@ -119,7 +119,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <Link href="/saved" suppressHydrationWarning className="hover:opacity-70 transition-opacity relative">
             <Bookmark className="w-5 h-5 stroke-[1.5]" />
             {savedItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-[#7B92A7] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
+              <span className="absolute -top-1.5 -right-2 bg-[#79A7D3] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
                 {savedItemCount}
               </span>
             )}

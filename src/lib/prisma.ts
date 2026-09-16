@@ -7,7 +7,9 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const createPrismaClient = () => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const connectionString = process.env.DATABASE_URL;
+
+  const pool = new Pool({ connectionString });
   const adapter = new PrismaPg(pool);
   
   return new PrismaClient({
@@ -16,6 +18,13 @@ const createPrismaClient = () => {
   });
 };
 
+// Force reload to pick up new schema changes (Journal model)
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = undefined;
+}
+
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

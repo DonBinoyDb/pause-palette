@@ -1,7 +1,14 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { prisma } from "@/lib/prisma";
+import JournalGridClient from "./JournalGridClient";
 
-export default function MakingJournalPage() {
+export default async function MakingJournalPage() {
+  const journals = await prisma.journal.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
@@ -9,102 +16,52 @@ export default function MakingJournalPage() {
       <div className="pt-24 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
         
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row justify-between mb-24 relative">
+        <div className="flex flex-col md:flex-row justify-between mb-8 relative">
           
           {/* Text Left */}
-          <div className="md:w-[45%] pt-24 md:pt-40 flex flex-col z-10">
-            <h1 className="font-serif text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-2">
+          <div className="md:w-[42%] pt-32 md:pt-56 flex flex-col z-10">
+            <h1 className="font-serif text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-1">
               THE MAKING JOURNAL
             </h1>
-            <p className="font-serif italic text-gray-700 font-bold text-[14px] mb-6">
+            <p className="italic font-bold text-gray-600 text-[16px] md:text-[17px] mb-2 leading-[1.6]">
               A journal of the stories, ideas and moments that shape Pause Palette.
             </p>
-            <p className="text-[12px] text-gray-500 leading-relaxed mb-4 text-justify">
+            <p className="text-[15px] text-gray-500 leading-[1.8] mb-2">
               From the things that inspire us and the stories behind our collections to sketches, experiments, making, shoots and moments along the way — a closer look into the world behind what we create.
             </p>
-            <p className="text-[12px] text-gray-500 leading-relaxed text-justify">
+            <p className="text-[15px] text-gray-500 leading-[1.8]">
               Some stories become pieces. Others simply become part of the journey.
             </p>
           </div>
           
           {/* Illustrations Right */}
-          <div className="md:w-[50%] flex items-end justify-end gap-4 relative">
-             <div className="w-[45%] flex justify-end pb-8">
+          <div className="md:w-[58%] flex items-end justify-end gap-2 relative">
+             <div className="w-[48%] flex justify-end pb-8">
                <img 
                  src="/images/artwork/boat.png" 
                  alt="Boat Illustration" 
-                 className="w-full max-w-[300px] object-contain" 
+                 className="w-full max-w-[450px] object-contain" 
                />
              </div>
-             <div className="w-[50%] flex justify-end">
+             <div className="w-[52%] flex justify-end">
                <img 
                  src="/images/artwork/home.png" 
                  alt="Treehouse Illustration" 
-                 className="w-full max-w-[340px] object-contain" 
+                 className="w-full max-w-[500px] object-contain" 
                />
              </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-10 mb-6 text-[10px] tracking-[0.15em] font-serif uppercase">
-           <button suppressHydrationWarning className="text-gray-400 hover:text-gray-800 transition-colors pb-1">VIDEOS</button>
-           <button suppressHydrationWarning className="text-[#8FB1D0] border-b border-[#8FB1D0] pb-1">PHOTOS</button>
-           <button suppressHydrationWarning className="text-gray-400 hover:text-gray-800 transition-colors pb-1">ALL</button>
+        <div className="flex gap-12 mb-12 text-[13px] tracking-[0.05em] font-serif uppercase">
+           <button suppressHydrationWarning className="text-gray-500 border-b border-gray-400 pb-0.5 hover:text-gray-800 transition-colors">VIDEOS</button>
+           <button suppressHydrationWarning className="text-[#8FB1D0] border-b border-[#8FB1D0] pb-0.5">PHOTOS</button>
+           <button suppressHydrationWarning className="text-gray-500 border-b border-gray-400 pb-0.5 hover:text-gray-800 transition-colors">ALL</button>
         </div>
 
-        {/* Masonry Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          
-          {/* Column 1 */}
-          <div className="flex flex-col gap-3">
-             <img 
-               src="https://images.unsplash.com/photo-1616423640778-28d1b53229bd?auto=format&fit=crop&w=600&h=1200&q=80" 
-               alt="Embroidery hoop" 
-               className="w-full h-auto aspect-[1/2] object-cover grayscale opacity-90 transition-opacity hover:opacity-100" 
-             />
-             <p className="text-[10px] text-gray-400 leading-relaxed text-justify break-all">
-               asdwghfherghrghtijkjcdjvnjrjvnkjvnkbvngfbngbg-bghnbntnnynyjmujmukjmukjmukjm,uk,ki,ki,k,tyjyjy
-             </p>
-          </div>
-          
-          {/* Column 2 */}
-          <div className="flex flex-col gap-3">
-             <img 
-               src="https://images.unsplash.com/photo-1584277261846-c6a1672ec512?auto=format&fit=crop&w=600&h=1200&q=80" 
-               alt="Fabric swatches and sketches" 
-               className="w-full h-auto aspect-[1/2] object-cover opacity-90 transition-opacity hover:opacity-100" 
-             />
-             <p className="text-[10px] text-gray-400 leading-relaxed text-justify break-all">
-               asdwghfherghrghtijkjcdjvnjrjvnkjvnkbvngfbngbg-bghnbntnnynyjmujmukjmukjmukjm,uk,ki,ki,k,tyjyjy
-             </p>
-          </div>
-          
-          {/* Column 3 */}
-          <div className="flex flex-col gap-3">
-             <img 
-               src="https://images.unsplash.com/photo-1628185038318-7b960c1d2cc3?auto=format&fit=crop&w=600&h=1200&q=80" 
-               alt="Colorful thread spools" 
-               className="w-full h-auto aspect-[1/2] object-cover opacity-90 transition-opacity hover:opacity-100" 
-             />
-             <p className="text-[10px] text-gray-400 leading-relaxed text-justify break-all">
-               asdwghfherghrghtijkjcdjvnjrjvnkjvnkbvngfbngbg-bghnbntnnynyjmujmukjmukjmukjm,uk,ki,ki,k,tyjyjy
-             </p>
-          </div>
-
-        </div>
-
-        {/* Carousel Controls */}
-        <div className="flex items-center justify-center gap-3 mb-24 text-gray-400 text-xs">
-          <button suppressHydrationWarning className="hover:text-gray-800 transition-colors">{'<'}</button>
-          <div className="flex gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
-          </div>
-          <button suppressHydrationWarning className="hover:text-gray-800 transition-colors">{'>'}</button>
-        </div>
+        {/* Masonry Grid with Pagination */}
+        <JournalGridClient journals={journals} />
 
         {/* Features / Icons Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-[1200px] mx-auto">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Star } from "lucide-react";
+import { Plus, Trash2, Star, Edit } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -60,12 +60,20 @@ export default function ReviewsManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((item) => (
               <div key={item.id} className="border border-gray-100 rounded-2xl p-6 relative group bg-[#F8F9FD]">
-                <button 
-                  onClick={() => handleDelete(item.id)}
-                  className="absolute top-4 right-4 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                  <Link
+                    href={`/admin/reviews/${item.id}`}
+                    className="text-blue-400 hover:text-blue-600 transition-colors"
+                  >
+                    <Edit size={16} />
+                  </Link>
+                  <button 
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
                 
                 {item.imageUrl && (
                   <div className="w-16 h-16 rounded-full overflow-hidden mb-4 border border-gray-200">

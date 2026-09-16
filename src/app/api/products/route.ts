@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description, price, images, silhouetteOption, collectionId, isPublished } = body;
+    const { name, slug, description, price, images, hasSilhouette, fits, accordions, gender, sizes, collectionId, isPublished } = body;
 
     if (!name || !slug || !price) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -39,7 +39,11 @@ export async function POST(request: Request) {
         description,
         price: parseFloat(price),
         images: images || [],
-        silhouetteOption,
+        hasSilhouette: hasSilhouette || false,
+        fits: fits || [],
+        accordions: accordions || [],
+        gender: gender || [],
+        sizes: sizes || [],
         isPublished: isPublished || false,
         collectionId,
       },

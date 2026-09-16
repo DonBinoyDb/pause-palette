@@ -8,7 +8,7 @@ export default function StoryAheadPage() {
       
       <div className="pt-32 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
         
-        <h1 className="font-serif text-[16px] tracking-[0.1em] text-gray-500 uppercase mb-16">
+        <h1 className="text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-16">
           THE STORY AHEAD
         </h1>
 
@@ -18,10 +18,10 @@ export default function StoryAheadPage() {
           <div className="md:col-span-7 flex flex-col justify-center gap-16 lg:gap-24">
             
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-[11px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 OUR FAVOURITE CANVAS
               </h2>
-              <div className="text-[11.5px] text-gray-500 leading-[1.8] text-justify flex flex-col gap-4">
+              <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   Linen sits at the heart of Pause Palette, alongside other thoughtfully chosen natural fabrics.
                 </p>
@@ -35,10 +35,10 @@ export default function StoryAheadPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-[11px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 OUR PALETTE
               </h2>
-              <div className="text-[11.5px] text-gray-500 leading-[1.8] text-justify flex flex-col gap-4">
+              <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   Our palette is shaped less by what is familiar, and more by what feels distinctive.
                 </p>
@@ -56,7 +56,7 @@ export default function StoryAheadPage() {
             <img 
               src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&h=1200&q=80" 
               alt="Color swatches and fabrics" 
-              className="w-full h-auto object-cover opacity-90 transition-opacity hover:opacity-100" 
+              className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
             />
           </div>
 
@@ -64,10 +64,10 @@ export default function StoryAheadPage() {
           <div className="md:col-span-7 flex flex-col justify-center gap-16 lg:gap-24">
             
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-[11px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 A SLOWER WAY FORWARD
               </h2>
-              <div className="text-[11.5px] text-gray-500 leading-[1.8] text-justify flex flex-col gap-4">
+              <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   We believe growth is most meaningful when it is considered.
                 </p>
@@ -81,10 +81,10 @@ export default function StoryAheadPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-[11px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 MADE TO ORDER
               </h2>
-              <div className="text-[11.5px] text-gray-500 leading-[1.8] text-justify flex flex-col gap-4">
+              <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   We create primarily on a made-to-order basis, allowing each piece to begin with purpose rather than simply becoming part of excess.
                 </p>
@@ -99,7 +99,7 @@ export default function StoryAheadPage() {
             <img 
               src="https://images.unsplash.com/photo-1520006403909-838d6b92c22e?auto=format&fit=crop&w=800&h=1200&q=80" 
               alt="Shirts hanging on line" 
-              className="w-full h-auto object-cover opacity-90 transition-opacity hover:opacity-100" 
+              className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
             />
           </div>
 
@@ -107,10 +107,10 @@ export default function StoryAheadPage() {
           <div className="md:col-span-7 flex flex-col justify-center gap-16 lg:gap-24">
             
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-[11px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 THOUGHTFUL PACKAGING
               </h2>
-              <div className="text-[11.5px] text-gray-500 leading-[1.8] text-justify flex flex-col gap-4">
+              <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   We extend the same sense of care beyond the garment itself, choosing packaging that is simple, purposeful and mindful of waste.
                 </p>
@@ -124,10 +124,10 @@ export default function StoryAheadPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="font-serif text-[11px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 LOOKING AHEAD
               </h2>
-              <div className="text-[11.5px] text-gray-500 leading-[1.8] text-justify flex flex-col gap-4">
+              <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   As Pause Palette grows, we hope to keep creating with greater thought — exploring new materials, colours and possibilities while staying true to the values that shape how we make.
                 </p>

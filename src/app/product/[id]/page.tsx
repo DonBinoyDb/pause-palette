@@ -26,7 +26,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     price: product.price,
     description: product.description || "",
     images: product.images,
-    category: product.collection?.name || "Uncategorized"
+    category: product.collection?.name || "Uncategorized",
+    hasSilhouette: product.hasSilhouette,
+    fits: product.fits,
+    gender: product.gender,
+    sizes: product.sizes
   };
 
   return <ProductDetailClient product={serializedProduct} />;

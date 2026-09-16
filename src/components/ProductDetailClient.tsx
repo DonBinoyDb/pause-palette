@@ -13,13 +13,20 @@ type ProductDetails = {
   description: string;
   images: string[];
   category: string;
+  hasSilhouette: boolean;
+  fits: {name: string, iconUrl: string}[];
+  accordions?: {title: string, content: string}[];
+  gender: string[];
+  sizes?: string[];
 };
 
 export default function ProductDetailClient({ product }: { product: ProductDetails }) {
   const [selectedSize, setSelectedSize] = useState("S");
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isSilhouetteModalOpen, setIsSilhouetteModalOpen] = useState(false);
-  const [selectedSilhouette, setSelectedSilhouette] = useState("original");
+  const [selectedSilhouette, setSelectedSilhouette] = useState(
+    product.fits && product.fits.length > 0 ? product.fits[0].name : "original"
+  );
   const [isAdded, setIsAdded] = useState(false);
 
   const { addToCart, toggleSaved, isSaved } = useShop();
@@ -43,17 +50,18 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  const sizes = ["S", "M", "L", "XL", "XXL"];
+  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["S", "M", "L", "XL", "XXL"];
 
-  const accordions = [
-    "Product Details",
-    "Size & Fit",
-    "The Fabric",
-    "Care",
-    "Made to Order & Shipping",
-    "Returns & Exchanges",
-    "Material & Pricing",
+  const defaultAccordions = [
+    { title: "Product Details", content: "" },
+    { title: "Size & Fit", content: "" },
+    { title: "The Fabric", content: "" },
+    { title: "Care", content: "" },
   ];
+  
+  const accordions = product.accordions && product.accordions.length > 0 
+    ? product.accordions 
+    : defaultAccordions;
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
@@ -91,7 +99,9 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           <div className="w-full lg:w-5/12 sticky top-32 py-4">
             <h1 className="font-serif text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
             <div className="flex items-center gap-2 mb-4">
-               <p className="text-[12px] tracking-wide text-gray-500 italic">{product.category}</p>
+               <p className="text-[12px] tracking-wide text-gray-500 italic">
+                 {product.category} {product.gender?.length > 0 ? `| ${product.gender.join(', ')}` : ''}
+               </p>
                <button onClick={() => toggleSaved(product)} className={`text-xs hover:scale-110 transition-transform ${isSaved(product.id) ? 'text-red-500' : 'text-gray-400'}`}>
                  {isSaved(product.id) ? '♥' : '♡'}
                </button>
@@ -118,7 +128,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                     key={size}
                     suppressHydrationWarning
                     onClick={() => setSelectedSize(size)}
-                    className={`w-9 h-9 flex items-center justify-center text-xs border ${selectedSize === size ? 'border-gray-800 text-gray-800 font-medium' : 'border-gray-200 text-gray-500 hover:border-gray-400'} transition-colors`}
+                    className={`w-9 h-9 flex items-center justify-center text-xs border ${selectedSize === size ? 'border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-md' : 'border-gray-200 text-gray-500 hover:border-gray-400'} transition-colors`}
                   >
                     {size}
                   </button>
@@ -130,17 +140,21 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             </div>
 
             {/* Silhouette Dropdown */}
-            <div className="mb-6">
-              <p className="text-[11px] text-gray-500 italic mb-2">Prefer this illustration in another form? Choose from our available silhouettes.</p>
-              <button 
-                suppressHydrationWarning 
-                onClick={() => setIsSilhouetteModalOpen(true)}
-                className="w-full border border-gray-300 py-3 px-4 flex justify-between items-center text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors"
-              >
-                <span className="mx-auto tracking-wide">Choose your silhouette.</span>
-                <span className="text-gray-400">+</span>
-              </button>
-            </div>
+            {product.hasSilhouette && product.fits?.length > 0 && (
+              <div className="mb-6">
+                <p className="text-[11px] text-gray-500 italic mb-2">Prefer this illustration in another form? Choose from our available silhouettes.</p>
+                <button 
+                  suppressHydrationWarning 
+                  onClick={() => setIsSilhouetteModalOpen(true)}
+                  className="w-full border border-gray-300 py-3 px-4 flex justify-between items-center text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <span className="mx-auto tracking-wide">
+                    {`Selected: ${selectedSilhouette}`}
+                  </span>
+                  <span className="text-gray-400">+</span>
+                </button>
+              </div>
+            )}
 
             {/* Add to Cart */}
             <button 
@@ -167,15 +181,15 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 <div key={idx} className="border-b border-gray-200">
                   <button 
                     suppressHydrationWarning
-                    onClick={() => setOpenAccordion(openAccordion === item ? null : item)}
+                    onClick={() => setOpenAccordion(openAccordion === item.title ? null : item.title)}
                     className="w-full py-4 flex justify-between items-center text-left"
                   >
-                    <span className="text-[12px] tracking-wide text-gray-600">{item}</span>
-                    <span className="text-gray-400 text-sm font-light">{openAccordion === item ? '−' : '+'}</span>
+                    <span className="text-[12px] tracking-wide text-gray-600">{item.title}</span>
+                    <span className="text-gray-400 text-sm font-light">{openAccordion === item.title ? '−' : '+'}</span>
                   </button>
-                  {openAccordion === item && (
-                    <div className="pb-4 text-[12px] text-gray-500 leading-relaxed pr-8">
-                      Here you can add the specific details for {item}. This content is dynamically rendered based on the selected accordion tab.
+                  {openAccordion === item.title && (
+                    <div className="pb-4 text-[12px] text-gray-500 leading-relaxed pr-8 whitespace-pre-wrap">
+                      {item.content || `Details for ${item.title} will be provided soon.`}
                     </div>
                   )}
                 </div>
@@ -211,75 +225,23 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               <h2 className="text-center font-serif text-xl tracking-widest text-gray-800 mb-2">CHOOSE YOUR SILHOUETTE</h2>
               <p className="text-center text-sm text-gray-600 mb-10">Select the silhouette you prefer for this illustration.</p>
 
-              {/* Original Silhouette */}
+              {/* Dynamic Fits */}
               <div className="mb-8">
-                <h3 className="text-xs font-medium tracking-widest text-gray-700 mb-3">ORIGINAL SILHOUETTE</h3>
-                <div 
-                  onClick={() => setSelectedSilhouette("original")}
-                  className={`border rounded-md p-4 flex items-center gap-6 cursor-pointer transition-colors ${selectedSilhouette === "original" ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
-                >
-                  <div className="w-24 h-24 bg-white border border-gray-100 flex items-center justify-center rounded-sm">
-                    {/* Placeholder for line drawing */}
-                    <svg className="w-16 h-16 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M20.38 3.46L16 2a8 8 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z" /></svg>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-serif text-gray-800 text-base">Drop-Shoulder Shirt</p>
-                    <p className="text-sm text-gray-500">Three-Quarter Sleeve</p>
-                  </div>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center border ${selectedSilhouette === "original" ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
-                    {selectedSilhouette === "original" && <Check size={14} strokeWidth={3} />}
-                  </div>
-                </div>
-              </div>
-
-              {/* Men's Silhouettes */}
-              <div className="mb-8">
-                <h3 className="text-xs font-medium tracking-widest text-gray-700 mb-3">MEN'S SILHOUETTES</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {[
-                    { id: 'm1', name: 'Cuban Collar Shirt', sleeve: 'Half Sleeve' },
-                    { id: 'm2', name: 'Mandarin Collar Shirt', sleeve: 'Half Sleeve' },
-                    { id: 'm3', name: 'Classic Point Collar Shirt', sleeve: 'Half Sleeve' }
-                  ].map((item) => (
-                    <div 
-                      key={item.id} 
-                      onClick={() => setSelectedSilhouette(item.id)}
-                      className={`border rounded-md p-4 flex flex-col items-center cursor-pointer transition-colors relative ${selectedSilhouette === item.id ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
-                    >
-                      <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center border ${selectedSilhouette === item.id ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
-                        {selectedSilhouette === item.id && <Check size={12} strokeWidth={3} />}
-                      </div>
-                      <div className="w-20 h-20 bg-white border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2">
-                        <svg className="w-12 h-12 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M20.38 3.46L16 2a8 8 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z" /></svg>
-                      </div>
-                      <p className="font-serif text-gray-800 text-xs text-center leading-tight mb-1">{item.name}</p>
-                      <p className="text-[11px] text-gray-500 text-center">{item.sleeve}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Women's Silhouettes */}
-              <div className="mb-8">
-                <h3 className="text-xs font-medium tracking-widest text-gray-700 mb-3">WOMEN'S SILHOUETTES</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    { id: 'w1', name: 'Off-Shoulder Shirt', sleeve: 'Three-Quarter Sleeve' },
-                    { id: 'w2', name: 'Classic Shirt', sleeve: 'Full Sleeve' }
-                  ].map((item) => (
+                  {product.fits.map((fitItem, idx) => (
                     <div 
-                      key={item.id} 
-                      onClick={() => setSelectedSilhouette(item.id)}
-                      className={`border rounded-md p-4 flex flex-col items-center cursor-pointer transition-colors relative ${selectedSilhouette === item.id ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
+                      key={idx} 
+                      onClick={() => setSelectedSilhouette(fitItem.name)}
+                      className={`border rounded-md p-4 flex flex-col items-center cursor-pointer transition-colors relative ${selectedSilhouette === fitItem.name ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
                     >
-                      <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center border ${selectedSilhouette === item.id ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
-                        {selectedSilhouette === item.id && <Check size={12} strokeWidth={3} />}
+                      <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center border ${selectedSilhouette === fitItem.name ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
+                        {selectedSilhouette === fitItem.name && <Check size={12} strokeWidth={3} />}
                       </div>
-                      <div className="w-20 h-20 bg-white border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2">
-                        <svg className="w-12 h-12 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M20.38 3.46L16 2a8 8 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.47a2 2 0 00-1.34-2.23z" /></svg>
+                      <div className="w-20 h-20 bg-white border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2 p-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
                       </div>
-                      <p className="font-serif text-gray-800 text-sm text-center leading-tight mb-1">{item.name}</p>
-                      <p className="text-[12px] text-gray-500 text-center">{item.sleeve}</p>
+                      <p className="font-serif text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
                     </div>
                   ))}
                 </div>

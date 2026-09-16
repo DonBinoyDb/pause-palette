@@ -1,8 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
-import Image from "next/image";
+import LookbookGridClient from "./LookbookGridClient";
 
 export default async function LookbookPage() {
   const lookbookItems = await prisma.lookbookItem.findMany({
@@ -18,16 +17,16 @@ export default async function LookbookPage() {
         
         {/* Header Section */}
         <div className="text-center mb-12 px-6">
-          <h1 className="font-serif text-[28px] tracking-[0.15em] text-[#7B92A7] uppercase mb-6">
+          <h1 className="font-serif text-[28px] tracking-[0.15em] text-gray-500 uppercase mb-6">
             LOOKBOOK
           </h1>
-          <p className="font-serif italic text-gray-600 text-[15px] mb-2 font-medium">
+          <p className="italic font-bold text-gray-600 text-[16px] md:text-[17px] mb-2 leading-[1.6]">
             A visual study of Pause Palette, captured in its most expressive moments.
           </p>
-          <p className="font-serif italic text-gray-500 text-[13px] max-w-2xl mx-auto mb-3">
+          <p className="text-[15px] text-gray-500 leading-[1.8] max-w-3xl mx-auto mb-2">
             A curated collection of our pieces through light, texture, movement and setting — bringing together the frames that best reflect the mood, character and quiet beauty of each design.
           </p>
-          <p className="font-serif italic text-gray-500 text-[13px]">
+          <p className="text-[15px] text-gray-500 leading-[1.8]">
             Discover the piece behind every frame.
           </p>
         </div>
@@ -39,46 +38,7 @@ export default async function LookbookPage() {
               New lookbook coming soon.
             </div>
           ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
-              {lookbookItems.map((item) => (
-                <div key={item.id} className="relative group break-inside-avoid overflow-hidden bg-gray-50">
-                  {item.linkUrl ? (
-                    <Link href={item.linkUrl} className="block relative">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
-                        src={item.imageUrl} 
-                        alt={item.title || "Lookbook Image"} 
-                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" 
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
-                      {item.title && (
-                        <div className="absolute bottom-5 right-5 z-10">
-                          <span className="text-white/90 font-serif italic text-sm border-b border-white/50 pb-0.5 tracking-wide shadow-black drop-shadow-md">
-                            {item.title}
-                          </span>
-                        </div>
-                      )}
-                    </Link>
-                  ) : (
-                    <div className="block relative">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img 
-                        src={item.imageUrl} 
-                        alt={item.title || "Lookbook Image"} 
-                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" 
-                      />
-                      {item.title && (
-                        <div className="absolute bottom-5 right-5 z-10">
-                          <span className="text-white/90 font-serif italic text-sm border-b border-white/50 pb-0.5 tracking-wide shadow-black drop-shadow-md">
-                            {item.title}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <LookbookGridClient items={lookbookItems} />
           )}
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Tag, LogOut, Image as ImageIcon, Star } from "lucide-react";
+import { LayoutDashboard, Package, Tag, LogOut, Image as ImageIcon, Star, BookOpen } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -13,18 +13,20 @@ export default function Sidebar() {
     { name: "Collections", href: "/admin/collections", icon: Tag },
     { name: "Lookbook", href: "/admin/lookbook", icon: ImageIcon },
     { name: "Reviews", href: "/admin/reviews", icon: Star },
+    { name: "Journal", href: "/admin/journals", icon: BookOpen },
   ];
 
   return (
-    <aside className="w-[280px] bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 py-6 px-4 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20">
-      <div className="mb-10 px-4">
-        <Link href="/" className="flex flex-col items-start -mt-2 hover:opacity-80 transition-opacity">
-          <span className="font-serif text-3xl font-medium tracking-tight text-gray-900">Pause Palette</span>
-          <p className="text-[12px] text-gray-400 mt-1 uppercase tracking-wider font-semibold">Admin Portal</p>
+    <aside className="w-[280px] bg-[#1C1B1A] border-r border-[#2C2B29] flex flex-col h-screen sticky top-0 py-10 shadow-2xl z-20">
+      <div className="mb-16 px-10">
+        <Link href="/" className="flex flex-col items-start hover:opacity-80 transition-opacity">
+          <span className="font-serif text-3xl font-medium tracking-tight text-[#FDFCFB]">Pause<br/>Palette</span>
+          <div className="w-8 h-[1px] bg-[#4A4844] mt-4 mb-3"></div>
+          <p className="text-[9px] text-[#8B8985] uppercase tracking-[0.2em]">Inventory System</p>
         </Link>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1 px-4">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -33,25 +35,28 @@ export default function Sidebar() {
             <Link 
               key={item.name}
               href={item.href} 
-              className={`flex items-center gap-4 px-4 py-3.5 text-[14px] font-semibold rounded-2xl transition-all duration-200 ${
+              className={`group flex items-center gap-4 px-6 py-4 text-[11px] uppercase tracking-[0.15em] transition-all duration-300 ${
                 isActive 
-                  ? "text-red-500 bg-red-50 shadow-sm" 
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                  ? "text-[#FDFCFB]" 
+                  : "text-[#8B8985] hover:text-[#C4C2BE]"
               }`}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+              {isActive && (
+                <div className="absolute left-0 w-1 h-8 bg-[#FDFCFB]"></div>
+              )}
+              <Icon size={16} strokeWidth={isActive ? 1.5 : 1.5} className={`${isActive ? '' : 'group-hover:scale-110'} transition-transform duration-300`} />
               {item.name}
             </Link>
           );
         })}
       </div>
 
-      <div className="mt-auto pt-4 border-t border-gray-100">
+      <div className="mt-auto pt-8 px-4 border-t border-[#2C2B29]">
         <Link 
           href="/api/auth/signout" 
-          className="flex items-center gap-4 px-4 py-3.5 text-[14px] font-semibold text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all duration-200 group"
+          className="flex items-center gap-4 px-6 py-4 text-[11px] uppercase tracking-[0.15em] text-[#8B8985] hover:text-[#FDFCFB] transition-colors group"
         >
-          <LogOut size={18} className="group-hover:text-red-500 transition-colors" />
+          <LogOut size={16} strokeWidth={1.5} className="group-hover:-translate-x-1 transition-transform" />
           Sign Out
         </Link>
       </div>

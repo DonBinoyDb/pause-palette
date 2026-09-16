@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Package, Plus, Search, Edit } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function ProductsManager() {
   const [products, setProducts] = useState<any[]>([]);
@@ -31,98 +30,99 @@ export default function ProductsManager() {
   );
 
   return (
-    <div className="p-8 max-w-6xl mx-auto w-full">
+    <div className="w-full">
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      {/* Header section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b border-[#E8E6E1] pb-12">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Products List</h1>
-          <p className="text-gray-500 mt-1 text-sm font-medium">Manage your products and pricing.</p>
+          <h1 className="font-serif text-4xl md:text-5xl text-[#2C2B29] tracking-tight mb-4">Inventory</h1>
+          <p className="text-[#8B8985] text-xs tracking-[0.2em] uppercase">Manage your collection pieces</p>
         </div>
         
         <Link 
           href="/admin/products/new"
-          className="flex items-center gap-2 bg-red-400 text-white px-5 py-2.5 rounded-full hover:bg-red-500 transition-colors font-medium text-sm shadow-md shadow-red-200"
+          className="group flex items-center gap-3 bg-[#2C2B29] text-[#FDFCFB] px-8 py-4 hover:bg-black transition-colors"
         >
-          <Plus size={16} />
-          Add Product
+          <Plus size={14} className="group-hover:rotate-90 transition-transform duration-500" />
+          <span className="text-[10px] tracking-[0.15em] uppercase">New Piece</span>
         </Link>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] p-6">
+      <div className="bg-[#FDFCFB] border border-[#E8E6E1] p-8 md:p-12">
         
         {/* Toolbar */}
-        <div className="mb-6 flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="mb-12 flex items-center gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-[#8B8985]" />
             <input 
               type="text" 
-              placeholder="Search products..." 
+              placeholder="SEARCH BY NAME..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#F8F9FD] rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-100 transition-shadow border border-transparent"
+              className="w-full pl-8 pr-4 py-2 bg-transparent text-[10px] tracking-[0.15em] uppercase border-b border-[#E8E6E1] focus:outline-none focus:border-[#2C2B29] transition-colors placeholder:text-[#C4C2BE]"
             />
           </div>
         </div>
 
-        {/* Table */}
+        {/* List */}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-gray-400 text-xs uppercase tracking-wider font-semibold border-b border-gray-100">
-                <th className="px-4 py-4">Product Name</th>
-                <th className="px-4 py-4">Status</th>
-                <th className="px-4 py-4">Price</th>
-                <th className="px-4 py-4">Collection</th>
-                <th className="px-4 py-4 text-right">Actions</th>
+              <tr className="text-[#8B8985] text-[10px] uppercase tracking-[0.15em] border-b border-[#E8E6E1]">
+                <th className="font-normal pb-6 pr-4">Piece</th>
+                <th className="font-normal pb-6 px-4">Status</th>
+                <th className="font-normal pb-6 px-4">Price</th>
+                <th className="font-normal pb-6 px-4">Collection</th>
+                <th className="font-normal pb-6 pl-4 text-right">Edit</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-[#E8E6E1]/50">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-gray-400 font-medium">Loading products...</td>
+                  <td colSpan={5} className="py-16 text-center text-[#8B8985] text-xs tracking-[0.2em] uppercase">Loading inventory...</td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-gray-400 font-medium">
-                    {search ? "No products match your search." : "No products found."}
+                  <td colSpan={5} className="py-16 text-center text-[#8B8985] text-xs tracking-[0.2em] uppercase">
+                    {search ? "No pieces match your search." : "No pieces found."}
                   </td>
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-[#F8F9FD]/50 transition-colors group">
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-[#F8F9FD] rounded-xl overflow-hidden flex-shrink-0 relative">
+                  <tr key={product.id} className="group hover:bg-[#F9F8F6] transition-colors">
+                    <td className="py-6 pr-4">
+                      <div className="flex items-center gap-6">
+                        <div className="w-16 h-20 bg-[#F2F0ED] overflow-hidden flex-shrink-0 relative">
                           {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="object-cover w-full h-full mix-blend-multiply" />
+                            <img src={product.images[0]} alt={product.name} className="object-cover w-full h-full mix-blend-multiply group-hover:scale-105 transition-transform duration-700" />
                           ) : (
-                            <Package className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-300" />
+                            <Package className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#C4C2BE]" size={20} strokeWidth={1} />
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900">{product.name}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">/product/{product.slug}</p>
+                          <p className="font-serif text-lg text-[#2C2B29] group-hover:text-[#8B8985] transition-colors">{product.name}</p>
+                          <p className="text-[10px] text-[#C4C2BE] mt-1 tracking-widest">{product.slug}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                        product.isPublished ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-600"
+                    <td className="py-6 px-4">
+                      <span className={`inline-flex items-center text-[10px] uppercase tracking-[0.15em] ${
+                        product.isPublished ? "text-[#4A4844]" : "text-[#C4C2BE] italic"
                       }`}>
                         {product.isPublished ? "Active" : "Draft"}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-sm font-semibold text-gray-700">
-                      ₹{product.price.toFixed(2)}
+                    <td className="py-6 px-4 text-sm text-[#2C2B29]">
+                      ₹{product.price.toLocaleString()}
                     </td>
-                    <td className="px-4 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">
+                    <td className="py-6 px-4">
+                      <span className="text-[10px] uppercase tracking-[0.15em] text-[#8B8985]">
                         {product.collection?.name || "Uncategorized"}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-right">
-                      <Link href={`/admin/products/${product.id}/edit`} className="inline-block p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit size={16} />
+                    <td className="py-6 pl-4 text-right">
+                      <Link href={`/admin/products/${product.id}/edit`} className="inline-block text-[#8B8985] hover:text-[#2C2B29] transition-colors">
+                        <Edit size={16} strokeWidth={1.5} />
                       </Link>
                     </td>
                   </tr>
