@@ -21,6 +21,8 @@ const garamond = localFont({
   display: 'swap',
 });
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "PausePalette | Premium Clothing Brand",
   description: "Discover the latest trends in premium clothing with PausePalette.",
