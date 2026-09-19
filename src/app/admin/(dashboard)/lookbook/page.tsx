@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Edit } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -62,12 +62,22 @@ export default function LookbookManager() {
               <div key={item.id} className="relative group border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
                 <div className="aspect-[3/4] relative bg-gray-50">
                   <Image src={item.imageUrl} alt={item.title || "Lookbook Image"} fill className="object-cover mix-blend-multiply" />
-                  <button 
-                    onClick={() => handleDelete(item.id)}
-                    className="absolute top-2 right-2 p-2 bg-white text-red-500 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Link 
+                      href={`/admin/lookbook/${item.id}`}
+                      className="p-2 bg-white text-blue-500 rounded-lg shadow-sm hover:bg-blue-50 transition-colors"
+                      title="Edit"
+                    >
+                      <Edit size={16} />
+                    </Link>
+                    <button 
+                      onClick={() => handleDelete(item.id)}
+                      className="p-2 bg-white text-red-500 rounded-lg shadow-sm hover:bg-red-50 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div className="p-4 bg-white">
                   <p className="font-semibold text-sm text-gray-900 truncate">{item.title || "Untitled"}</p>

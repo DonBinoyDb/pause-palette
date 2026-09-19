@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from 'next/font/local';
 import "./globals.css";
 import { ShopProvider } from "@/context/ShopContext";
+import AuthProvider from "@/components/AuthProvider";
+import { Toaster } from "react-hot-toast";
 
 const sindieEldora = localFont({
   src: '../../public/fonts/SindieEldoraDemoRegular.ttf',
@@ -36,9 +38,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sindieEldora.variable} ${medino.variable} ${garamond.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground flex flex-col font-sans antialiased" suppressHydrationWarning>
-        <ShopProvider>
-          {children}
-        </ShopProvider>
+        <AuthProvider>
+          <ShopProvider>
+            <Toaster position="top-right" />
+            {children}
+          </ShopProvider>
+        </AuthProvider>
       </body>
     </html>
   );

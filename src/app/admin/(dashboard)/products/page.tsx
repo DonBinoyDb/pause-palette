@@ -30,106 +30,137 @@ export default function ProductsManager() {
   );
 
   return (
-    <div className="w-full">
+    <div className="p-6 md:p-8 max-w-[1400px] mx-auto w-full font-sans">
       
-      {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16 border-b border-[#E8E6E1] pb-12">
+      {/* Dashboard Header */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-4xl md:text-5xl text-[#2C2B29] tracking-tight mb-4">Inventory</h1>
-          <p className="text-[#8B8985] text-xs tracking-[0.2em] uppercase">Manage your collection pieces</p>
+          <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage your collection pieces and products.</p>
         </div>
-        
         <Link 
           href="/admin/products/new"
-          className="group flex items-center gap-3 bg-[#2C2B29] text-[#FDFCFB] px-8 py-4 hover:bg-black transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm shrink-0"
         >
-          <Plus size={14} className="group-hover:rotate-90 transition-transform duration-500" />
-          <span className="text-[10px] tracking-[0.15em] uppercase">New Piece</span>
+          <Plus size={18} />
+          New Product
         </Link>
       </div>
 
-      <div className="bg-[#FDFCFB] border border-[#E8E6E1] p-8 md:p-12">
-        
-        {/* Toolbar */}
-        <div className="mb-12 flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <Search size={14} className="absolute left-0 top-1/2 -translate-y-1/2 text-[#8B8985]" />
-            <input 
-              type="text" 
-              placeholder="SEARCH BY NAME..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-4 py-2 bg-transparent text-[10px] tracking-[0.15em] uppercase border-b border-[#E8E6E1] focus:outline-none focus:border-[#2C2B29] transition-colors placeholder:text-[#C4C2BE]"
-            />
+      {/* Product List (Full Width) */}
+      <div className="w-full">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+          
+          {/* Toolbar */}
+          <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/30">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input 
+                suppressHydrationWarning
+                type="text" 
+                placeholder="Search products by name..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+              />
+            </div>
+            <div className="text-sm text-gray-500 font-medium hidden sm:block">
+              {filteredProducts.length} Product{filteredProducts.length !== 1 ? 's' : ''}
+            </div>
           </div>
-        </div>
 
-        {/* List */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="text-[#8B8985] text-[10px] uppercase tracking-[0.15em] border-b border-[#E8E6E1]">
-                <th className="font-normal pb-6 pr-4">Piece</th>
-                <th className="font-normal pb-6 px-4">Status</th>
-                <th className="font-normal pb-6 px-4">Price</th>
-                <th className="font-normal pb-6 px-4">Collection</th>
-                <th className="font-normal pb-6 pl-4 text-right">Edit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E8E6E1]/50">
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="py-16 text-center text-[#8B8985] text-xs tracking-[0.2em] uppercase">Loading inventory...</td>
-                </tr>
-              ) : filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-16 text-center text-[#8B8985] text-xs tracking-[0.2em] uppercase">
-                    {search ? "No pieces match your search." : "No pieces found."}
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((product) => (
-                  <tr key={product.id} className="group hover:bg-[#F9F8F6] transition-colors">
-                    <td className="py-6 pr-4">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-20 bg-[#F2F0ED] overflow-hidden flex-shrink-0 relative">
+          {/* List */}
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="p-12 text-center text-sm text-gray-500">Loading inventory...</div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="p-16 text-center text-sm text-gray-500 flex flex-col items-center">
+                <Package className="text-gray-300 mb-3" size={40} />
+                <p className="text-base font-medium text-gray-900 mb-1">No products found</p>
+                <p>Try adjusting your search or create a new product.</p>
+                <Link 
+                  href="/admin/products/new"
+                  className="mt-4 text-blue-600 font-medium hover:underline flex items-center gap-1"
+                >
+                  <Plus size={16} /> Create one now
+                </Link>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50/50">
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[80px]">Image</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Product Info</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Collection</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
+                      
+                      {/* Product Image Thumbnail */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="w-12 h-16 bg-gray-100 rounded-md border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
                           {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="object-cover w-full h-full mix-blend-multiply group-hover:scale-105 transition-transform duration-700" />
+                            <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
-                            <Package className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#C4C2BE]" size={20} strokeWidth={1} />
+                            <Package size={18} className="text-gray-400" />
                           )}
                         </div>
-                        <div>
-                          <p className="font-serif text-lg text-[#2C2B29] group-hover:text-[#8B8985] transition-colors">{product.name}</p>
-                          <p className="text-[10px] text-[#C4C2BE] mt-1 tracking-widest">{product.slug}</p>
+                      </td>
+                      
+                      {/* Info */}
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">{product.name}</span>
+                          <span className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-0.5 rounded-full self-start font-mono">/{product.slug}</span>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-6 px-4">
-                      <span className={`inline-flex items-center text-[10px] uppercase tracking-[0.15em] ${
-                        product.isPublished ? "text-[#4A4844]" : "text-[#C4C2BE] italic"
-                      }`}>
-                        {product.isPublished ? "Active" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="py-6 px-4 text-sm text-[#2C2B29]">
-                      ₹{product.price.toLocaleString()}
-                    </td>
-                    <td className="py-6 px-4">
-                      <span className="text-[10px] uppercase tracking-[0.15em] text-[#8B8985]">
-                        {product.collection?.name || "Uncategorized"}
-                      </span>
-                    </td>
-                    <td className="py-6 pl-4 text-right">
-                      <Link href={`/admin/products/${product.id}/edit`} className="inline-block text-[#8B8985] hover:text-[#2C2B29] transition-colors">
-                        <Edit size={16} strokeWidth={1.5} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                          product.isPublished 
+                            ? "bg-green-50 text-green-700 border-green-200" 
+                            : "bg-gray-50 text-gray-600 border-gray-200"
+                        }`}>
+                          {product.isPublished ? "Active" : "Draft"}
+                        </span>
+                      </td>
+
+                      {/* Collection */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-600">
+                          {product.collection?.name || <span className="italic text-gray-400">Uncategorized</span>}
+                        </span>
+                      </td>
+
+                      {/* Price */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ₹{product.price.toLocaleString()}
+                      </td>
+                      
+                      {/* Actions */}
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link 
+                            href={`/admin/products/${product.id}/edit`} 
+                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Edit size={18} />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>

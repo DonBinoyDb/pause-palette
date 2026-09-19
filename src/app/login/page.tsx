@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
-import Image from "next/image";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -11,8 +10,10 @@ export default function LoginPage() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("admin@pausepalette.com");
-  const [password, setPassword] = useState("admin123");
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,6 +23,31 @@ export default function LoginPage() {
     setError("");
 
     try {
+      if (!isLogin) {
+        // Registration Flow
+        if (password !== confirmPassword) {
+          setError("Passwords do not match.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) {
+          const errorMsg = await res.text();
+          setError(errorMsg || "Registration failed.");
+          setLoading(false);
+          return;
+        }
+
+        // If registration succeeds, log them in automatically
+      }
+
+      // Login Flow (handles both actual login and post-registration auto-login)
       const res = await signIn("credentials", {
         email,
         password,
@@ -31,8 +57,6 @@ export default function LoginPage() {
       if (res?.error) {
         setError("Invalid credentials.");
       } else if (res?.ok) {
-        // We let middleware handle the redirect if they try to access /admin directly,
-        // but here we can just push to /admin/dashboard and middleware will kick them out if they aren't admin.
         router.push("/admin/dashboard");
       }
     } catch (err) {
@@ -47,8 +71,14 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white p-4 md:p-8 font-sans">
+    <main className="flex min-h-screen items-center justify-center bg-white p-4 md:p-8 font-sans relative">
       
+      {/* Back Button */}
+      <Link href="/" className="absolute top-6 left-6 md:top-10 md:left-10 flex items-center gap-2 text-[12px] text-gray-400 hover:text-black transition-colors font-medium tracking-wide uppercase">
+        <ArrowLeft size={14} />
+        Back to Store
+      </Link>
+
       <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-12 lg:gap-24 items-center h-full">
         
         {/* Left Side: Rounded Image */}
@@ -86,6 +116,7 @@ export default function LoginPage() {
               <label className="text-[12px] text-gray-400 font-medium ml-1">Email</label>
               <input 
                 suppressHydrationWarning
+                required
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -99,6 +130,7 @@ export default function LoginPage() {
               <div className="relative">
                 <input 
                   suppressHydrationWarning
+                  required
                   type={showPassword ? "text" : "password"} 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -113,6 +145,30 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {/* Confirm Password Field (Only for Sign Up) */}
+            {!isLogin && (
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] text-gray-400 font-medium ml-1">Confirm Password</label>
+                <div className="relative">
+                  <input 
+                    suppressHydrationWarning
+                    required
+                    type={showConfirmPassword ? "text" : "password"} 
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full border-b border-gray-300 pb-2 px-1 text-[15px] text-gray-900 focus:outline-none focus:border-black transition-colors bg-transparent tracking-widest placeholder:text-gray-300 pr-8"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-1 top-0 text-gray-500 hover:text-black transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Remember Me & Forgot Password */}
             {isLogin && (
@@ -165,7 +221,11 @@ export default function LoginPage() {
             </span>
             <button 
               suppressHydrationWarning
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError("");
+                setConfirmPassword("");
+              }}
               className="text-[12px] text-gray-800 font-bold hover:underline ml-1"
             >
               {isLogin ? "Sign Up" : "Log in"}

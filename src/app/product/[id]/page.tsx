@@ -31,7 +31,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     fits: (product.fits as {name: string, iconUrl: string}[]) || [],
     accordions: (product.accordions as {title: string, content: string}[]) || [],
     gender: product.gender,
-    sizes: product.sizes
+    sizes: product.sizes,
+    fitGuideDescription: product.fitGuideDescription || "",
+    fitGuideImage: product.fitGuideImage || "",
+    colors: (product.colors as {name: string, hex: string, images: string[]}[]) || []
   };
 
   return <ProductDetailClient product={serializedProduct} />;

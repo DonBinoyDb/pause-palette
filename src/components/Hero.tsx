@@ -33,7 +33,7 @@ export default function Hero() {
   }, [currentIndex]);
 
   return (
-    <section className="relative h-[90vh] min-h-[700px] w-full flex items-end pb-12 overflow-hidden">
+    <section className="relative h-[80vh] md:h-[90vh] min-h-[500px] md:min-h-[700px] w-full flex items-end pb-12 md:pb-16 overflow-hidden">
       {/* Background media */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black/30 z-10" />
@@ -67,8 +67,8 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="relative z-20 text-white px-12 md:px-24">
-        <h1 className="text-[2.5rem] md:text-[3.5rem] leading-[1.1] font-sans mb-1">
+      <div className="relative z-20 text-white px-6 md:px-10 lg:px-20 mb-8 md:mb-0 w-full">
+        <h1 className="text-4xl md:text-[3.5rem] leading-[1.1] font-sans mb-2 md:mb-1">
           illustrated stories<br/>
           for slow living.
         </h1>

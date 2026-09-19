@@ -3,11 +3,41 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useShop } from "@/context/ShopContext";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Minus, Plus, X, ArrowRight, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, cartTotal } = useShop();
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  const handleWhatsAppCheckout = () => {
+    // Number matches the Contact page
+    const phoneNumber = "917907629021"; 
+    let message = "Hello, I would like to purchase the following items from my cart:\n\n";
+    
+    cart.forEach((item, index) => {
+      message += `${index + 1}. ${item.name}\n`;
+      message += `   Size: ${item.size} | Fit: ${item.silhouette.replace('-', ' ')}\n`;
+      message += `   Quantity: ${item.quantity}\n`;
+      message += `   Price: ₹${(item.price * item.quantity).toLocaleString()}\n\n`;
+    });
+    
+    message += `Estimated Total: ₹${cartTotal.toLocaleString()}\n\n`;
+    message += "Please let me know the next steps for payment and shipping.";
+    
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+  };
 
   return (
     <main className="flex min-h-screen flex-col bg-[#F9F8F6]">
@@ -115,8 +145,11 @@ export default function CartPage() {
                   <span className="font-serif text-3xl md:text-4xl text-[#2C2B29]">₹ {cartTotal.toLocaleString()}</span>
                 </div>
                 
-                <button className="w-full group relative overflow-hidden bg-[#2C2B29] text-white py-5 px-8 flex items-center justify-between hover:bg-black transition-colors">
-                  <span className="text-xs tracking-[0.2em] uppercase">Secure Checkout</span>
+                <button 
+                  onClick={handleWhatsAppCheckout}
+                  className="w-full group relative overflow-hidden bg-[#2C2B29] text-white py-5 px-8 flex items-center justify-between hover:bg-black transition-colors"
+                >
+                  <span className="text-xs tracking-[0.2em] uppercase">Checkout via WhatsApp</span>
                   <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
                 </button>
                 

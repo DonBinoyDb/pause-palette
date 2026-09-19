@@ -11,6 +11,7 @@ export async function GET(
       where: { id },
       include: {
         collection: true,
+        categories: true,
       },
     });
 
@@ -39,6 +40,15 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { collectionId: true }
+    });
+
+    if (!existingProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -46,13 +56,24 @@ export async function PUT(
         slug: data.slug,
         description: data.description,
         price: parseFloat(data.price),
-        collectionId: data.collectionId || null,
+        ...(data.collectionId 
+          ? { collection: { connect: { id: data.collectionId } } } 
+          : existingProduct.collectionId 
+             ? { collection: { disconnect: true } }
+             : {}
+        ),
         hasSilhouette: data.hasSilhouette ?? false,
         fits: data.fits || [],
         accordions: data.accordions || [],
-        gender: data.gender || [],
+        colors: data.colors || [],
+        categories: {
+          set: data.categoryIds?.map((id: string) => ({ id })) || []
+        },
         sizes: data.sizes || [],
+        fitGuideDescription: data.fitGuideDescription || null,
+        fitGuideImage: data.fitGuideImage || null,
         isPublished: data.isPublished,
+        isNew: data.isNew ?? true,
         images: data.images || [],
       },
     });

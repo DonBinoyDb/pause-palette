@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Upload, Star } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, Save, X, Star } from "lucide-react";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
@@ -39,12 +40,12 @@ export default function EditReviewItem() {
         setImageUrl(data.imageUrl || "");
         setRating(data.rating || 5);
       } else {
-        alert("Failed to fetch review");
+        toast.error("Failed to fetch review");
         router.push("/admin/reviews");
       }
     } catch (error) {
       console.error("Failed to fetch review", error);
-      alert("Failed to fetch review");
+      toast.error("Failed to fetch review");
       router.push("/admin/reviews");
     } finally {
       setFetching(false);
@@ -69,10 +70,12 @@ export default function EditReviewItem() {
       if (data.success) {
         setImageUrl(data.url);
       } else {
-        alert(data.message || "Upload failed");
+        console.error("Upload error:", data);
+        toast.error(data.message || "Upload failed");
       }
     } catch (error) {
       console.error("Upload failed", error);
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -82,7 +85,7 @@ export default function EditReviewItem() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName || !reviewText) {
-      alert("Name and review text are required.");
+      toast.error("Name and review text are required.");
       return;
     }
     
@@ -102,12 +105,15 @@ export default function EditReviewItem() {
       });
 
       if (res.ok) {
+        toast.success("Review updated successfully!");
         router.push("/admin/reviews");
+        router.refresh();
       } else {
-        alert("Failed to save");
+        toast.error("Failed to save");
       }
     } catch (error) {
-      console.error("Failed to submit", error);
+      console.error("Save failed", error);
+      toast.error("Failed to save");
     } finally {
       setLoading(false);
     }

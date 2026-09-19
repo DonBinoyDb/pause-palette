@@ -19,14 +19,14 @@ export async function GET(request: Request) {
     return NextResponse.json(products);
   } catch (error) {
     console.error("[PRODUCTS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description, price, images, hasSilhouette, fits, accordions, gender, sizes, collectionId, isPublished } = body;
+    const { name, slug, description, price, images, hasSilhouette, fits, accordions, colors, categoryIds, sizes, collectionId, isPublished, isNew, fitGuideDescription, fitGuideImage } = body;
 
     if (!name || !slug || !price) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -42,16 +42,22 @@ export async function POST(request: Request) {
         hasSilhouette: hasSilhouette || false,
         fits: fits || [],
         accordions: accordions || [],
-        gender: gender || [],
+        colors: colors || [],
+        categories: {
+          connect: categoryIds?.map((id: string) => ({ id })) || []
+        },
         sizes: sizes || [],
+        fitGuideDescription: fitGuideDescription || null,
+        fitGuideImage: fitGuideImage || null,
         isPublished: isPublished || false,
-        collectionId,
+        isNew: isNew ?? true,
+        ...(collectionId ? { collection: { connect: { id: collectionId } } } : {})
       },
     });
 
     return NextResponse.json(product);
   } catch (error) {
     console.error("[PRODUCTS_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

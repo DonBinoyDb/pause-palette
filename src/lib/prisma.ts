@@ -18,7 +18,7 @@ const createPrismaClient = () => {
   });
 };
 
-// Force reload to pick up new schema changes (Journal model)
+// Force reload to pick up new schema changes (isNew field)
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = undefined;
 }

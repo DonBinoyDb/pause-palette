@@ -1,25 +1,32 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Info, Plus } from "lucide-react";
+import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Info, Plus, Save } from "lucide-react";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function EditProductForm({ 
   product, 
-  collections 
+  collections,
+  categories
 }: { 
   product: any, 
-  collections: any[] 
+  collections: any[],
+  categories: any[]
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const iconInputRef = useRef<HTMLInputElement>(null);
   const productId = product.id;
+  const MAX_FILE_SIZE = 2 * 1024 * 1024;
   
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [iconUploading, setIconUploading] = useState(false);
+  const [fitGuideUploading, setFitGuideUploading] = useState(false);
+  
+  const fitGuideInputRef = useRef<HTMLInputElement>(null);
   
   // Form Data
   const [name, setName] = useState(product.name || "");
@@ -28,10 +35,16 @@ export default function EditProductForm({
   const [price, setPrice] = useState(product.price?.toString() || "");
   const [collectionId, setCollectionId] = useState(product.collectionId || "");
   
-  const [gender, setGender] = useState<string[]>(product.gender || []);
+  const [categoryIds, setCategoryIds] = useState<string[]>(
+    product.categories?.map((c: any) => c.id) || []
+  );
   const [sizes, setSizes] = useState<string[]>(product.sizes || []);
   const [images, setImages] = useState<string[]>(product.images || []);
   const [isPublished, setIsPublished] = useState(product.isPublished || false);
+  const [isNew, setIsNew] = useState(product.isNew ?? true);
+
+  const [fitGuideDescription, setFitGuideDescription] = useState(product.fitGuideDescription || "");
+  const [fitGuideImage, setFitGuideImage] = useState(product.fitGuideImage || "");
 
   // Fits
   const [hasSilhouette, setHasSilhouette] = useState(product.hasSilhouette || false);
@@ -51,6 +64,17 @@ export default function EditProductForm({
       ? product.accordions 
       : defaultAccordions
   );
+
+  // Colors
+  const savedColors = Array.isArray(product.colors) ? product.colors : [];
+  const mainColorItem = savedColors.find((c: any) => c.isMain);
+  const additionalColors = savedColors.filter((c: any) => !c.isMain);
+
+  const [mainColorName, setMainColorName] = useState(mainColorItem ? mainColorItem.name : "Original");
+  const [colors, setColors] = useState<{name: string, hex: string, images: string[]}[]>(additionalColors);
+  const [newColorName, setNewColorName] = useState("");
+  const colorInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+  const [colorUploading, setColorUploading] = useState<{ [key: number]: boolean }>({});
   
   // UI State
   const [openAccordion, setOpenAccordion] = useState<number | null>(null);
@@ -67,6 +91,15 @@ export default function EditProductForm({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+
+    // Check all files for 2MB limit
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > MAX_FILE_SIZE) {
+        toast.error(`File ${files[i].name} exceeds the 2MB limit. Please choose smaller images.`);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+    }
 
     setUploading(true);
     try {
@@ -96,6 +129,12 @@ export default function EditProductForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds the 2MB limit. Please choose a smaller icon.");
+      if (iconInputRef.current) iconInputRef.current.value = "";
+      return;
+    }
+
     setIconUploading(true);
     try {
       const formData = new FormData();
@@ -114,9 +153,34 @@ export default function EditProductForm({
     }
   };
 
+  const handleFitGuideUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds the 2MB limit.");
+      if (fitGuideInputRef.current) fitGuideInputRef.current.value = "";
+      return;
+    }
+
+    setFitGuideUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) setFitGuideImage(data.url);
+    } catch (error) {
+      console.error("Fit Guide Image upload failed", error);
+    } finally {
+      setFitGuideUploading(false);
+      if (fitGuideInputRef.current) fitGuideInputRef.current.value = "";
+    }
+  };
+
   const addFit = () => {
     if (!newFitName.trim() || !newFitIconUrl) {
-      alert("Please provide both a name and an uploaded icon for the new fit.");
+      toast.error("Please provide both a name and an uploaded icon for the new fit.");
       return;
     }
     setFits([...fits, { name: newFitName.trim(), iconUrl: newFitIconUrl }]);
@@ -125,18 +189,84 @@ export default function EditProductForm({
   };
 
   const removeFit = (index: number) => {
-    setFits(fits.filter((_, i) => i !== index));
+    setFits(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addColor = () => {
+    if (!newColorName.trim()) {
+      toast.error("Please provide a name.");
+      return;
+    }
+    setColors(prev => [...prev, { name: newColorName, hex: "#000000", images: [] }]);
+    setNewColorName("");
+  };
+
+  const removeColor = (index: number) => {
+    setColors(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleColorImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Check sizes
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > MAX_FILE_SIZE) {
+        toast.error(`File ${files[i].name} exceeds the 2MB limit.`);
+        if (colorInputRefs.current[index]) colorInputRefs.current[index]!.value = "";
+        return;
+      }
+    }
+
+    setColorUploading(prev => ({ ...prev, [index]: true }));
+    try {
+      const newImageUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
+        formData.append("file", files[i]);
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (data.success) {
+          newImageUrls.push(data.url);
+        }
+      }
+      
+      setColors(prev => {
+        const next = [...prev];
+        next[index] = {
+          ...next[index],
+          images: [...next[index].images, ...newImageUrls]
+        };
+        return next;
+      });
+    } catch (error) {
+      console.error("Color image upload failed", error);
+    } finally {
+      setColorUploading(prev => ({ ...prev, [index]: false }));
+      if (colorInputRefs.current[index]) colorInputRefs.current[index]!.value = "";
+    }
+  };
+
+  const removeColorImage = (colorIndex: number, imageIndex: number) => {
+    setColors(prev => {
+      const next = [...prev];
+      next[colorIndex] = {
+        ...next[colorIndex],
+        images: next[colorIndex].images.filter((_, i) => i !== imageIndex)
+      };
+      return next;
+    });
   };
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const toggleGender = (g: string) => {
-    if (gender.includes(g)) {
-      setGender(gender.filter(item => item !== g));
+  const toggleCategory = (id: string) => {
+    if (categoryIds.includes(id)) {
+      setCategoryIds(categoryIds.filter(item => item !== id));
     } else {
-      setGender([...gender, g]);
+      setCategoryIds([...categoryIds, id]);
     }
   };
 
@@ -176,46 +306,56 @@ export default function EditProductForm({
           slug,
           description,
           price,
-          collectionId: collectionId || null,
+          collectionId,
+          categoryIds,
+          sizes,
           hasSilhouette,
           fits,
           accordions,
-          gender,
-          sizes,
           isPublished,
-          images
+          isNew,
+          images,
+          fitGuideDescription,
+          fitGuideImage,
+          colors: [
+            { name: mainColorName, hex: "#000000", images: images, isMain: true },
+            ...colors
+          ]
         }),
       });
 
       if (res.ok) {
-        router.push("/admin/products");
+        toast.success("Product updated successfully!");
+        router.refresh();
       } else {
-        alert("Failed to update product");
+        toast.error("Failed to update product");
       }
     } catch (error) {
-      console.error("Failed to submit", error);
+      console.error("Save failed", error);
+      toast.error("Failed to update product");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this piece?")) return;
-    
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/products/${productId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        router.push("/admin/products");
-      } else {
-        alert("Failed to delete product");
+    if (confirm("Are you sure you want to delete this product?")) {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/products/${product.id}`, { method: "DELETE" });
+        if (res.ok) {
+          toast.success("Product deleted successfully!");
+          router.push("/admin/products");
+          router.refresh();
+        } else {
+          toast.error("Failed to delete product");
+        }
+      } catch (error) {
+        console.error("Delete failed", error);
+        toast.error("Failed to delete product");
+      } finally {
         setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to delete", error);
-      setLoading(false);
     }
   };
 
@@ -266,6 +406,16 @@ export default function EditProductForm({
               className={`px-4 py-3 text-[10px] tracking-[0.15em] uppercase flex items-center gap-2 transition-colors ${!isPublished ? 'bg-gray-100 text-gray-800' : 'text-gray-500 hover:bg-gray-50'}`}
             >
               <EyeOff size={14} /> Draft
+            </button>
+          </div>
+          
+          <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden ml-2">
+            <button 
+              type="button"
+              onClick={() => setIsNew(!isNew)}
+              className={`px-4 py-3 text-[10px] tracking-[0.15em] uppercase flex items-center gap-2 transition-colors ${isNew ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <Check size={14} className={isNew ? "opacity-100" : "opacity-0"} /> New In Tag
             </button>
           </div>
         </div>
@@ -356,7 +506,7 @@ export default function EditProductForm({
                   </div>
                 ))}
 
-                {images.length > 0 && (
+                {displayImages.length < 5 && (
                   <button 
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -381,6 +531,18 @@ export default function EditProductForm({
                   multiple 
                   className="hidden" 
                 />
+
+                <div className="mt-4 flex flex-col gap-2 bg-gray-50 p-4 border border-gray-200 rounded-sm">
+                  <label className="text-[11px] uppercase tracking-widest text-gray-500 font-medium">Main Images Variant Name</label>
+                  <input 
+                    type="text" 
+                    value={mainColorName}
+                    onChange={(e) => setMainColorName(e.target.value)}
+                    placeholder="e.g. Original, Ivory, Default"
+                    className="w-full text-sm font-medium text-gray-900 border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
+                  />
+                  <p className="text-[10px] text-gray-400 italic">This name will be displayed for the main images color swatch on the product page.</p>
+                </div>
               </div>
             </div>
 
@@ -410,21 +572,17 @@ export default function EditProductForm({
                  
                  <span className="text-gray-300">|</span>
                  
-                 <div className="flex items-center gap-2">
-                   <button 
-                     type="button"
-                     onClick={() => toggleGender("MEN")}
-                     className={`px-3 py-1 text-[10px] tracking-widest uppercase transition-colors rounded-sm ${gender.includes("MEN") ? 'bg-[#2C2B29] text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'}`}
-                   >
-                     Men
-                   </button>
-                   <button 
-                     type="button"
-                     onClick={() => toggleGender("WOMEN")}
-                     className={`px-3 py-1 text-[10px] tracking-widest uppercase transition-colors rounded-sm ${gender.includes("WOMEN") ? 'bg-[#2C2B29] text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'}`}
-                   >
-                     Women
-                   </button>
+                 <div className="flex flex-wrap items-center gap-2">
+                   {categories.map(cat => (
+                     <button 
+                       key={cat.id}
+                       type="button"
+                       onClick={() => toggleCategory(cat.id)}
+                       className={`px-3 py-1 text-[10px] tracking-widest uppercase transition-colors rounded-sm ${categoryIds.includes(cat.id) ? 'bg-[#2C2B29] text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'}`}
+                     >
+                       {cat.name}
+                     </button>
+                   ))}
                  </div>
               </div>
               
@@ -441,21 +599,161 @@ export default function EditProductForm({
                 />
               </div>
 
-              {/* Sizes Selection */}
-              <div className="flex justify-between items-end mb-6">
-                <div className="flex gap-2">
-                  {["XS", "S", "M", "L", "XL", "XXL"].map(size => (
+              {/* Sizes Selection & Fit Guide Editor */}
+              <div className="mb-6">
+                <div className="flex justify-between items-end mb-4">
+                  <div className="flex gap-2">
+                    {["XS", "S", "M", "L", "XL", "XXL"].map(size => (
+                      <button 
+                        type="button"
+                        key={size}
+                        onClick={() => toggleSize(size)}
+                        className={`w-9 h-9 flex items-center justify-center text-xs border transition-colors ${sizes.includes(size) ? 'border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-md' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Fit Guide Slider Content */}
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                  <p className="text-[11px] uppercase tracking-widest text-gray-500 mb-3 font-medium">Fit Guide Slider Content</p>
+                  
+                  <div className="flex flex-col gap-4">
+                    <textarea 
+                      value={fitGuideDescription}
+                      onChange={(e) => setFitGuideDescription(e.target.value)}
+                      placeholder="Enter the fit guide description for the side slider..."
+                      className="w-full text-[12px] text-gray-600 border border-gray-300 focus:border-gray-800 outline-none p-3 rounded-sm min-h-[80px] bg-white resize-y"
+                    />
+                    
+                    <div className="flex items-center gap-4">
+                      {fitGuideImage && (
+                        <div className="relative w-16 h-20 bg-gray-100 border border-gray-200 rounded-sm overflow-hidden shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={fitGuideImage} alt="Fit Guide" className="w-full h-full object-cover" />
+                          <button 
+                            type="button" 
+                            onClick={() => setFitGuideImage("")}
+                            className="absolute inset-0 bg-white/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
+                          >
+                            <X size={16} className="text-red-500" />
+                          </button>
+                        </div>
+                      )}
+                      
+                      <button 
+                        type="button"
+                        onClick={() => fitGuideInputRef.current?.click()}
+                        className="flex-1 py-3 border border-gray-300 border-dashed text-[11px] uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-colors bg-white rounded-sm flex items-center justify-center gap-2"
+                      >
+                        {fitGuideUploading ? "UPLOADING..." : (
+                          <>
+                            <Upload size={14} /> {fitGuideImage ? "Change Image" : "Upload Fit Guide Image"}
+                          </>
+                        )}
+                      </button>
+                      <input 
+                        type="file" 
+                        ref={fitGuideInputRef} 
+                        onChange={handleFitGuideUpload} 
+                        accept="image/*" 
+                        className="hidden" 
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Color Variants Configuration */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-[11px] uppercase tracking-widest text-gray-500 font-medium">Additional Color Variants</p>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
+                  {colors.length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">No additional variants added yet.</p>
+                  ) : (
+                    <div className="space-y-6">
+                      {colors.map((color, colorIdx) => (
+                        <div key={colorIdx} className="bg-white border border-gray-200 p-4 rounded-md shadow-sm">
+                          <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm font-medium text-gray-900">{color.name}</span>
+                            </div>
+                            <button 
+                              type="button" 
+                              onClick={() => removeColor(colorIdx)}
+                              className="text-red-500 hover:text-red-600 p-1"
+                              title="Remove Color"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {color.images.map((img, imgIdx) => (
+                              <div key={imgIdx} className="relative w-16 h-20 bg-gray-100 border border-gray-200 rounded-sm overflow-hidden group">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={img} alt={`${color.name} ${imgIdx}`} className="w-full h-full object-cover" />
+                                <button 
+                                  type="button" 
+                                  onClick={() => removeColorImage(colorIdx, imgIdx)}
+                                  className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                >
+                                  <X size={16} className="text-red-600" />
+                                </button>
+                              </div>
+                            ))}
+                            
+                            <button 
+                              type="button"
+                              onClick={() => colorInputRefs.current[colorIdx]?.click()}
+                              disabled={colorUploading[colorIdx]}
+                              className="w-16 h-20 flex flex-col items-center justify-center gap-1 border border-gray-300 border-dashed rounded-sm bg-gray-50 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                            >
+                              {colorUploading[colorIdx] ? (
+                                <span className="text-[10px] text-gray-500 animate-pulse">Wait</span>
+                              ) : (
+                                <>
+                                  <Upload size={14} className="text-gray-400" />
+                                  <span className="text-[9px] uppercase tracking-wider text-gray-500">Upload</span>
+                                </>
+                              )}
+                            </button>
+                            <input 
+                              type="file" 
+                              multiple
+                              accept="image/*"
+                              ref={(el) => { colorInputRefs.current[colorIdx] = el }}
+                              onChange={(e) => handleColorImageUpload(colorIdx, e)} 
+                              className="hidden" 
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 items-center mt-4 pt-4 border-t border-gray-200">
+                    <input 
+                      type="text" 
+                      value={newColorName}
+                      onChange={(e) => setNewColorName(e.target.value)}
+                      placeholder="Variant Name (e.g. Forest Green or Option A)"
+                      className="flex-1 text-xs border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
+                    />
                     <button 
                       type="button"
-                      key={size}
-                      onClick={() => toggleSize(size)}
-                      className={`w-9 h-9 flex items-center justify-center text-xs border transition-colors ${sizes.includes(size) ? 'border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-md' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}
+                      onClick={addColor}
+                      className="bg-gray-800 text-white px-3 py-2 rounded-sm text-xs font-medium hover:bg-black transition-colors"
                     >
-                      {size}
+                      Add Variant
                     </button>
-                  ))}
+                  </div>
                 </div>
-                <span className="text-[11px] text-gray-500 cursor-not-allowed">Fit Guide &gt;</span>
               </div>
 
               {/* Silhouette Editor */}

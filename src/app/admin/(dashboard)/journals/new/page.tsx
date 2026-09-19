@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { ArrowLeft, Upload, BookOpen } from "lucide-react";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -36,10 +37,12 @@ export default function NewJournalItem() {
       if (data.success) {
         setImageUrl(data.url);
       } else {
-        alert(data.message || "Upload failed");
+        console.error("Upload error:", data);
+        toast.error(data.message || "Upload failed");
       }
     } catch (error) {
       console.error("Upload failed", error);
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -48,8 +51,8 @@ export default function NewJournalItem() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !content) {
-      alert("Title and content are required.");
+    if (!title.trim() || !content.trim()) {
+      toast.error("Title and content are required.");
       return;
     }
     
@@ -67,13 +70,15 @@ export default function NewJournalItem() {
       });
 
       if (res.ok) {
+        toast.success("Journal entry created successfully!");
         router.push("/admin/journals");
       } else {
         const errorData = await res.json();
-        alert(`Failed to save: ${errorData.details || errorData.error || 'Unknown error'}`);
+        toast.error(`Failed to save: ${errorData.details || errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error("Failed to submit", error);
+      console.error("Save failed", error);
+      toast.error("Failed to save");
     } finally {
       setLoading(false);
     }

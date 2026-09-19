@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { ArrowLeft, Upload } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Upload, Save, X } from "lucide-react";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -16,6 +17,14 @@ export default function NewLookbookItem() {
   const [title, setTitle] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => setProducts(Array.isArray(data) ? data : []))
+      .catch(console.error);
+  }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -35,7 +44,8 @@ export default function NewLookbookItem() {
       if (data.success) {
         setImageUrl(data.url);
       } else {
-        alert(data.message || "Upload failed");
+        console.error("Upload error:", data);
+        toast.error(data.message || "Upload failed");
       }
     } catch (error) {
       console.error("Upload failed", error);
@@ -48,7 +58,7 @@ export default function NewLookbookItem() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!imageUrl) {
-      alert("Please upload an image first");
+      toast.error("Please upload an image first");
       return;
     }
     
@@ -66,12 +76,14 @@ export default function NewLookbookItem() {
       });
 
       if (res.ok) {
+        toast.success("Lookbook item created successfully!");
         router.push("/admin/lookbook");
       } else {
-        alert("Failed to save");
+        toast.error("Failed to save");
       }
     } catch (error) {
-      console.error("Failed to submit", error);
+      console.error("Save failed", error);
+      toast.error("Failed to save");
     } finally {
       setLoading(false);
     }
@@ -159,6 +171,25 @@ export default function NewLookbookItem() {
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-[#F8F9FD]"
             />
             <p className="text-[11px] text-gray-400 mt-1">If provided, users can click the image to view the product.</p>
+          </div>
+
+          <div className="flex flex-col gap-1.5 mt-2">
+            <label className="text-[12px] text-gray-500 font-semibold tracking-wide">Or Select a Product to Auto-fill</label>
+            <select 
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all bg-[#F8F9FD]"
+              onChange={(e) => {
+                 if (e.target.value) {
+                   setLinkUrl(e.target.value);
+                 }
+              }}
+            >
+              <option value="">Select a product...</option>
+              {products.map(p => (
+                <option key={p.id} value={`/product/${p.slug}`}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

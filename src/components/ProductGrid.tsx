@@ -19,7 +19,7 @@ export default function ProductGrid({ products }: { products: Product[] }) {
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 md:gap-x-8 gap-y-8 md:gap-y-16">
       {products.map((product) => {
         // Map Prisma product format to the format expected by useShop if needed
         const shopProduct = {
@@ -50,14 +50,15 @@ export default function ProductGrid({ products }: { products: Product[] }) {
               
               {/* Wishlist Button */}
               <button 
+                suppressHydrationWarning
                 onClick={() => toggleSaved(shopProduct)}
-                className={`absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-all duration-300 ${isSaved(product.id) ? 'text-red-500 opacity-100' : 'text-gray-400 opacity-0 group-hover:opacity-100 hover:text-gray-900 hover:scale-110'}`}
+                className={`absolute top-2 md:top-4 right-2 md:right-4 z-10 w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-all duration-300 ${isSaved(product.id) ? 'text-red-500 opacity-100' : 'text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-gray-900 hover:scale-110'}`}
               >
                 {isSaved(product.id) ? '♥' : '♡'}
               </button>
               
               {/* Quick Add (Visible on Hover) */}
-              <div className={`absolute bottom-0 left-0 w-full p-4 transform transition-transform duration-300 ${hoveredProduct === product.id ? 'translate-y-0' : 'translate-y-full'}`}>
+              <div className={`absolute bottom-0 left-0 w-full p-2 md:p-4 transform transition-transform duration-300 ${hoveredProduct === product.id ? 'translate-y-0' : 'translate-y-full'} hidden md:block`}>
                 <Link href={`/product/${product.slug}`} className="w-full bg-white/90 backdrop-blur-md text-gray-900 text-[10px] tracking-widest uppercase py-3 flex justify-center hover:bg-black hover:text-white transition-colors">
                   View Details
                 </Link>
@@ -65,14 +66,14 @@ export default function ProductGrid({ products }: { products: Product[] }) {
             </div>
 
             {/* Product Info */}
-            <div className="flex justify-between items-start px-1">
-              <div>
+            <div className="flex flex-col md:flex-row justify-between items-start px-1 mt-1 md:mt-2">
+              <div className="w-full pr-2">
                 <Link href={`/product/${product.slug}`}>
-                  <h3 className="font-title text-lg text-gray-900 hover:text-gray-600 transition-colors mb-1">{product.name}</h3>
+                  <h3 className="font-title text-[13px] md:text-lg text-gray-900 hover:text-gray-600 transition-colors mb-0.5 md:mb-1 truncate">{product.name}</h3>
                 </Link>
-                <p className="text-[11px] text-gray-500 italic">{shopProduct.category}</p>
+                <p className="text-[11px] md:text-[15px] text-gray-500 truncate">{shopProduct.category}</p>
               </div>
-              <p className="font-title text-sm text-gray-900">₹ {product.price}</p>
+              <p className="font-title text-[12px] md:text-sm text-gray-900 mt-1 md:mt-0 whitespace-nowrap">₹ {product.price}</p>
             </div>
           </div>
         );

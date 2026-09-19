@@ -9,14 +9,14 @@ export async function GET() {
     return NextResponse.json(collections);
   } catch (error) {
     console.error("[COLLECTIONS_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description } = body;
+    const { name, slug, description, coverImage } = body;
 
     if (!name || !slug) {
       return new NextResponse("Name and slug are required", { status: 400 });
@@ -27,12 +27,13 @@ export async function POST(request: Request) {
         name,
         slug,
         description,
+        coverImage,
       },
     });
 
     return NextResponse.json(collection);
   } catch (error) {
     console.error("[COLLECTIONS_POST]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

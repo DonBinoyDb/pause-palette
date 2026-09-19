@@ -3,12 +3,12 @@ import { ArrowRight } from "lucide-react";
 
 export default function StorySection() {
   return (
-    <section className="bg-white py-32">
-      <div className="container mx-auto px-12 md:px-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-24 items-center">
+    <section className="bg-white py-16 md:py-32">
+      <div className="w-full px-6 md:px-10 lg:px-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
           
           {/* Our Story */}
-          <Link href="/discover/our-story" className="flex items-start gap-10 group hover:opacity-80 transition-opacity">
+          <Link href="/discover/our-story" className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10 group hover:opacity-80 transition-opacity">
             {/* Logo image replacing the coded illustration */}
             <div className="w-48 h-56 relative shrink-0 transition-transform duration-500 group-hover:scale-105">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -19,9 +19,9 @@ export default function StorySection() {
               />
             </div>
             
-            <div className="pt-8">
+            <div className="pt-2 md:pt-8 flex flex-col items-center md:items-start">
               <h2 className="text-[13px] tracking-[0.2em] text-gray-500 uppercase mb-4 group-hover:text-gray-900 transition-colors">OUR STORY</h2>
-              <p className="text-[15px] leading-relaxed text-gray-800 font-serif italic text-balance mb-6">
+              <p className="text-[17px] leading-relaxed text-gray-800 text-balance mb-6" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
                 Pause Palette began with a simple<br/>
                 thought between two architects —<br/>
                 what if our illustrations could live<br/>
@@ -34,7 +34,7 @@ export default function StorySection() {
           </Link>
 
           {/* The Making Journal */}
-          <Link href="/discover/making-journal" className="flex items-start gap-10 group hover:opacity-80 transition-opacity">
+          <Link href="/discover/making-journal" className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10 group hover:opacity-80 transition-opacity">
             {/* SVG Illustration */}
             <div className="w-64 h-64 relative shrink-0 transition-transform duration-500 group-hover:scale-105">
                {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -45,9 +45,9 @@ export default function StorySection() {
               />
             </div>
             
-            <div className="pt-20">
+            <div className="pt-4 md:pt-20 flex flex-col items-center md:items-start">
               <h2 className="text-[13px] tracking-[0.2em] text-gray-500 uppercase mb-4 group-hover:text-gray-900 transition-colors">THE MAKING JOURNAL</h2>
-              <p className="text-[15px] leading-relaxed text-gray-800 font-serif italic text-balance mb-6">
+              <p className="text-[17px] leading-relaxed text-gray-800 text-balance mb-6" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
                 A glimpse into the process behind<br/>
                 every piece.
               </p>

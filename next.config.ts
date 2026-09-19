@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-// Forcing a server restart to reload the Prisma Client
+// Forcing server restart for Fit Guide Prisma fields
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'eaamruuepyfuiyyiazgy.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
         port: '',
         pathname: '/**',
       },

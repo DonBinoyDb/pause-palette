@@ -30,12 +30,12 @@ export default async function ShopAllPage() {
 
         {/* Filter / Sort Bar */}
         <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-12">
-          <div className="flex gap-8 text-[11px] tracking-widest uppercase text-gray-500">
-            <button className="text-gray-900 font-medium">All</button>
-            <button className="hover:text-gray-900 transition-colors">Men</button>
-            <button className="hover:text-gray-900 transition-colors">Women</button>
+          <div className="flex gap-8 text-sm tracking-widest uppercase text-gray-500">
+            <button suppressHydrationWarning className="text-gray-900 font-medium">All</button>
+            <button suppressHydrationWarning className="hover:text-gray-900 transition-colors">Men</button>
+            <button suppressHydrationWarning className="hover:text-gray-900 transition-colors">Women</button>
           </div>
-          <button className="text-[11px] tracking-widest uppercase text-gray-500 hover:text-gray-900 transition-colors">
+          <button suppressHydrationWarning className="text-sm tracking-widest uppercase text-gray-500 hover:text-gray-900 transition-colors">
             Sort By +
           </button>
         </div>
