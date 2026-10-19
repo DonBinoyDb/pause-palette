@@ -17,6 +17,7 @@
   --font-sans: var(--font-body);
   --font-serif: var(--font-title);
   --font-brand: var(--font-brand);
+  --font-garamond: var(--font-body), "EB Garamond", Garamond, Georgia, serif;
 }
 
 :root {
@@ -50,6 +51,9 @@ body {
   }
   .glass-panel {
     @apply bg-white/70 dark:bg-black/70 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+  .font-garamond {
+    font-family: var(--font-garamond), var(--font-body), "EB Garamond", Garamond, Georgia, serif;
   }
   .animate-fade-in-up {
     animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;

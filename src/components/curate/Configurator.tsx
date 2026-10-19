@@ -216,7 +216,7 @@ export default function Configurator() {
               <path d="M19 44 L29 44 L31 58 L17 58 Z" fill="#2E7D32" rx="2" />
             </svg>
           </div>
-          <h2 className="text-sm font-serif font-bold tracking-[0.18em] uppercase text-gray-900 mb-1">
+          <h2 className="text-sm font-garamond font-bold tracking-[0.14em] uppercase text-gray-900 mb-1">
             ORIGINAL ILLUSTRATION
           </h2>
           <p className="text-xs text-gray-500 font-sans tracking-wide">
@@ -241,7 +241,7 @@ export default function Configurator() {
               <path d="M37 13 C45 6 48 20 40 24 C32 28 20 36 22 46 C24 54 36 50 34 42" stroke="#B87333" strokeWidth="1.5" fill="none" strokeDasharray="3 3" />
             </svg>
           </div>
-          <h2 className="text-sm font-serif font-bold tracking-[0.18em] uppercase text-gray-900 mb-1">
+          <h2 className="text-sm font-garamond font-bold tracking-[0.14em] uppercase text-gray-900 mb-1">
             THEME-BASED EMBROIDERY
           </h2>
           <p className="text-xs text-gray-500 font-sans tracking-wide">
@@ -265,7 +265,7 @@ export default function Configurator() {
               <div className="w-7 h-7 rounded-full bg-[#B87333] shadow-sm"></div>
             </div>
           </div>
-          <h2 className="text-sm font-serif font-bold tracking-[0.18em] uppercase text-gray-900 mb-1">
+          <h2 className="text-sm font-garamond font-bold tracking-[0.14em] uppercase text-gray-900 mb-1">
             SOLID LINEN
           </h2>
           <p className="text-xs text-gray-500 font-sans tracking-wide">
@@ -509,7 +509,7 @@ export default function Configurator() {
                 <span className={`w-6 h-6 rounded-full ${badgeColors.illustration.bg} ${badgeColors.illustration.text} flex items-center justify-center text-xs font-bold shrink-0`}>
                   {technique === "printed" ? 6 : 7}
                 </span>
-                <h3 className="text-sm font-bold tracking-wide uppercase text-gray-900">
+                <h3 className="text-sm font-bold tracking-wide uppercase text-gray-900 font-garamond">
                   Your Piece
                 </h3>
               </div>
@@ -532,40 +532,43 @@ export default function Configurator() {
                   {/* Right: Specifications & Final Price */}
                   <div className="flex-1 flex flex-col justify-between w-full">
                     <div>
-                      <h4 className="font-serif text-lg font-semibold text-gray-900 mb-3">
+                      <h4 className="font-garamond text-xl font-medium text-gray-900 mb-3">
                         {audience === "men" ? "Men's Shirt" : "Women's Shirt"}
                       </h4>
 
-                      <div className="grid grid-cols-[110px_1fr] gap-y-1.5 text-xs text-gray-700 font-sans">
-                        <span className="text-gray-400 uppercase">Technique:</span>
-                        <span className="capitalize font-medium">{technique}</span>
+                      <div className="grid grid-cols-[120px_1fr] gap-y-2 text-sm text-gray-800 font-garamond">
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Selection:</span>
+                        <span className="font-normal">{audience === "men" ? "Men's" : "Women's"}</span>
 
-                        <span className="text-gray-400 uppercase">Product:</span>
-                        <span className="font-medium">{selectedPiece.name}</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Technique:</span>
+                        <span className="capitalize font-normal">{technique}</span>
 
-                        <span className="text-gray-400 uppercase">Silhouette:</span>
-                        <span className="font-medium">{selectedSilhouette.name}</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Product:</span>
+                        <span className="font-normal">{selectedPiece.name}</span>
 
-                        <span className="text-gray-400 uppercase">Size:</span>
-                        <span className="font-medium">{size}</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Silhouette:</span>
+                        <span className="font-normal">{selectedSilhouette.name}</span>
+
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Size:</span>
+                        <span className="font-normal">{size}</span>
 
                         {technique === "embroidered" && (
                           <>
-                            <span className="text-gray-400 uppercase">Linen colour:</span>
-                            <span className="font-medium">{selectedColor.name}</span>
+                            <span className="text-gray-400 uppercase tracking-wider text-xs">Colour:</span>
+                            <span className="font-normal">{selectedColor.name}</span>
                           </>
                         )}
                       </div>
                     </div>
 
                     {/* Final Price Block */}
-                    <div className="mt-6 pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="mt-6 pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-garamond">
                       <div>
-                        <span className="text-[11px] uppercase tracking-wider text-gray-400 block">
-                          Final Price (Auto calculated)
+                        <span className="text-xs uppercase tracking-wider text-gray-400 block font-garamond">
+                          TOTAL:
                         </span>
-                        <span className="font-serif text-2xl md:text-3xl font-bold text-gray-900">
-                          ₹{calculatedPrice.toLocaleString()}
+                        <span className="font-garamond text-2xl md:text-3xl font-normal text-gray-900">
+                          ₹ {calculatedPrice.toLocaleString()}
                         </span>
                       </div>
 
@@ -776,10 +779,10 @@ export default function Configurator() {
                   {themeSubmitted ? "Theme Submitted ✓" : "Share Your Theme"}
                 </button>
 
-                <span className="text-xs uppercase tracking-wider text-gray-500 mb-1">
+                <span className="text-xs uppercase tracking-wider text-gray-500 mb-1 font-garamond">
                   Starting Price (Auto calculated)
                 </span>
-                <span className="font-serif text-3xl font-bold text-gray-900 mb-2">
+                <span className="font-garamond text-3xl font-normal text-gray-900 mb-2">
                   ₹{calculatedPrice.toLocaleString()}+
                 </span>
                 <p className="text-xs text-gray-500 italic max-w-md">
@@ -943,7 +946,7 @@ export default function Configurator() {
                 <span className={`w-6 h-6 rounded-full ${badgeColors.solid.bg} ${badgeColors.solid.text} flex items-center justify-center text-xs font-bold shrink-0`}>
                   5
                 </span>
-                <h3 className="text-sm font-bold tracking-wide uppercase text-gray-900">
+                <h3 className="text-sm font-bold tracking-wide uppercase text-gray-900 font-garamond">
                   Your Piece
                 </h3>
               </div>
@@ -959,36 +962,36 @@ export default function Configurator() {
                   {/* Right: Specifications & Final Price */}
                   <div className="flex-1 flex flex-col justify-between w-full">
                     <div>
-                      <h4 className="font-serif text-lg font-semibold text-gray-900 mb-3">
+                      <h4 className="font-garamond text-xl font-medium text-gray-900 mb-3">
                         {audience === "men" ? "Men's Shirt" : "Women's Shirt"}
                       </h4>
 
-                      <div className="grid grid-cols-[110px_1fr] gap-y-1.5 text-xs text-gray-700 font-sans">
-                        <span className="text-gray-400 uppercase">Technique:</span>
-                        <span className="font-medium">-</span>
+                      <div className="grid grid-cols-[120px_1fr] gap-y-2 text-sm text-gray-800 font-garamond">
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Selection:</span>
+                        <span className="font-normal">{audience === "men" ? "Men's" : "Women's"}</span>
 
-                        <span className="text-gray-400 uppercase">Product:</span>
-                        <span className="font-medium">Solid Linen</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Technique:</span>
+                        <span className="font-normal">Solid Linen</span>
 
-                        <span className="text-gray-400 uppercase">Silhouette:</span>
-                        <span className="font-medium">{selectedSilhouette.name}</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Silhouette:</span>
+                        <span className="font-normal">{selectedSilhouette.name}</span>
 
-                        <span className="text-gray-400 uppercase">Size:</span>
-                        <span className="font-medium">{size}</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Size:</span>
+                        <span className="font-normal">{size}</span>
 
-                        <span className="text-gray-400 uppercase">Linen colour:</span>
-                        <span className="font-medium">{selectedColor.name}</span>
+                        <span className="text-gray-400 uppercase tracking-wider text-xs">Colour:</span>
+                        <span className="font-normal">{selectedColor.name}</span>
                       </div>
                     </div>
 
                     {/* Final Price Block */}
-                    <div className="mt-6 pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="mt-6 pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-garamond">
                       <div>
-                        <span className="text-[11px] uppercase tracking-wider text-gray-400 block">
-                          Final Price (Auto calculated)
+                        <span className="text-xs uppercase tracking-wider text-gray-400 block font-garamond">
+                          TOTAL:
                         </span>
-                        <span className="font-serif text-2xl md:text-3xl font-bold text-gray-900">
-                          ₹{calculatedPrice.toLocaleString()}
+                        <span className="font-garamond text-2xl md:text-3xl font-normal text-gray-900">
+                          ₹ {calculatedPrice.toLocaleString()}
                         </span>
                       </div>
 

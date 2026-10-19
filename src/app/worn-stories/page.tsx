@@ -59,13 +59,13 @@ export default async function WornStoriesPage() {
 
         {/* Share Your Story Section */}
         <div className="max-w-xl mx-auto text-center mb-16">
-          <h2 className="font-serif text-sm tracking-[0.1em] text-gray-700 uppercase mb-4">
+          <h2 className="font-garamond text-base tracking-[0.12em] text-gray-700 uppercase mb-3">
             Share Your Story
           </h2>
-          <p className="font-serif italic text-gray-600 text-sm mb-4">
+          <p className="font-garamond italic text-gray-600 text-base md:text-lg mb-4">
             Is a piece of Pause Palette already part of your story?
           </p>
-          <p className="text-[13px] text-gray-500 leading-relaxed mb-8">
+          <p className="font-garamond text-[14px] text-gray-500 leading-relaxed mb-8">
             Tell us how you wore it, where it went with you, or simply what you loved about it — and, if you wish, share a photograph from the moment.<br/><br/>
             Your story could become part of Worn Stories.
           </p>
@@ -116,7 +116,7 @@ export default async function WornStoriesPage() {
             <button 
               suppressHydrationWarning
               type="button"
-              className="w-full border border-[#8FB1D0] text-[#7A9BB9] font-serif italic py-2.5 rounded-sm hover:bg-[#F4F8FB] transition-colors text-sm"
+              className="w-full border border-[#8FB1D0] text-[#7A9BB9] font-garamond italic py-2.5 rounded-sm hover:bg-[#F4F8FB] transition-colors text-sm"
             >
               Send your Story
             </button>

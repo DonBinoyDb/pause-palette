@@ -9,10 +9,10 @@ export default function CurateYourPiecePage() {
       
       <main className="flex-1 pt-24 md:pt-32 pb-16 md:pb-24">
         <div className="max-w-5xl mx-auto px-6 flex flex-col items-center">
-          <h1 className="font-serif text-2xl md:text-3xl tracking-wide uppercase text-center mb-4 md:mb-6 text-gray-900">
+          <h1 className="font-garamond text-2xl md:text-3xl tracking-[0.14em] uppercase text-center mb-4 md:mb-6 text-gray-900 font-normal">
             CURATE YOUR PIECE
           </h1>
-          <p className="text-sm md:text-base font-sans text-gray-600 text-center max-w-2xl mx-auto mb-10 md:mb-16 leading-relaxed">
+          <p className="text-sm md:text-base font-garamond text-gray-600 text-center max-w-2xl mx-auto mb-10 md:mb-16 leading-relaxed">
             Create a Pause Palette piece that reflects your style and individuality through curated choices on Custom fit silhouette, details and detail.
           </p>
           

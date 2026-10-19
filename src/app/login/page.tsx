@@ -34,7 +34,7 @@ export default function LoginPage() {
         const res = await fetch("/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email: email.trim(), password })
         });
 
         if (!res.ok) {
@@ -49,15 +49,16 @@ export default function LoginPage() {
 
       // Login Flow (handles both actual login and post-registration auto-login)
       const res = await signIn("credentials", {
-        email,
+        email: email.trim(),
         password,
+        callbackUrl: "/admin/dashboard",
         redirect: false,
       });
 
       if (res?.error) {
-        setError("Invalid credentials.");
+        setError("Invalid email or password.");
       } else if (res?.ok) {
-        router.push("/admin/dashboard");
+        window.location.href = "/admin/dashboard";
       }
     } catch (err) {
       setError("An unexpected error occurred.");
@@ -67,7 +68,10 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: "/admin/dashboard" });
+    setError("");
+    signIn("google", { callbackUrl: "/admin/dashboard" }).catch(() => {
+      setError("Google Sign-In is not configured yet. Please sign in with email and password.");
+    });
   };
 
   return (
@@ -192,7 +196,7 @@ export default function LoginPage() {
               suppressHydrationWarning
               type="submit"
               disabled={loading}
-              className="w-full bg-[#111111] text-white rounded-full font-serif tracking-widest uppercase text-[13px] py-4 mt-6 hover:bg-black/80 transition-colors disabled:opacity-50"
+              className="w-full bg-[#111111] text-white rounded-full font-garamond tracking-[0.14em] uppercase text-[14px] py-4 mt-6 hover:bg-black/80 transition-colors disabled:opacity-50"
             >
               {loading ? "Authenticating..." : (isLogin ? "Log in" : "Sign Up")}
             </button>
@@ -202,7 +206,7 @@ export default function LoginPage() {
               suppressHydrationWarning
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full bg-[#f4f4f5] text-gray-900 rounded-full font-serif tracking-widest uppercase text-[13px] py-4 flex items-center justify-center gap-3 hover:bg-gray-200 transition-colors"
+              className="w-full bg-[#f4f4f5] text-gray-900 rounded-full font-garamond tracking-[0.14em] uppercase text-[14px] py-4 flex items-center justify-center gap-3 hover:bg-gray-200 transition-colors"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25C22.56 11.47 22.49 10.71 22.36 9.97H12V14.28H17.92C17.66 15.68 16.88 16.85 15.7 17.64V20.45H19.27C21.36 18.52 22.56 15.65 22.56 12.25Z" fill="#4285F4"/>

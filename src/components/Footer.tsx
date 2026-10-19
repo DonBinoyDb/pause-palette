@@ -51,21 +51,21 @@ export default function Footer() {
         </div>
         
         {/* Bottom Row */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 font-light gap-8 md:gap-0">
-          <div className="flex-1 text-center md:text-left">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center text-sm text-gray-500 font-light">
+          <div className="md:col-span-5 text-center md:text-left">
             © 2026 Pause Palette
             <div className="mt-1 text-xs">
               Developed by <a href="https://asimovx.se" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors underline decoration-gray-300 underline-offset-2">Asimovx Technologies AB</a>
             </div>
           </div>
           
-          <div className="flex-1 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 md:gap-24">
-            <Link href="/privacy-policy" className="hover:text-gray-900 transition-colors">Privacy Policy</Link>
-            <Link href="/terms-and-conditions" className="hover:text-gray-900 transition-colors">Terms & Conditions</Link>
+          <div className="md:col-span-5 flex flex-col sm:flex-row justify-center md:justify-start items-center gap-4 sm:gap-8 md:gap-10">
+            <Link href="/privacy-policy" className="hover:text-gray-900 transition-colors whitespace-nowrap">Privacy Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:text-gray-900 transition-colors whitespace-nowrap">Terms & Conditions</Link>
           </div>
           
-          <div className="flex-1 flex justify-center md:justify-end gap-6 w-full md:w-auto mt-4 md:mt-0">
-            <a href="https://www.instagram.com/pause_palette?stkn=c2k1dGNxeGJ4aGtj" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors text-gray-600">
+          <div className="md:col-span-2 flex justify-center md:justify-end gap-6">
+            <a href="https://www.instagram.com/pause_palette?stkn=c2k1dGNxeGJ4aGtj" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors text-gray-600" aria-label="Instagram">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
             </a>
             <a href="#" className="hover:text-gray-900 transition-colors text-gray-600" aria-label="Pinterest">

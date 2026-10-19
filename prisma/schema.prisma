@@ -174,3 +174,14 @@ model CuratorSettings {
   silhouettes      Json     @default("[]")
   updatedAt        DateTime @updatedAt
 }
+
+model HeroBanner {
+  id         String   @id @default("singleton")
+  title      String   @default("illustrated stories\nfor slow living.")
+  subtitle   String   @default("Thoughtfully designed pieces that carry\nart, colour and character.")
+  buttonText String   @default("EXPLORE COLLECTIONS")
+  buttonLink String   @default("/collections")
+  mediaItems Json     @default("[]")
+  updatedAt  DateTime @updatedAt
+}
+

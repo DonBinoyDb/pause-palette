@@ -7,16 +7,15 @@ export default function StoryAheadPage() {
       <Navbar variant="dark" />
       
       <div className="pt-32 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
-        
-        <h1 className="text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-16">
-          THE STORY AHEAD
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-y-24 gap-x-12 lg:gap-x-24">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-y-24 gap-x-12 lg:gap-x-24 items-start">
           
           {/* --- Section 1: Canvas & Palette --- */}
-          <div className="md:col-span-7 flex flex-col justify-center gap-16 lg:gap-24">
+          <div className="md:col-span-7 flex flex-col gap-12 lg:gap-16">
             
+            <h1 className="text-[18px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+              THE STORY AHEAD
+            </h1>
+
             <div className="flex flex-col gap-4">
               <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 OUR FAVOURITE CANVAS

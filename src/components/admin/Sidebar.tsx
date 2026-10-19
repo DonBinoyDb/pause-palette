@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Tag, Layers, LogOut, Image as ImageIcon, Star, BookOpen } from "lucide-react";
+import { LayoutDashboard, Package, Tag, Layers, LogOut, Image as ImageIcon, Star, BookOpen, Sparkles } from "lucide-react";
 
 import { signOut } from "next-auth/react";
 
@@ -11,6 +11,7 @@ export default function Sidebar() {
 
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { name: "Hero Banner", href: "/admin/hero", icon: Sparkles },
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Categories", href: "/admin/categories", icon: Layers },
     { name: "Collections", href: "/admin/collections", icon: Tag },

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { User, Search, ShoppingCart, Bookmark, Menu, X } from "lucide-react";
 import { useShop } from "@/context/ShopContext";
 import { useSession } from "next-auth/react";
@@ -124,12 +125,16 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
 
         </nav>
 
-        {/* Center Logo (Desktop Only) */}
-        <Link href="/" className="hidden md:flex flex-col items-center justify-center -mt-2 hover:opacity-80 transition-opacity">
-          <span className="font-brand text-5xl leading-none">Pause</span>
-          <span className="font-brand text-5xl leading-none -mt-2 translate-x-[-4px] translate-y-[-9px]">
-            palette<span className="inline-block w-[6px] h-[6px] rounded-full bg-current ml-[2px]"></span>
-          </span>
+        {/* Center Logo */}
+        <Link href="/" className="flex flex-col items-center justify-center -mt-2 hover:opacity-85 transition-opacity">
+          <Image 
+            src="/images/logo1.png" 
+            alt="Pause Palette" 
+            width={76} 
+            height={84} 
+            className="w-auto h-14 md:h-16 lg:h-20 object-contain transition-transform duration-300 hover:scale-105" 
+            priority
+          />
         </Link>
         
         {/* Right Icons */}
@@ -165,11 +170,14 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
         <div className="fixed inset-0 top-0 left-0 w-full h-screen bg-white text-gray-900 z-40 flex flex-col pt-24 px-8 overflow-y-auto">
           
           {/* Logo inside mobile menu */}
-          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center mb-12 hover:opacity-80 transition-opacity">
-            <span className="font-brand text-5xl leading-none">Pause</span>
-            <span className="font-brand text-5xl leading-none -mt-2 translate-x-[-4px] translate-y-[-9px]">
-              palette<span className="inline-block w-[6px] h-[6px] rounded-full bg-current ml-[2px]"></span>
-            </span>
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center mb-10 hover:opacity-85 transition-opacity">
+            <Image 
+              src="/images/logo1.png" 
+              alt="Pause Palette" 
+              width={80} 
+              height={90} 
+              className="w-auto h-20 object-contain" 
+            />
           </Link>
 
           <nav className="flex flex-col gap-8 text-sm tracking-[0.2em] uppercase">
