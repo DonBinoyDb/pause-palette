@@ -33,7 +33,10 @@ export default function Hero() {
   }, [currentIndex]);
 
   return (
-    <section className="relative h-[80vh] md:h-[90vh] min-h-[500px] md:min-h-[700px] w-full flex items-end pb-12 md:pb-16 overflow-hidden">
+    <section 
+      className="relative w-full h-screen min-h-screen min-h-[100dvh] h-[100dvh] shrink-0 flex items-end pb-12 md:pb-16 overflow-hidden"
+      style={{ height: "100vh", minHeight: "100vh" }}
+    >
       {/* Background media */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black/30 z-10" />
