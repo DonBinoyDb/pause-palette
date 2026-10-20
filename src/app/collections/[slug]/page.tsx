@@ -73,12 +73,8 @@ export default async function CollectionInnerPage({ params }: { params: Promise<
 
         {/* Products Grid */}
         <div className="mb-8 md:mb-12">
-          <h2 className="font-serif text-xl md:text-2xl text-gray-800 mb-6 md:mb-8 border-b border-gray-200 pb-2 md:pb-4 text-center md:text-left">
-            Pieces in this Collection
-          </h2>
-          
           {collectionData.products.length === 0 ? (
-            <div className="py-12 text-gray-500 italic">No pieces found in this collection.</div>
+            <div className="py-12 text-gray-500 italic text-center">No pieces found in this collection.</div>
           ) : (
             <ProductGrid products={collectionData.products} />
           )}

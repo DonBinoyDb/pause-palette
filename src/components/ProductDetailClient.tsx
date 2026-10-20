@@ -23,6 +23,7 @@ type ProductDetails = {
   fitGuideDescription?: string;
   fitGuideImage?: string;
   colors?: {name: string, hex: string, images: string[]}[];
+  dispatchInfo?: string | null;
 };
 
 export default function ProductDetailClient({ product }: { product: ProductDetails }) {
@@ -123,7 +124,12 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                </p>
             </div>
             
-            <p className="font-serif text-2xl text-gray-700 mb-6">₹ {product.price}</p>
+            <p 
+              className="font-garamond text-2xl md:text-3xl text-gray-800 mb-6"
+              style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, serif" }}
+            >
+              ₹ {product.price}
+            </p>
 
             {/* Colour Options */}
             {colors.length > 0 && (
@@ -161,7 +167,11 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                     key={size}
                     suppressHydrationWarning
                     onClick={() => setSelectedSize(size)}
-                    className={`w-11 h-11 flex items-center justify-center text-sm border ${selectedSize === size ? 'border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-md' : 'border-gray-200 text-gray-500 hover:border-gray-400'} transition-colors`}
+                    className={`w-11 h-11 flex items-center justify-center text-sm border transition-all ${
+                      selectedSize === size 
+                        ? 'border-[#79A7D3] bg-[#79A7D3] text-white font-medium shadow-sm' 
+                        : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'
+                    }`}
                   >
                     {size}
                   </button>
@@ -219,7 +229,9 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 <span className="text-2xl leading-none pt-0.5">{isSaved(product.id) ? '♥' : '♡'}</span>
               </button>
             </div>
-            <p className="text-xs text-gray-400 italic text-center mb-10">Thoughtfully made to order - Dispatches in 12-15 business days.</p>
+            <p className="text-xs text-gray-400 italic text-center mb-10">
+              {product.dispatchInfo || "Thoughtfully made to order - Dispatches in 12-15 business days."}
+            </p>
 
             {/* Description */}
             <p className="text-base text-gray-600 leading-relaxed mb-10 whitespace-pre-wrap">

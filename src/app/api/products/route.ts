@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description, price, images, hasSilhouette, fits, accordions, colors, categoryIds, sizes, collectionId, isPublished, isNew, fitGuideDescription, fitGuideImage } = body;
+    const { name, slug, description, price, images, hasSilhouette, fits, accordions, colors, categoryIds, sizes, collectionId, isPublished, isNew, fitGuideDescription, fitGuideImage, dispatchInfo } = body;
 
     if (!name || !slug || !price) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         fitGuideImage: fitGuideImage || null,
         isPublished: isPublished || false,
         isNew: isNew ?? true,
+        dispatchInfo: dispatchInfo || "Thoughtfully made to order - Dispatches in 12-15 business days.",
         ...(collectionId ? { collection: { connect: { id: collectionId } } } : {})
       },
     });

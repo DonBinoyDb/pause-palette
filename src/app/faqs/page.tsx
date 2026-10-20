@@ -109,8 +109,8 @@ export default function FAQPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-48 pb-32 max-w-7xl">
-        <h1 className="font-sans text-3xl md:text-4xl text-gray-900 mb-16 text-center tracking-wide">FAQ'S</h1>
+      <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-36 md:pt-48 pb-32 max-w-7xl">
+        <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-12 md:mb-16 text-center">FAQ'S</h1>
         
         <div className="flex flex-col md:flex-row gap-16 md:gap-24 relative">
           
@@ -149,7 +149,7 @@ export default function FAQPage() {
                           onClick={() => toggleAccordion(uniqueId)}
                           className="w-full flex items-center justify-between text-left focus:outline-none group"
                         >
-                          <h3 className="font-sans italic font-semibold text-lg text-gray-800 pr-8">{item.question}</h3>
+                          <h3 className="font-sans italic font-normal text-lg text-gray-500 group-hover:text-gray-800 transition-colors pr-8">{item.question}</h3>
                           <div className="text-gray-400 group-hover:text-gray-900 transition-colors shrink-0">
                             {isOpen ? <Minus size={16} strokeWidth={1.5} /> : <Plus size={16} strokeWidth={1.5} />}
                           </div>

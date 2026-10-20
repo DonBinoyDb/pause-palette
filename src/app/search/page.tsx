@@ -16,14 +16,15 @@ export default function SearchPage() {
         
         <div className="w-full max-w-3xl">
           <div className="relative border-b border-gray-300 pb-2 mb-16 group">
-            <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-gray-800 transition-colors" strokeWidth={1.5} />
+            <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 text-gray-400 group-focus-within:text-gray-800 transition-colors" strokeWidth={1.5} />
             <input 
               suppressHydrationWarning
               type="text" 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search for pieces, colors, or collections..." 
-              className="w-full bg-transparent pl-12 pr-4 py-4 text-xl md:text-2xl font-serif text-gray-800 focus:outline-none placeholder:text-gray-300 placeholder:italic placeholder:font-serif"
+              style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, serif" }}
+              className="w-full bg-transparent pl-9 md:pl-10 pr-4 py-3 md:py-4 text-[15px] md:text-lg font-garamond text-gray-800 focus:outline-none placeholder:text-gray-400 placeholder:italic placeholder:font-garamond"
               autoFocus
             />
           </div>

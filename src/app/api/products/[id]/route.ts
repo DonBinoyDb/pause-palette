@@ -74,6 +74,7 @@ export async function PUT(
         fitGuideImage: data.fitGuideImage || null,
         isPublished: data.isPublished,
         isNew: data.isNew ?? true,
+        dispatchInfo: data.dispatchInfo !== undefined ? data.dispatchInfo : undefined,
         images: data.images || [],
       },
     });

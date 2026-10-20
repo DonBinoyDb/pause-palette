@@ -99,6 +99,7 @@ model Product {
   fitGuideImage       String?
   isPublished   Boolean     @default(false)
   isNew         Boolean     @default(true)
+  dispatchInfo  String?     @default("Thoughtfully made to order - Dispatches in 12-15 business days.")
   collectionId  String?
   collection    Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
   categories    Category[]

@@ -8,8 +8,10 @@ export default function ReturnsAndExchangesPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-48 pb-32 max-w-4xl">
-        <h1 className="font-serif text-3xl md:text-4xl text-gray-900 mb-12 tracking-wider text-center uppercase">Returns & Exchanges</h1>
+      <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-36 md:pt-48 pb-32 max-w-4xl text-center">
+        <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-10 md:mb-12">
+          Returns & Exchanges
+        </h1>
         
         <div className="prose prose-gray max-w-3xl mx-auto text-gray-600 leading-relaxed text-sm md:text-[15px]" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
           

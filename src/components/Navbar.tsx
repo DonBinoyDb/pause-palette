@@ -11,11 +11,11 @@ import { usePathname } from "next/navigation";
 export default function Navbar({ variant = "light" }: { variant?: "light" | "dark" | "glass" }) {
   const isGlass = variant === "glass";
   const headerBg = isGlass ? "bg-white/40 backdrop-blur-md border-b border-white/50 shadow-sm" : "bg-transparent";
-  const borderColor = variant === "light" ? "border-white/20" : "border-[#79A7D3]/20";
-  const bgColor = variant === "light" ? "bg-white/10" : "bg-white/80";
-  const hoverBg = variant === "light" ? "hover:bg-white/20" : "hover:bg-[#79A7D3]/10";
-  const hoverTextColor = variant === "light" ? "hover:text-white" : "hover:text-[#79A7D3]";
-  const childTextColor = variant === "light" ? "text-white/80" : "text-[#79A7D3]/80";
+  const borderColor = variant === "light" ? "border-white/20" : "border-gray-200";
+  const bgColor = variant === "light" ? "bg-white/10" : "bg-white/95";
+  const hoverBg = variant === "light" ? "hover:bg-white/20" : "hover:bg-gray-100";
+  const hoverTextColor = variant === "light" ? "hover:text-white" : "hover:text-black";
+  const childTextColor = variant === "light" ? "text-white/80" : "text-gray-600";
 
   // Use the shop context for dynamic badges
   const { cart, saved } = useShop();
@@ -27,7 +27,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   const pathname = usePathname();
 
   // Force text-gray-900 when mobile menu is open so the close button (and icons) are visible against the white overlay
-  const textColor = mobileMenuOpen ? "text-gray-900" : (variant === "light" ? "text-white" : "text-[#79A7D3]");
+  const textColor = mobileMenuOpen ? "text-gray-900" : (variant === "light" ? "text-white" : "text-gray-900");
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -148,7 +148,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <Link href="/cart" suppressHydrationWarning className="hover:opacity-70 transition-opacity relative">
             <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-[#79A7D3] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
+              <span className="absolute -top-1.5 -right-2 bg-gray-900 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
                 {cartItemCount}
               </span>
             )}
@@ -156,7 +156,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <Link href="/saved" suppressHydrationWarning className="hover:opacity-70 transition-opacity relative">
             <Bookmark className="w-5 h-5 stroke-[1.5]" />
             {savedItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-[#79A7D3] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
+              <span className="absolute -top-1.5 -right-2 bg-gray-900 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
                 {savedItemCount}
               </span>
             )}
@@ -169,44 +169,43 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
       {mobileMenuOpen && (
         <div className="fixed inset-0 top-0 left-0 w-full h-screen bg-white text-gray-900 z-40 flex flex-col pt-24 px-8 overflow-y-auto">
           
-          {/* Logo inside mobile menu */}
-          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center mb-10 hover:opacity-85 transition-opacity">
-            <Image 
-              src="/images/logo1.png" 
-              alt="Pause Palette" 
-              width={80} 
-              height={90} 
-              className="w-auto h-20 object-contain" 
-            />
+          {/* Logo inside mobile menu (Blue Brand Logo) */}
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex flex-col items-center justify-center mb-10 hover:opacity-85 transition-opacity text-[#79A7D3]">
+            <span className="font-brand text-5xl leading-none">Pause</span>
+            <span className="font-brand text-5xl leading-none -mt-2 translate-x-[-4px] translate-y-[-9px]">
+              palette<span className="inline-block w-[6px] h-[6px] rounded-full bg-[#79A7D3] ml-[2px]"></span>
+            </span>
           </Link>
 
-          <nav className="flex flex-col gap-8 text-sm tracking-[0.2em] uppercase">
+          <nav className="flex flex-col gap-8 text-sm">
             <div>
-              <div className="text-gray-400 mb-4 text-xs font-semibold">SHOP</div>
-              <div className="flex flex-col gap-4 pl-4 border-l border-gray-100">
-                <Link href="/shop/new-in">New In</Link>
-                <Link href="/shop/all">All</Link>
-                <Link href="/collections">Collections</Link>
-                <Link href="/categories/men">Men</Link>
-                <Link href="/categories/women">Women</Link>
-                <Link href="/curate-your-piece" className="text-blue-600">Curate Your Piece</Link>
+              <div className="text-[#79A7D3] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">SHOP</div>
+              <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
+                <Link href="/shop/new-in" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">New In</Link>
+                <Link href="/shop/all" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">All</Link>
+                <Link href="/collections" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Collections</Link>
+                <Link href="/categories/men" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Men</Link>
+                <Link href="/categories/women" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Women</Link>
+                <Link href="/curate-your-piece" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-black transition-colors">Curate Your Piece</Link>
               </div>
             </div>
 
             <div>
-              <div className="text-gray-400 mb-4 text-xs font-semibold">DISCOVER</div>
-              <div className="flex flex-col gap-4 pl-4 border-l border-gray-100">
-                <Link href="/discover/story-ahead">The Story Ahead</Link>
-                <Link href="/discover/our-story">Our Story</Link>
-                <Link href="/discover/making-journal">The Making Journal</Link>
-                <Link href="/worn-stories">Worn Stories</Link>
-                <Link href="/discover/lookbook">Lookbook</Link>
+              <div className="text-[#79A7D3] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">DISCOVER</div>
+              <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
+                <Link href="/discover/story-ahead" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Story Ahead</Link>
+                <Link href="/discover/our-story" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Our Story</Link>
+                <Link href="/discover/making-journal" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Making Journal</Link>
+                <Link href="/worn-stories" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Worn Stories</Link>
+                <Link href="/discover/lookbook" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Lookbook</Link>
               </div>
             </div>
             
             {status === "authenticated" && (
-              <div className="mt-4 pt-8 border-t border-gray-100">
-                <Link href="/profile" className="flex items-center gap-2"><User className="w-4 h-4" /> My Account</Link>
+              <div className="mt-4 pt-6 border-t border-gray-100 text-[15px] text-gray-700">
+                <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 hover:text-black transition-colors">
+                  <User className="w-4 h-4" /> My Account
+                </Link>
               </div>
             )}
           </nav>

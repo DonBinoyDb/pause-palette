@@ -53,7 +53,7 @@ body {
     @apply bg-white/70 dark:bg-black/70 backdrop-blur-md border border-white/20 dark:border-white/10;
   }
   .font-garamond {
-    font-family: var(--font-garamond), var(--font-body), "EB Garamond", Garamond, Georgia, serif;
+    font-family: var(--font-body), "EB Garamond", Garamond, Georgia, serif !important;
   }
   .animate-fade-in-up {
     animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;

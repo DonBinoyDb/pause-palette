@@ -33,6 +33,7 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [isPublished, setIsPublished] = useState(false);
   const [isNew, setIsNew] = useState(true);
+  const [dispatchInfo, setDispatchInfo] = useState("Thoughtfully made to order - Dispatches in 12-15 business days.");
 
   const [fitGuideDescription, setFitGuideDescription] = useState("");
   const [fitGuideImage, setFitGuideImage] = useState("");
@@ -314,6 +315,7 @@ export default function NewProductPage() {
           sizes,
           isPublished,
           isNew,
+          dispatchInfo,
           images,
           fitGuideDescription,
           fitGuideImage,
@@ -560,14 +562,15 @@ export default function NewProductPage() {
               </div>
               
               <div className="relative mb-8 w-max">
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 font-serif text-lg text-gray-700">₹</span>
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 font-garamond text-lg text-gray-700" style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, serif" }}>₹</span>
                 <input 
                   type="number" 
                   step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="0.00"
-                  className="font-serif text-lg text-gray-700 border-b border-transparent hover:border-gray-200 focus:border-gray-400 focus:outline-none bg-transparent pl-6 w-32 pb-0.5 transition-colors"
+                  style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, serif" }}
+                  className="font-garamond text-lg text-gray-700 border-b border-transparent hover:border-gray-200 focus:border-gray-400 focus:outline-none bg-transparent pl-6 w-32 pb-0.5 transition-colors"
                   required
                 />
               </div>
@@ -581,7 +584,7 @@ export default function NewProductPage() {
                         type="button"
                         key={size}
                         onClick={() => toggleSize(size)}
-                        className={`w-9 h-9 flex items-center justify-center text-xs border transition-colors ${sizes.includes(size) ? 'border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-md' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}
+                        className={`w-9 h-9 flex items-center justify-center text-xs border transition-colors ${sizes.includes(size) ? 'border-[#79A7D3] bg-[#79A7D3] text-white font-medium shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}
                       >
                         {size}
                       </button>
@@ -761,7 +764,16 @@ export default function NewProductPage() {
                 {loading ? "SAVING..." : "SAVE & PUBLISH PRODUCT"}
               </button>
               
-              <p className="text-[10px] text-gray-400 italic text-center mb-10">Thoughtfully made to order - Dispatches in 12-15 business days.</p>
+              <div className="text-center mb-10">
+                <input 
+                  type="text"
+                  value={dispatchInfo}
+                  onChange={(e) => setDispatchInfo(e.target.value)}
+                  placeholder="Thoughtfully made to order - Dispatches in 12-15 business days."
+                  className="w-full text-xs text-gray-400 italic text-center bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-400 focus:outline-none transition-colors py-1"
+                  title="Click to edit dispatch information"
+                />
+              </div>
 
               {/* Description Input */}
               <div className="relative mb-10">

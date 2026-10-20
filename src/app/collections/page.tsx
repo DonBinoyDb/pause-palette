@@ -26,17 +26,14 @@ export default async function CollectionsPage() {
       <div className="pt-24 md:pt-32 pb-16 px-6 md:px-12 lg:px-24 container mx-auto w-full">
         
         {/* Header Section */}
-        <div className="text-center mb-12 md:mb-20 mt-6 md:mt-10">
-          <h1 className="font-garamond text-2xl md:text-[28px] tracking-[0.14em] text-gray-600 uppercase mb-3 font-normal">
+        <header className="mb-14 flex flex-col items-center text-center">
+          <h1 className="font-serif text-2xl md:text-3xl text-gray-500 font-normal tracking-wide mb-3">
             Our Collections
           </h1>
-          <p className="font-garamond italic text-gray-500 text-base md:text-lg mb-6">
-            Two expressions. Many stories.
+          <p className="text-gray-400 italic text-[12px] md:text-[13px] tracking-wide font-serif whitespace-nowrap">
+            Two expressions. Many stories — our collections take form through print and embroidery.
           </p>
-          <p className="font-garamond text-[15px] md:text-[17px] text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Our collections take form through two distinct expressions — print and embroidery. Original hand-drawn illustrations are brought to life through digital print on natural fabric blends or intricate embroidery on 100% linen.
-          </p>
-        </div>
+        </header>
 
         {/* Collections List */}
         {collections.length === 0 ? (

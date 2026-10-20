@@ -16,17 +16,17 @@ export default async function LookbookPage() {
       <div className="pt-32 pb-12 w-full">
         
         {/* Header Section */}
-        <div className="text-center mb-12 px-6">
-          <h1 className="font-serif text-[28px] tracking-[0.15em] text-gray-500 uppercase mb-6">
+        <div className="text-center mb-12 px-6 max-w-[1400px] mx-auto">
+          <h1 className="font-serif text-[16px] md:text-[18px] tracking-[0.2em] text-gray-500 font-semibold uppercase mb-4">
             LOOKBOOK
           </h1>
-          <p className="italic font-bold text-gray-600 text-[16px] md:text-[17px] mb-2 leading-[1.6]">
+          <p className="italic font-normal text-gray-600 text-[15px] md:text-[16px] mb-3 leading-[1.6]">
             A visual study of Pause Palette, captured in its most expressive moments.
           </p>
-          <p className="text-[15px] text-gray-500 leading-[1.8] max-w-3xl mx-auto mb-2">
+          <p className="text-[14px] md:text-[15px] text-gray-500 leading-[1.8] max-w-[1200px] mx-auto mb-2">
             A curated collection of our pieces through light, texture, movement and setting — bringing together the frames that best reflect the mood, character and quiet beauty of each design.
           </p>
-          <p className="text-[15px] text-gray-500 leading-[1.8]">
+          <p className="text-[14px] md:text-[15px] text-gray-500 leading-[1.8]">
             Discover the piece behind every frame.
           </p>
         </div>
