@@ -30,8 +30,11 @@ export default async function CollectionsPage() {
           <h1 className="font-serif text-2xl md:text-3xl text-gray-500 font-normal tracking-wide mb-3">
             Our Collections
           </h1>
-          <p className="text-gray-400 italic text-[12px] md:text-[13px] tracking-wide font-serif whitespace-nowrap">
-            Two expressions. Many stories — our collections take form through print and embroidery.
+          <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans whitespace-nowrap">
+            Two expressions. Many stories
+          </p>
+          <p className="text-gray-400 text-[11px] md:text-[12px] tracking-wide font-sans mt-1.5 whitespace-nowrap">
+            Our collections take form through print and embroidery. Original hand-drawn illustrations are brought to life through digital print on natural fabric blends or intricate embroidery on 100% linen.
           </p>
         </header>
 

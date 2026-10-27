@@ -65,6 +65,11 @@ export async function POST(request: Request) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
+    if (productId.startsWith("curated-")) {
+      // Curated items are handled client-side / in localStorage
+      return NextResponse.json({ success: true, isCurated: true });
+    }
+
     // Upsert the cart item
     const cartItem = await prisma.cartItem.upsert({
       where: {
@@ -115,31 +120,34 @@ export async function PUT(request: Request) {
       return new NextResponse("Invalid payload", { status: 400 });
     }
 
-    // For each item, upsert it. We could do this in a transaction.
-    await prisma.$transaction(
-      items.map((item: any) => 
-        prisma.cartItem.upsert({
-          where: {
-            userId_productId_size_silhouette: {
+    const dbItems = items.filter((item: any) => !item.productId?.startsWith("curated-"));
+
+    if (dbItems.length > 0) {
+      await prisma.$transaction(
+        dbItems.map((item: any) => 
+          prisma.cartItem.upsert({
+            where: {
+              userId_productId_size_silhouette: {
+                userId: user.id,
+                productId: item.productId,
+                size: item.size,
+                silhouette: item.silhouette
+              }
+            },
+            update: {
+              quantity: item.quantity
+            },
+            create: {
               userId: user.id,
               productId: item.productId,
               size: item.size,
-              silhouette: item.silhouette
+              silhouette: item.silhouette,
+              quantity: item.quantity
             }
-          },
-          update: {
-            quantity: item.quantity // Keep local quantity or add? We'll just overwrite.
-          },
-          create: {
-            userId: user.id,
-            productId: item.productId,
-            size: item.size,
-            silhouette: item.silhouette,
-            quantity: item.quantity
-          }
-        })
-      )
-    );
+          })
+        )
+      );
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -169,6 +177,10 @@ export async function DELETE(request: Request) {
 
     if (!productId || !size || !silhouette) {
       return new NextResponse("Missing required fields", { status: 400 });
+    }
+
+    if (productId.startsWith("curated-")) {
+      return NextResponse.json({ success: true });
     }
 
     await prisma.cartItem.delete({

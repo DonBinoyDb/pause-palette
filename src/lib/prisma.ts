@@ -14,17 +14,33 @@ const createPrismaClient = () => {
   
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: ["error"],
   });
 };
 
-// Force reload to pick up new schema changes (isNew field)
+const getPrismaClient = (): PrismaClient => {
+  if (globalForPrisma.prisma && (globalForPrisma.prisma as any).storeSettings) {
+    return globalForPrisma.prisma;
+  }
+  const fresh = createPrismaClient();
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = fresh;
+  }
+  return fresh;
+};
+
+export const prisma = new Proxy({} as PrismaClient, {
+  get(target, prop, receiver) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client, prop, receiver);
+    if (typeof value === "function") {
+      return value.bind(client);
+    }
+    return value;
+  },
+});
+
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = undefined;
+  globalForPrisma.prisma = getPrismaClient();
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}

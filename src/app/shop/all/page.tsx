@@ -25,7 +25,7 @@ export default async function ShopAllPage() {
           <h1 className="font-serif text-2xl md:text-3xl text-gray-500 font-normal tracking-wide mb-3">
             All Pieces
           </h1>
-          <p className="text-gray-400 italic text-[12px] md:text-[13px] tracking-wide font-serif whitespace-nowrap">
+          <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans">
             Thoughtfully designed, slowly crafted. Explore our complete archive of illustrated stories.
           </p>
         </header>

@@ -98,7 +98,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-6 w-full">
+        <form suppressHydrationWarning onSubmit={handleLogin} className="flex flex-col gap-6 w-full">
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-md text-[13px] text-center border border-red-100 font-sans">
               {error}
@@ -135,6 +135,7 @@ export default function LoginPage() {
                 className="w-full border-b border-gray-300 pb-2 text-[14px] text-gray-900 focus:outline-none focus:border-black transition-colors bg-transparent tracking-widest placeholder:text-gray-300 pr-8 font-sans"
               />
               <button
+                suppressHydrationWarning
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-0 top-1 text-gray-400 hover:text-black transition-colors cursor-pointer"
@@ -160,6 +161,7 @@ export default function LoginPage() {
                   className="w-full border-b border-gray-300 pb-2 text-[14px] text-gray-900 focus:outline-none focus:border-black transition-colors bg-transparent tracking-widest placeholder:text-gray-300 pr-8 font-sans"
                 />
                 <button
+                  suppressHydrationWarning
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-0 top-1 text-gray-400 hover:text-black transition-colors cursor-pointer"
@@ -175,6 +177,7 @@ export default function LoginPage() {
             <div className="flex justify-between items-center text-[12px] text-gray-400 pt-0.5">
               <label className="flex items-center gap-2 cursor-pointer group">
                 <input
+                  suppressHydrationWarning
                   type="checkbox"
                   className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-black text-black cursor-pointer"
                 />
@@ -183,6 +186,7 @@ export default function LoginPage() {
                 </span>
               </label>
               <button
+                suppressHydrationWarning
                 type="button"
                 className="text-[12px] text-gray-400 hover:text-gray-900 transition-colors font-sans cursor-pointer"
               >

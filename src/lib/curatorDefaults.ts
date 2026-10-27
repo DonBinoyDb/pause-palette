@@ -55,6 +55,7 @@ export const DEFAULT_PRICING = {
     M: 0,
     L: 100,
     XL: 200,
+    XXL: 300,
   },
   linenColors: [
     { id: "black", name: "Black", hex: "#1C1C1C", adjustment: 0 },
@@ -82,3 +83,43 @@ export const DEFAULT_VISIBILITY = {
   embroidery: { showAudience: true, showTheme: true, showSilhouette: true, showSize: true, showColor: true },
   solid: { showAudience: true, showSilhouette: true, showSize: true, showColor: true },
 };
+
+export const DEFAULT_MODES = {
+  illustration: {
+    enabled: true,
+    title: "ORIGINAL ILLUSTRATION",
+    description: "Begin with one of our existing Pause Palette designs and curate the piece through your preferred technique, silhouette, size and choice of collar, options.",
+    icon: "/images/flower.svg",
+    techniques: {
+      printed: { enabled: true, value: 200 },
+      embroidered: { enabled: true, value: 500 },
+    },
+    silhouettes: ["classic-point-collar", "cuban-collar", "mandarin-collar"],
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+  },
+  embroidery: {
+    enabled: true,
+    title: "THEME-BASED EMBROIDERY",
+    description: "Your idea, our illustration",
+    icon: "/images/needle.png",
+    startingPrice: 2000,
+    placeholder: "Tell us about your theme, idea or inspiration...",
+    reviewNotice: "Final embroidery/design charge will be confirmed after review.",
+    customerNote: "(Customer sees only this starting price)",
+    silhouettes: ["classic-point-collar", "cuban-collar", "mandarin-collar"],
+    linenColors: ["black", "olive", "brown", "beige", "sage"],
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+  },
+  solid: {
+    enabled: true,
+    title: "SOLID LINEN",
+    subtitle: "No print, no embroidery",
+    description: "Choose your preferred silhouette, size and available linen shade to create a pure, understated piece in one of our meticulously crafted European linens.",
+    icon: "",
+    basePrice: 2000,
+    silhouettes: ["classic-point-collar", "cuban-collar", "mandarin-collar"],
+    linenColors: ["black", "olive", "brown", "beige", "sage"],
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+  },
+};
+

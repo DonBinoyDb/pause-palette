@@ -34,7 +34,7 @@ export default function StorySection() {
           </Link>
 
           {/* The Making Journal */}
-          <Link href="/discover/making-journal" className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10 group hover:opacity-90 transition-opacity">
+          <Link href="/discover/making-journal" className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10 group">
             {/* SVG Illustration */}
             <div className="w-64 h-64 relative shrink-0 transition-transform duration-500 group-hover:scale-105">
               {/* eslint-disable-next-line @next/next/no-img-element */}

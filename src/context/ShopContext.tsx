@@ -4,6 +4,19 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
+export interface CuratedDetails {
+  isCurated: boolean;
+  mode: "illustration" | "embroidery" | "solid" | string;
+  modeTitle: string;
+  audience: "Men" | "Women" | string;
+  technique?: "Printed" | "Embroidered" | string;
+  pieceName?: string;
+  silhouetteName: string;
+  size: string;
+  colorName?: string;
+  theme?: string;
+}
+
 export interface CartItem {
   id: string; // Unique ID for the cart item (product ID + size + silhouette)
   productId: string;
@@ -13,6 +26,7 @@ export interface CartItem {
   size: string;
   silhouette: string;
   quantity: number;
+  curatedDetails?: CuratedDetails;
 }
 
 export interface SavedItem {
@@ -107,9 +121,22 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           // 2. Fetch the combined true state from DB
           const cartRes = await fetch('/api/cart');
           if (cartRes.ok) {
-            const dbCart = await cartRes.json();
-            setCart(dbCart);
-            localStorage.setItem('pause_palette_cart', JSON.stringify(dbCart));
+            const dbCart: CartItem[] = await cartRes.json();
+            setCart(prevCart => {
+              const localCurated = prevCart.filter(item => 
+                item.curatedDetails || 
+                item.productId.startsWith('curated-') || 
+                item.name.toLowerCase().includes('curated')
+              );
+              const combined = [...dbCart];
+              localCurated.forEach(cItem => {
+                if (!combined.some(i => i.id === cItem.id)) {
+                  combined.push(cItem);
+                }
+              });
+              localStorage.setItem('pause_palette_cart', JSON.stringify(combined));
+              return combined;
+            });
           }
 
           const savedRes = await fetch('/api/wishlist');

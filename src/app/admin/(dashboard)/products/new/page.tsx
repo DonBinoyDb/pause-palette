@@ -5,6 +5,7 @@ import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Save, Plus, Info } fr
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -344,10 +345,10 @@ export default function NewProductPage() {
   const displayImages = images.length > 0 ? images : [""]; 
 
   return (
-    <form onSubmit={handleSubmit} className="w-full">
+    <form id="product-new-form" onSubmit={handleSubmit} className="w-full">
       
-      {/* Admin Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-6 border-b border-[#E8E6E1]">
+      {/* Admin Action Bar (Normal flow, not sticky) */}
+      <div className="pb-6 mb-8 border-b border-[#E8E6E1] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/admin/products" className="w-10 h-10 bg-white flex items-center justify-center text-gray-500 hover:text-black transition-colors border border-gray-200 rounded-sm">
             <ArrowLeft size={16} />
@@ -358,11 +359,11 @@ export default function NewProductPage() {
           </div>
         </div>
         
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap gap-3 items-center">
           <button 
             type="button"
             onClick={() => router.push("/admin/products")}
-            className="px-8 py-3 text-[10px] tracking-[0.15em] uppercase text-gray-700 hover:bg-gray-100 border border-gray-200 transition-colors rounded-sm"
+            className="px-6 py-2.5 text-[10px] tracking-[0.15em] uppercase text-gray-700 hover:bg-gray-100 border border-gray-200 transition-colors rounded-sm font-medium"
           >
             Cancel
           </button>
@@ -370,29 +371,38 @@ export default function NewProductPage() {
             <button 
               type="button"
               onClick={() => setIsPublished(true)}
-              className={`px-4 py-3 text-[10px] tracking-[0.15em] uppercase flex items-center gap-2 transition-colors ${isPublished ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-gray-50'}`}
+              className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${isPublished ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-gray-50'}`}
             >
-              <Eye size={14} /> Active
+              <Eye size={13} /> Active
             </button>
             <div className="w-px h-full bg-gray-200" />
             <button 
               type="button"
               onClick={() => setIsPublished(false)}
-              className={`px-4 py-3 text-[10px] tracking-[0.15em] uppercase flex items-center gap-2 transition-colors ${!isPublished ? 'bg-gray-100 text-gray-800' : 'text-gray-500 hover:bg-gray-50'}`}
+              className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${!isPublished ? 'bg-gray-100 text-gray-800' : 'text-gray-500 hover:bg-gray-50'}`}
             >
-              <EyeOff size={14} /> Draft
+              <EyeOff size={13} /> Draft
             </button>
           </div>
           
-          <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden ml-2">
+          <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden">
             <button 
               type="button"
               onClick={() => setIsNew(!isNew)}
-              className={`px-4 py-3 text-[10px] tracking-[0.15em] uppercase flex items-center gap-2 transition-colors ${isNew ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
+              className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${isNew ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
             >
-              <Check size={14} className={isNew ? "opacity-100" : "opacity-0"} /> New In Tag
+              <Check size={13} className={isNew ? "opacity-100" : "opacity-0"} /> New In Tag
             </button>
           </div>
+
+          <button 
+            type="submit"
+            disabled={loading || uploading}
+            className="px-6 py-2.5 text-[10px] tracking-[0.15em] uppercase bg-[#2C2B29] text-white hover:bg-black transition-colors rounded-sm flex items-center gap-2 shadow-sm disabled:opacity-50 font-semibold"
+          >
+            <Save size={13} />
+            <span>{loading ? "SAVING..." : "SAVE PRODUCT"}</span>
+          </button>
         </div>
       </div>
 
@@ -755,25 +765,35 @@ export default function NewProductPage() {
                 )}
               </div>
 
-              {/* Save Button */}
-              <button 
-                type="submit"
-                disabled={loading || uploading}
-                className="w-full border border-gray-800 bg-gray-800 text-white font-serif tracking-widest uppercase py-4 mb-4 hover:bg-black transition-colors disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
-              >
-                {loading ? "SAVING..." : "SAVE & PUBLISH PRODUCT"}
-              </button>
-              
-              <div className="text-center mb-10">
+              {/* Dispatch / Made-to-Order Customization */}
+              <div className="mb-6 p-4 bg-gray-50/80 border border-gray-200 rounded-lg text-left">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[11px] uppercase tracking-wider text-gray-700 font-semibold flex items-center gap-1.5">
+                    <span>📦</span> Dispatch / Made-to-Order Note
+                  </label>
+                  <span className="text-[10px] text-gray-400 font-mono">Product Page Text</span>
+                </div>
                 <input 
                   type="text"
                   value={dispatchInfo}
                   onChange={(e) => setDispatchInfo(e.target.value)}
                   placeholder="Thoughtfully made to order - Dispatches in 12-15 business days."
-                  className="w-full text-xs text-gray-400 italic text-center bg-transparent border-b border-transparent hover:border-gray-300 focus:border-gray-400 focus:outline-none transition-colors py-1"
-                  title="Click to edit dispatch information"
+                  className="w-full text-xs text-gray-700 italic bg-white border border-gray-300 focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:outline-none rounded px-3 py-2 transition-all shadow-sm"
+                  title="Customize the dispatch/made-to-order notice on the product page"
                 />
+                <p className="text-[10px] text-gray-400 mt-1.5 italic">
+                  Displays on the product detail page right beneath the &quot;Add to Cart&quot; button.
+                </p>
               </div>
+
+              {/* Save Button */}
+              <button 
+                type="submit"
+                disabled={loading || uploading}
+                className="w-full border border-gray-800 bg-gray-800 text-white font-serif tracking-widest uppercase py-4 mb-8 hover:bg-black transition-colors disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
+              >
+                {loading ? "SAVING..." : "SAVE & PUBLISH PRODUCT"}
+              </button>
 
               {/* Description Input */}
               <div className="relative mb-10">
@@ -955,6 +975,14 @@ export default function NewProductPage() {
           </div>
         </div>
       )}
+
+      {/* Floating Sticky Save Bar */}
+      <StickySaveBar
+        formId="product-new-form"
+        saving={loading || uploading}
+        label="Save Product"
+        subtext={isPublished ? "Active on store" : "Draft status"}
+      />
 
     </form>
   );

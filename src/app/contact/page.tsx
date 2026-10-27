@@ -1,11 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { MessageCircle, Mail } from "lucide-react";
 import Link from "next/link";
 
 export default function ContactPage() {
+  const [whatsappNumber, setWhatsappNumber] = useState("917907629021");
+  const [supportEmail, setSupportEmail] = useState("pausepalette@gmail.com");
+  const [instagramUrl, setInstagramUrl] = useState("https://www.instagram.com/pause_palette?stkn=c2k1dGNxeGJ4aGtj");
+
+  useEffect(() => {
+    fetch("/api/settings/contact")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.whatsappNumber) setWhatsappNumber(data.whatsappNumber.replace(/\D/g, "") || "917907629021");
+        if (data?.supportEmail) setSupportEmail(data.supportEmail);
+        if (data?.instagramUrl) setInstagramUrl(data.instagramUrl);
+      })
+      .catch(() => {});
+  }, []);
   return (
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
@@ -76,7 +91,12 @@ export default function ContactPage() {
                 <p className="font-sans text-gray-500 text-[13px] mb-1">
                   For orders, product enquiries and quick assistance.
                 </p>
-                <a href="tel:+917907629021" className="font-sans text-[11px] text-gray-700 tracking-widest uppercase hover:text-black transition-colors">
+                <a 
+                  href={`https://wa.me/${whatsappNumber}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="font-sans text-[11px] text-gray-700 tracking-widest uppercase hover:text-black transition-colors"
+                >
                   CHAT WITH US
                 </a>
               </div>
@@ -91,7 +111,10 @@ export default function ContactPage() {
                 <p className="font-sans text-gray-500 text-[13px] mb-1">
                   For general enquiries, collaborations and detailed requests.
                 </p>
-                <a href="mailto:pausepalette@gmail.com" className="font-sans text-[11px] text-gray-700 tracking-widest uppercase hover:text-black transition-colors">
+                <a 
+                  href={`mailto:${supportEmail}`} 
+                  className="font-sans text-[11px] text-gray-700 tracking-widest uppercase hover:text-black transition-colors"
+                >
                   WRITE TO US
                 </a>
               </div>
@@ -106,7 +129,12 @@ export default function ContactPage() {
                 <p className="font-sans text-gray-500 text-[13px] mb-1">
                   For new collections, behind-the-scenes moments and updates
                 </p>
-                <a href="https://www.instagram.com/pause_palette?stkn=c2k1dGNxeGJ4aGtj" target="_blank" rel="noopener noreferrer" className="font-sans text-[11px] text-gray-700 tracking-widest uppercase hover:text-black transition-colors">
+                <a 
+                  href={instagramUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="font-sans text-[11px] text-gray-700 tracking-widest uppercase hover:text-black transition-colors"
+                >
                   Follow @pause_palette
                 </a>
               </div>

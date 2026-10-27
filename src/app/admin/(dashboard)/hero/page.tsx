@@ -15,9 +15,10 @@ import {
   Eye, 
   Sparkles,
   RefreshCw,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 interface MediaItem {
   id: string;
@@ -210,8 +211,8 @@ export default function HeroBannerManager() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto w-full pb-24">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-[#E8E6E1]">
+      {/* Header Banner (Normal flow, not sticky) */}
+      <div className="pb-6 mb-8 border-b border-[#E8E6E1] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase tracking-widest text-[#8B8985] font-semibold">Storefront</span>
@@ -620,6 +621,14 @@ export default function HeroBannerManager() {
           </div>
         </div>
       )}
+
+      {/* Floating Sticky Save Bar */}
+      <StickySaveBar
+        onSave={handleSave}
+        saving={saving}
+        label="Save Changes"
+        subtext={`${data.mediaItems.length} slides ready`}
+      />
     </div>
   );
 }

@@ -4,8 +4,9 @@ import { useState, useRef, useEffect, use } from "react";
 import { ArrowLeft, Upload, Trash2, Save, X } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 export default function EditLookbookItem({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -124,8 +125,9 @@ export default function EditLookbookItem({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 max-w-4xl mx-auto w-full">
-      <div className="flex items-center justify-between mb-8">
+    <form id="lookbook-form" onSubmit={handleSubmit} className="p-8 max-w-4xl mx-auto w-full">
+      {/* Header Banner (Normal flow, not sticky) */}
+      <div className="pb-6 mb-8 border-b border-gray-200 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/admin/lookbook" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 shadow-sm transition-colors border border-gray-100">
             <ArrowLeft size={18} />
@@ -227,6 +229,14 @@ export default function EditLookbookItem({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </div>
+
+      {/* Floating Sticky Save Bar */}
+      <StickySaveBar
+        formId="lookbook-form"
+        saving={loading || uploading}
+        label="Save Changes"
+        subtext="Lookbook Image"
+      />
     </form>
   );
 }

@@ -1,58 +1,67 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { DEFAULT_SHIPPING_AND_DELIVERY, PolicyPageData } from "@/lib/policyDefaults";
 
 export default function ShippingAndDeliveryPage() {
+  const [data, setData] = useState<PolicyPageData>(DEFAULT_SHIPPING_AND_DELIVERY);
+
+  useEffect(() => {
+    fetch("/api/policy-pages/shipping-and-delivery")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json && json.title) {
+          setData(json);
+        }
+      })
+      .catch((err) => console.error("Error loading shipping policy:", err));
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
       <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-36 md:pt-48 pb-32 max-w-4xl text-center">
         <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-10 md:mb-12">
-          Shipping & Delivery
+          {data.title}
         </h1>
         
         <div className="prose prose-gray max-w-3xl mx-auto text-gray-600 leading-relaxed text-sm md:text-[15px]" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
           
-          <div className="mb-12">
-            <p className="italic">
-              Most Pause Palette pieces are thoughtfully made to order, helping us create with greater intention while reducing unnecessary production and fabric waste.
-            </p>
-          </div>
+          {data.introText && (
+            <div className="mb-12 space-y-4">
+              {data.introText.split("\n\n").map((para, i) => (
+                <p key={i} className={data.introItalic ? "italic" : ""}>
+                  {para}
+                </p>
+              ))}
+            </div>
+          )}
 
-          <section className="mb-10">
-            <h2 className="font-sans text-xs tracking-[0.2em] text-gray-500 uppercase mb-3 font-semibold">DISPATCH</h2>
-            <div className="space-y-4">
-              <p>
-                Orders are typically dispatched within 12–15 business days from confirmation. Customised pieces or material related delays may require a little additional time, and we will keep you informed where needed.
+          {data.sections.map((section, idx) => (
+            <section key={section.id || idx} className="mb-10">
+              <h2 className="font-sans text-xs tracking-[0.2em] text-gray-500 uppercase mb-3 font-semibold">
+                {section.title}
+              </h2>
+              <div className="space-y-4">
+                {(section.content || "").split("\n\n").map((para, pIdx) => (
+                  <p key={pIdx}>
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </section>
+          ))}
+
+          {data.footerNote && (
+            <div className="mt-16">
+              <p className={data.footerItalic ? "italic" : ""}>
+                {data.footerNote}
               </p>
             </div>
-          </section>
-
-          <section className="mb-10">
-            <h2 className="font-sans text-xs tracking-[0.2em] text-gray-500 uppercase mb-3 font-semibold">COMPLIMENTARY SHIPPING</h2>
-            <div className="space-y-4">
-              <p>
-                We offer complimentary shipping across India. Tracking details will be shared once your order has been dispatched.
-              </p>
-            </div>
-          </section>
-
-          <section className="mb-12">
-            <h2 className="font-sans text-xs tracking-[0.2em] text-gray-500 uppercase mb-3 font-semibold">DELIVERY</h2>
-            <div className="space-y-4">
-              <p>
-                Delivery timelines begin from the date of dispatch and may vary depending on your location and courier service. Please ensure your delivery details are complete and accurate to avoid delays.
-              </p>
-            </div>
-          </section>
-
-          <div className="mt-16">
-            <p className="italic">
-              Pieces made with intention are worth a little time. Thank you for allowing us the time to make yours thoughtfully
-            </p>
-          </div>
+          )}
 
         </div>
       </div>

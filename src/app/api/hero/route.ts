@@ -16,9 +16,11 @@ export const DEFAULT_HERO_DATA = {
 
 export async function GET() {
   try {
-    const hero = await prisma.heroBanner.findUnique({
-      where: { id: "singleton" },
-    });
+    const hero = prisma.heroBanner?.findUnique
+      ? await prisma.heroBanner.findUnique({
+          where: { id: "singleton" },
+        })
+      : null;
 
     if (!hero) {
       return NextResponse.json(DEFAULT_HERO_DATA);

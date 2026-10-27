@@ -4,8 +4,9 @@ import { useState, useRef } from "react";
 import { ArrowLeft, Upload, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 export default function NewJournalItem() {
   const router = useRouter();
@@ -85,8 +86,9 @@ export default function NewJournalItem() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-8 max-w-4xl mx-auto w-full">
-      <div className="flex items-center justify-between mb-8">
+    <form id="journal-new-form" onSubmit={handleSubmit} className="p-8 max-w-4xl mx-auto w-full">
+      {/* Header Banner (Normal flow, not sticky) */}
+      <div className="pb-6 mb-8 border-b border-gray-200 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/admin/journals" className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500 hover:text-gray-900 shadow-sm transition-colors border border-gray-100">
             <ArrowLeft size={18} />
@@ -192,6 +194,14 @@ export default function NewJournalItem() {
           </div>
         </div>
       </div>
+
+      {/* Floating Sticky Save Bar */}
+      <StickySaveBar
+        formId="journal-new-form"
+        saving={loading || uploading}
+        label="Save Entry"
+        subtext={isPublished ? "Published Entry" : "Draft Entry"}
+      />
     </form>
   );
 }

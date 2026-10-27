@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
@@ -68,11 +69,14 @@ export default async function MakingJournalPage() {
 
           {/* Icon 1: Drawn by Hand */}
           <div className="flex flex-col items-center text-center px-4">
-            <div className="w-14 h-14 mb-4 text-gray-700">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-                <path d="m15 5 4 4"></path>
-              </svg>
+            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+              <Image
+                src="/images/pencil_icon.png"
+                alt="Drawn by Hand"
+                width={96}
+                height={96}
+                className="w-16 h-16 md:w-20 md:h-20 object-contain"
+              />
             </div>
             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               DRAWN BY HAND
@@ -84,12 +88,14 @@ export default async function MakingJournalPage() {
 
           {/* Icon 2: Crafted with Intention */}
           <div className="flex flex-col items-center text-center px-4">
-            <div className="w-14 h-14 mb-4 text-gray-700">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                <path d="M14.5 2 4 22"></path>
-                <path d="M14.5 2c0 0 4-1 6 3s-3 6-5 6c-3 0-5 3-4 6s5 6 9 3"></path>
-                <line x1="13.5" y1="4" x2="15.5" y2="4"></line>
-              </svg>
+            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+              <Image
+                src="/images/needle.png"
+                alt="Crafted with Intention"
+                width={80}
+                height={80}
+                className="w-14 h-14 md:w-16 md:h-16 object-contain"
+              />
             </div>
             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               CRAFTED WITH INTENTION
@@ -101,11 +107,14 @@ export default async function MakingJournalPage() {
 
           {/* Icon 3: Naturally Chosen */}
           <div className="flex flex-col items-center text-center px-4">
-            <div className="w-14 h-14 mb-4 text-gray-700">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
-                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
-              </svg>
+            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+              <Image
+                src="/images/leaf_icon.png"
+                alt="Naturally Chosen"
+                width={120}
+                height={120}
+                className="w-20 h-20 md:w-26 md:h-26 object-contain scale-125"
+              />
             </div>
             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               NATURALLY CHOSEN
@@ -117,11 +126,14 @@ export default async function MakingJournalPage() {
 
           {/* Icon 4: Designed & Made in India */}
           <div className="flex flex-col items-center text-center px-4">
-            <div className="w-14 h-14 mb-4 text-gray-700">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
+            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+              <Image
+                src="/images/home_icon.png"
+                alt="Designed & Made in India"
+                width={96}
+                height={96}
+                className="w-16 h-16 md:w-20 md:h-20 object-contain"
+              />
             </div>
             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               DESIGNED & MADE IN INDIA

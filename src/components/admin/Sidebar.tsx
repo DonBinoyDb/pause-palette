@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Tag, Layers, LogOut, Image as ImageIcon, Star, BookOpen, Sparkles } from "lucide-react";
+import { LayoutDashboard, Package, Tag, Layers, LogOut, Image as ImageIcon, Star, BookOpen, Sparkles, ShoppingBag, FileText, MessageCircle } from "lucide-react";
 
 import { signOut } from "next-auth/react";
 
@@ -12,6 +12,7 @@ export default function Sidebar() {
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Hero Banner", href: "/admin/hero", icon: Sparkles },
+    { name: "New Arrivals", href: "/admin/new-arrivals", icon: ShoppingBag },
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Categories", href: "/admin/categories", icon: Layers },
     { name: "Collections", href: "/admin/collections", icon: Tag },
@@ -19,10 +20,12 @@ export default function Sidebar() {
     { name: "Reviews", href: "/admin/reviews", icon: Star },
     { name: "Journal", href: "/admin/journals", icon: BookOpen },
     { name: "Curator Settings", href: "/admin/curator", icon: LayoutDashboard },
+    { name: "Policy Pages", href: "/admin/policy-pages", icon: FileText },
+    { name: "WhatsApp & Contact", href: "/admin/contact-settings", icon: MessageCircle },
   ];
 
   return (
-    <aside className="w-[260px] bg-[#FDFCFB] border-r border-[#E8E6E1] flex flex-col h-screen sticky top-0 py-8 z-20">
+    <aside className="w-[260px] shrink-0 bg-[#FDFCFB] border-r border-[#E8E6E1] flex flex-col h-full py-8 z-20 overflow-y-auto">
       <div className="mb-12 px-8">
         <Link href="/" className="flex flex-col items-start group">
           <span className="font-serif text-[28px] font-medium tracking-tight text-[#2C2B29] group-hover:opacity-80 transition-opacity">

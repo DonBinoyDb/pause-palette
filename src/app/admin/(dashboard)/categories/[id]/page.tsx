@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import FileErrorModal from "@/components/admin/FileErrorModal";
+import StickySaveBar from "@/components/admin/StickySaveBar";
 
 export default function EditCategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -130,18 +131,31 @@ export default function EditCategoryPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
-      <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200">
-        <Link href="/admin/categories" className="w-10 h-10 bg-white flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border border-gray-200 rounded-lg">
-          <ArrowLeft size={18} />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Edit Category</h1>
-          <p className="text-sm font-medium text-gray-500 mt-1">Update category details and cover image.</p>
+      {/* Header Banner (Normal flow, not sticky) */}
+      <div className="pb-6 mb-8 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/categories" className="w-10 h-10 bg-white flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors border border-gray-200 rounded-lg">
+            <ArrowLeft size={18} />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Edit Category</h1>
+            <p className="text-sm font-medium text-gray-500 mt-1">Update category details and cover image.</p>
+          </div>
         </div>
+
+        <button 
+          type="submit"
+          form="category-form"
+          disabled={saving}
+          className="bg-[#2C2B29] text-white rounded-xl font-semibold text-xs uppercase tracking-wider px-6 py-2.5 hover:bg-black transition-colors disabled:opacity-50 shadow-sm flex items-center gap-2"
+        >
+          <Save size={14} />
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
       </div>
 
       <div className="bg-white rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] p-8">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form id="category-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-1.5">
@@ -218,6 +232,14 @@ export default function EditCategoryPage({ params }: { params: Promise<{ id: str
       </div>
 
       <FileErrorModal error={fileError} onClose={() => setFileError(null)} />
+
+      {/* Floating Sticky Save Bar */}
+      <StickySaveBar
+        formId="category-form"
+        saving={saving}
+        label="Save Changes"
+        subtext="Category Settings"
+      />
     </div>
   );
 }

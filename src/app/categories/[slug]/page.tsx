@@ -63,7 +63,11 @@ export default async function CategoryInnerPage({ params }: { params: Promise<{ 
           {/* Right: Category Details */}
           <div className="w-full md:w-1/2 flex flex-col justify-center py-0 md:py-4">
             <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl text-gray-800 mb-1 md:mb-2 text-center md:text-left">{categoryData.name}</h1>
-            <p className="text-[11px] md:text-[13px] tracking-[0.15em] text-gray-400 uppercase text-center md:text-left">Category</p>
+            <p className="text-[11px] md:text-[13px] tracking-[0.15em] text-gray-400 uppercase mb-4 md:mb-8 text-center md:text-left">Category</p>
+            
+            <p className="text-[15px] md:text-[17px] text-gray-500 leading-relaxed mb-6 whitespace-pre-wrap text-center md:text-left">
+              {categoryData.description || `Explore our thoughtfully designed pieces for ${categoryData.name.toLowerCase()}.`}
+            </p>
           </div>
         </div>
 

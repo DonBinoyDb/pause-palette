@@ -186,3 +186,37 @@ model HeroBanner {
   updatedAt  DateTime @updatedAt
 }
 
+model NewArrivalsSettings {
+  id          String   @id @default("singleton")
+  isEnabled   Boolean  @default(true)
+  tagline     String   @default("NEW IN")
+  title       String   @default("")
+  subtitle    String?  @default("")
+  buttonText  String   @default("Explore All")
+  buttonLink  String   @default("/shop/new-in")
+  limit       Int      @default(4)
+  productIds  String[] @default([])
+  updatedAt   DateTime @updatedAt
+}
+
+model PolicyPage {
+  id           String   @id // "shipping-and-delivery" or "returns-and-exchanges"
+  title        String
+  introText    String?  @db.Text
+  introItalic  Boolean  @default(false)
+  sections     Json     @default("[]") // [{ id: string, title: string, content: string }]
+  footerNote   String?  @db.Text
+  footerItalic Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+}
+
+model StoreSettings {
+  id             String   @id @default("singleton")
+  whatsappNumber String   @default("917907629021")
+  supportEmail   String?  @default("pausepalette@gmail.com")
+  instagramUrl   String?  @default("https://www.instagram.com/pause_palette?stkn=c2k1dGNxeGJ4aGtj")
+  updatedAt      DateTime @updatedAt
+}
+
+
+

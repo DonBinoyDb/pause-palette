@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Package, Tag, Users, ChevronRight, Plus, Star, BarChart3, Clock } from "lucide-react";
+import { Package, Tag, Users, ChevronRight, Plus, Star, BarChart3, Clock, FileText, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -148,6 +148,26 @@ export default async function DashboardPage() {
                     <Star size={14} />
                   </div>
                   <span className="font-medium text-gray-700 group-hover:text-gray-900">Lookbook</span>
+                </div>
+                <ChevronRight size={14} className="text-gray-400 group-hover:text-gray-600" />
+              </Link>
+
+              <Link href="/admin/policy-pages" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 text-sm group border border-transparent hover:border-gray-200 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center">
+                    <FileText size={14} />
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-gray-900">Policy Pages (Shipping & Returns)</span>
+                </div>
+                <ChevronRight size={14} className="text-gray-400 group-hover:text-gray-600" />
+              </Link>
+
+              <Link href="/admin/contact-settings" className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 text-sm group border border-transparent hover:border-gray-200 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    <MessageCircle size={14} />
+                  </div>
+                  <span className="font-medium text-gray-700 group-hover:text-gray-900">WhatsApp & Contact Settings</span>
                 </div>
                 <ChevronRight size={14} className="text-gray-400 group-hover:text-gray-600" />
               </Link>

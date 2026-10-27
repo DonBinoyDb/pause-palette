@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY } from "@/lib/curatorDefaults";
+import { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES } from "@/lib/curatorDefaults";
 
-export { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY };
+export { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES };
 
 export async function GET() {
   try {
@@ -20,6 +20,7 @@ export async function GET() {
         id: "singleton",
         visibility: DEFAULT_VISIBILITY,
         pricing: DEFAULT_PRICING,
+        modes: DEFAULT_MODES,
         silhouettes: DEFAULT_SILHOUETTES,
         canvasProducts: [],
       });
@@ -27,17 +28,32 @@ export async function GET() {
 
     const visibilityData = (settings.visibility as any) || {};
     const pricing = visibilityData.pricing || DEFAULT_PRICING;
-    const cleanVisibility = {
-      ...DEFAULT_VISIBILITY,
-      ...(visibilityData.illustration ? { illustration: visibilityData.illustration } : {}),
-      ...(visibilityData.embroidery ? { embroidery: visibilityData.embroidery } : {}),
-      ...(visibilityData.solid ? { solid: visibilityData.solid } : {}),
-    };
-
     let silhouettes = settings.silhouettes as any[];
-    if (!silhouettes || silhouettes.length === 0) {
+    if (!silhouettes || silhouettes.length === 0 || !silhouettes.some((s) => s.id === "cuban-collar" || s.id === "classic-point-collar")) {
       silhouettes = DEFAULT_SILHOUETTES;
     }
+
+    const embroiderySilhouettes = (visibilityData.modes?.embroidery?.silhouettes || []).filter((id: string) =>
+      silhouettes.some((s) => s.id === id)
+    );
+
+    const solidSilhouettes = (visibilityData.modes?.solid?.silhouettes || []).filter((id: string) =>
+      silhouettes.some((s) => s.id === id)
+    );
+
+    const modes = {
+      illustration: { ...DEFAULT_MODES.illustration, ...(visibilityData.modes?.illustration || {}) },
+      embroidery: {
+        ...DEFAULT_MODES.embroidery,
+        ...(visibilityData.modes?.embroidery || {}),
+        silhouettes: embroiderySilhouettes.length > 0 ? embroiderySilhouettes : DEFAULT_MODES.embroidery.silhouettes,
+      },
+      solid: {
+        ...DEFAULT_MODES.solid,
+        ...(visibilityData.modes?.solid || {}),
+        silhouettes: solidSilhouettes.length > 0 ? solidSilhouettes : DEFAULT_MODES.solid.silhouettes,
+      },
+    };
 
     // Try fetching products if ids exist
     let canvasProducts: any[] = [];
@@ -52,10 +68,18 @@ export async function GET() {
       }
     }
 
+    const cleanVisibility = {
+      ...DEFAULT_VISIBILITY,
+      ...(visibilityData.illustration ? { illustration: visibilityData.illustration } : {}),
+      ...(visibilityData.embroidery ? { embroidery: visibilityData.embroidery } : {}),
+      ...(visibilityData.solid ? { solid: visibilityData.solid } : {}),
+    };
+
     return NextResponse.json({
       ...settings,
       visibility: cleanVisibility,
       pricing,
+      modes,
       silhouettes,
       canvasProducts,
     });
@@ -65,6 +89,7 @@ export async function GET() {
       id: "singleton",
       visibility: DEFAULT_VISIBILITY,
       pricing: DEFAULT_PRICING,
+      modes: DEFAULT_MODES,
       silhouettes: DEFAULT_SILHOUETTES,
       canvasProducts: [],
     });
@@ -74,12 +99,13 @@ export async function GET() {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { visibility, canvasProductIds, silhouettes, pricing } = body;
+    const { visibility, canvasProductIds, silhouettes, pricing, modes } = body;
 
-    // Merge pricing into visibility payload to store seamlessly without schema alteration
+    // Merge pricing and modes into visibility payload to store seamlessly without schema alteration
     const mergedVisibility = {
       ...(visibility || {}),
       ...(pricing !== undefined && { pricing }),
+      ...(modes !== undefined && { modes }),
     };
 
     try {
@@ -101,6 +127,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({
         ...settings,
         pricing: mergedVisibility.pricing || DEFAULT_PRICING,
+        modes: mergedVisibility.modes || DEFAULT_MODES,
       });
     } catch (dbErr) {
       console.warn("Database save failed, returning updated JSON payload:", dbErr);
@@ -108,6 +135,7 @@ export async function PUT(req: Request) {
         id: "singleton",
         visibility,
         pricing: pricing || DEFAULT_PRICING,
+        modes: modes || DEFAULT_MODES,
         silhouettes: silhouettes || DEFAULT_SILHOUETTES,
         canvasProductIds: canvasProductIds || [],
       });
