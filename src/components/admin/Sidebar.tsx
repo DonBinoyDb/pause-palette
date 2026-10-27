@@ -69,7 +69,13 @@ export default function Sidebar() {
         <div className="w-full h-[1px] bg-[#E8E6E1] mb-6 mx-2 max-w-[calc(100%-16px)]"></div>
         <button 
           suppressHydrationWarning
-          onClick={() => signOut({ callbackUrl: '/login' })}
+          onClick={async () => {
+            try {
+              await signOut({ redirect: false });
+            } finally {
+              window.location.href = '/login';
+            }
+          }}
           className="w-full flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-medium text-[#8B8985] hover:text-[#D94F4F] hover:bg-[#D94F4F]/5 transition-all duration-300 group"
         >
           <LogOut size={18} strokeWidth={1.5} className="text-[#8B8985] group-hover:text-[#D94F4F] transition-colors" />

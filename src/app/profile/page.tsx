@@ -31,7 +31,11 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     clearData();
-    await signOut({ callbackUrl: '/' });
+    try {
+      await signOut({ redirect: false });
+    } finally {
+      window.location.href = '/';
+    }
   };
 
   return (

@@ -5,6 +5,14 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
+// Auto-sanitize NEXTAUTH_URL and VERCEL_URL if they contain typos (e.g. trailing parentheses or punctuation)
+if (process.env.NEXTAUTH_URL) {
+  process.env.NEXTAUTH_URL = process.env.NEXTAUTH_URL.replace(/[\)\.\,\'\"\s]+$/, "");
+}
+if (process.env.VERCEL_URL) {
+  process.env.VERCEL_URL = process.env.VERCEL_URL.replace(/[\)\.\,\'\"\s]+$/, "");
+}
+
 export const authOptions: NextAuthOptions = {
   // @ts-ignore
   adapter: PrismaAdapter(prisma),
@@ -58,6 +66,21 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      const cleanBase = (baseUrl || "").replace(/[\)\.\,\'\"\s]+$/, "");
+      if (url.startsWith("/")) {
+        return `${cleanBase}${url}`;
+      }
+      try {
+        const cleanUrl = url.replace(/[\)\.\,\'\"\s]+$/, "");
+        const parsedUrl = new URL(cleanUrl);
+        const parsedBase = new URL(cleanBase);
+        if (parsedUrl.origin === parsedBase.origin) {
+          return cleanUrl;
+        }
+      } catch {}
+      return cleanBase || "/";
+    },
     async jwt({ token, user }) {
       if (user) {
         // @ts-ignore - role exists on our user model
