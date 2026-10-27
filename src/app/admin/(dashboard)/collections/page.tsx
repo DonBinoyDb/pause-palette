@@ -119,20 +119,20 @@ export default function CollectionsManager() {
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-[1400px] mx-auto w-full font-sans">
+    <div className="w-full font-sans">
       
       {/* Dashboard Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Collections</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage and organize your product categories.</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Collections</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Manage and organize your product collections.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-95"
         >
           <Plus size={18} />
-          New Collection
+          <span>New Collection</span>
         </button>
       </div>
 
@@ -174,68 +174,109 @@ export default function CollectionsManager() {
                 </button>
               </div>
             ) : (
-              <table className="w-full text-left border-collapse min-w-[600px]">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50/50">
-                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[100px]">Cover</th>
-                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Collection Info</th>
-                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredCollections.map((col) => (
-                    <tr key={col.id} className="hover:bg-gray-50/50 transition-colors group">
-                      
-                      {/* Cover Image Thumbnail */}
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="w-16 h-12 bg-gray-100 rounded-md border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
-                          {col.coverImage ? (
-                            <img src={col.coverImage} alt={col.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <Tag size={18} className="text-gray-400" />
-                          )}
-                        </div>
-                      </td>
-                      
-                      {/* Info */}
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{col.name}</span>
-                          <span className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-0.5 rounded-full self-start font-mono">/{col.slug}</span>
-                        </div>
-                      </td>
-
-                      {/* Description */}
-                      <td className="px-6 py-4">
-                        <p className="text-sm text-gray-500 line-clamp-2 max-w-sm">
-                          {col.description || <span className="italic text-gray-400">No description provided</span>}
+            <>
+              {/* Mobile Card View (Screens < md) */}
+              <div className="divide-y divide-gray-100 md:hidden">
+                {filteredCollections.map((col) => (
+                  <div key={col.id} className="p-3.5 flex items-center gap-3 hover:bg-gray-50 transition-colors">
+                    <div className="w-14 h-12 bg-gray-100 rounded-md border border-gray-200 overflow-hidden flex items-center justify-center shrink-0">
+                      {col.coverImage ? (
+                        <img src={col.coverImage} alt={col.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Tag size={18} className="text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold text-gray-900 truncate">
+                        {col.name}
+                      </h3>
+                      <p className="text-[11px] font-mono text-gray-500 truncate">
+                        /{col.slug}
+                      </p>
+                      {col.description && (
+                        <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+                          {col.description}
                         </p>
-                      </td>
-                      
-                      {/* Actions */}
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link 
-                            href={`/admin/collections/${col.id}`} 
-                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Edit"
-                          >
-                            <Edit size={18} />
-                          </Link>
-                          <button 
-                            onClick={() => handleDelete(col.id)} 
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Link 
+                        href={`/admin/collections/${col.id}`} 
+                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Edit size={16} />
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(col.id)} 
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table View (Screens >= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50/50">
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider w-[100px]">Cover</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Collection Info</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredCollections.map((col) => (
+                      <tr key={col.id} className="hover:bg-gray-50/50 transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="w-16 h-12 bg-gray-100 rounded-md border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {col.coverImage ? (
+                              <img src={col.coverImage} alt={col.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Tag size={18} className="text-gray-400" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-gray-900">{col.name}</span>
+                            <span className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-0.5 rounded-full self-start font-mono">/{col.slug}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm text-gray-500 line-clamp-2 max-w-sm">
+                            {col.description || <span className="italic text-gray-400">No description provided</span>}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link 
+                              href={`/admin/collections/${col.id}`} 
+                              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <Edit size={18} />
+                            </Link>
+                            <button 
+                              onClick={() => handleDelete(col.id)} 
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
             )}
           </div>
         </div>

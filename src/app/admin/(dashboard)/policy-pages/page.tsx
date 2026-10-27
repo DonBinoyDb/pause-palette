@@ -316,7 +316,7 @@ export default function PolicyPagesManager() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-28">
+    <div className="w-full pb-28">
       
       {/* Header Banner (Normal flow, not sticky) */}
       <div className="pb-6 mb-6 border-b border-[#E8E6E1] flex flex-col md:flex-row md:items-center justify-between gap-4">

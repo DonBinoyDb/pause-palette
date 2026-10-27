@@ -36,7 +36,7 @@ export default function ReviewsManager() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto w-full">
+    <div className="w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">Worn Stories (Reviews)</h1>

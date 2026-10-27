@@ -71,7 +71,7 @@ export default function StickySaveBar({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 md:right-10 z-50 flex items-center gap-2.5 sm:gap-3 bg-[#2C2B29]/95 text-white pl-4 sm:pl-5 pr-2.5 py-2.5 rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.35)] border border-white/15 backdrop-blur-md transition-all hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)]">
+    <div className="fixed bottom-20 sm:bottom-6 right-3 sm:right-6 md:right-10 z-50 flex items-center gap-2 sm:gap-3 bg-[#2C2B29]/95 text-white pl-3 sm:pl-5 pr-2 py-2 sm:pr-2.5 sm:py-2.5 rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.35)] border border-white/15 backdrop-blur-md transition-all hover:shadow-[0_16px_40px_rgba(0,0,0,0.45)] max-w-[calc(100vw-24px)]">
       {/* Status indicator */}
       <div className="hidden sm:flex items-center gap-2 pr-3 border-r border-white/20 text-xs select-none">
         {isDirty === true ? (
@@ -94,10 +94,10 @@ export default function StickySaveBar({
         <button
           type="button"
           onClick={secondaryAction.onClick}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
         >
           {secondaryAction.icon}
-          <span>{secondaryAction.label}</span>
+          <span className="hidden xs:inline">{secondaryAction.label}</span>
         </button>
       )}
 
@@ -106,7 +106,7 @@ export default function StickySaveBar({
         form={formId}
         onClick={handleSaveClick}
         disabled={saving}
-        className="flex items-center gap-2 px-5 py-2 bg-white text-[#2C2B29] hover:bg-gray-100 active:scale-95 rounded-full text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm cursor-pointer"
+        className="flex items-center gap-2 px-3.5 sm:px-5 py-2 bg-white text-[#2C2B29] hover:bg-gray-100 active:scale-95 rounded-full text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm cursor-pointer whitespace-nowrap"
       >
         {saving ? (
           <>

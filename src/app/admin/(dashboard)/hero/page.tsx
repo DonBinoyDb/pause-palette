@@ -210,7 +210,7 @@ export default function HeroBannerManager() {
   const currentPreviewSlide = data.mediaItems[activePreviewIndex] || data.mediaItems[0];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full pb-24">
+    <div className="w-full pb-24">
       {/* Header Banner (Normal flow, not sticky) */}
       <div className="pb-6 mb-8 border-b border-[#E8E6E1] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

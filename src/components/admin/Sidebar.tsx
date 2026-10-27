@@ -25,7 +25,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-[260px] shrink-0 bg-[#FDFCFB] border-r border-[#E8E6E1] flex flex-col h-full py-8 z-20 overflow-y-auto">
+    <aside className="hidden lg:flex w-[260px] shrink-0 bg-[#FDFCFB] border-r border-[#E8E6E1] flex-col h-full py-8 z-20 overflow-y-auto">
       <div className="mb-12 px-8">
         <Link href="/" className="flex flex-col items-start group">
           <span className="font-serif text-[28px] font-medium tracking-tight text-[#2C2B29] group-hover:opacity-80 transition-opacity">

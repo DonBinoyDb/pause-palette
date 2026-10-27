@@ -589,12 +589,12 @@ export default function CuratorSettingsPage() {
       </div>
 
       {/* 3 Main Tabs: Original Illustration, Theme-Based Embroidery, Solid Linen */}
-      <div className="flex border-b border-gray-200 space-x-2">
+      <div className="flex border-b border-gray-200 space-x-2 overflow-x-auto pb-px">
         
         {/* Tab 1 */}
         <button
           onClick={() => setActiveTab("illustration")}
-          className={`flex items-center gap-2 py-3 px-5 border-b-2 font-medium text-sm transition-all cursor-pointer ${
+          className={`flex items-center gap-2 py-3 px-4 sm:px-5 border-b-2 font-medium text-xs sm:text-sm transition-all cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === "illustration"
               ? "border-[#79A7D3] text-gray-900 font-semibold"
               : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
@@ -608,7 +608,7 @@ export default function CuratorSettingsPage() {
         {/* Tab 2 */}
         <button
           onClick={() => setActiveTab("embroidery")}
-          className={`flex items-center gap-2 py-3 px-5 border-b-2 font-medium text-sm transition-all cursor-pointer ${
+          className={`flex items-center gap-2 py-3 px-4 sm:px-5 border-b-2 font-medium text-xs sm:text-sm transition-all cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === "embroidery"
               ? "border-[#79A7D3] text-gray-900 font-semibold"
               : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
@@ -622,7 +622,7 @@ export default function CuratorSettingsPage() {
         {/* Tab 3 */}
         <button
           onClick={() => setActiveTab("solid")}
-          className={`flex items-center gap-2 py-3 px-5 border-b-2 font-medium text-sm transition-all cursor-pointer ${
+          className={`flex items-center gap-2 py-3 px-4 sm:px-5 border-b-2 font-medium text-xs sm:text-sm transition-all cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === "solid"
               ? "border-[#79A7D3] text-gray-900 font-semibold"
               : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
