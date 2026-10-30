@@ -70,7 +70,7 @@ export default function ProductGrid({
             {/* Product Info */}
             <div className="flex flex-col md:flex-row justify-between items-start px-1 mt-1 md:mt-2">
               <div className="w-full pr-2">
-                <h3 className="font-serif text-[14px] md:text-lg text-gray-900 group-hover:text-gray-600 transition-colors mb-0.5 md:mb-1 truncate font-normal">
+                <h3 className="font-garamond text-[14px] md:text-lg text-gray-900 group-hover:text-gray-600 transition-colors mb-0.5 md:mb-1 truncate font-normal">
                   {product.name}
                 </h3>
                 <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic">

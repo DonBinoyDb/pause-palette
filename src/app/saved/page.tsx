@@ -47,7 +47,7 @@ export default function SavedPage() {
       {/* Hero Header */}
       <div className="pt-32 pb-12 px-6 border-b border-gray-100 bg-white">
         <div className="container mx-auto w-full max-w-[1200px] text-center">
-          <h1 className="font-serif text-3xl md:text-4xl tracking-wider text-gray-900 uppercase mb-3">
+          <h1 className="font-garamond text-3xl md:text-4xl tracking-wider text-gray-900 uppercase mb-3">
             YOUR SAVED EDIT
           </h1>
           <p className="text-gray-500 text-base">
@@ -60,20 +60,20 @@ export default function SavedPage() {
         
         {saved.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white border border-gray-100 shadow-sm p-10">
-            <h2 className="font-serif text-3xl md:text-4xl tracking-widest text-gray-800 mb-6 uppercase text-center">Your edit is currently empty</h2>
+            <h2 className="font-garamond text-3xl md:text-4xl tracking-widest text-gray-800 mb-6 uppercase text-center">Your edit is currently empty</h2>
             <p className="text-gray-500 mb-10 text-center max-w-md">
               Discover our latest collections and save your favorite pieces to curate your own personalized edit.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 
                 href="/shop/new-in"
-                className="border border-[#3A3831] bg-[#3A3831] text-white font-serif tracking-widest text-sm py-4 px-10 hover:bg-[#2A2821] transition-colors flex items-center justify-center gap-2"
+                className="border border-[#3A3831] bg-[#3A3831] text-white font-garamond tracking-widest text-sm py-4 px-10 hover:bg-[#2A2821] transition-colors flex items-center justify-center gap-2"
               >
                 DISCOVER NEW IN <ArrowRight size={14} />
               </Link>
               <Link 
                 href="/collections"
-                className="border border-[#3A3831] text-[#3A3831] font-serif tracking-widest text-sm py-4 px-10 hover:bg-gray-50 transition-colors flex items-center justify-center"
+                className="border border-[#3A3831] text-[#3A3831] font-garamond tracking-widest text-sm py-4 px-10 hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 VIEW COLLECTIONS
               </Link>
@@ -120,7 +120,7 @@ export default function SavedPage() {
                   <div className="mt-auto pt-2">
                     <button 
                       onClick={() => handleAddToCart(item)}
-                      className={`w-full border font-serif tracking-widest text-xs py-3 transition-colors ${
+                      className={`w-full border font-garamond tracking-widest text-xs py-3 transition-colors ${
                         addingId === item.productId 
                           ? 'border-green-600 bg-green-50 text-green-700' 
                           : 'border-[#3A3831] hover:bg-[#3A3831] text-[#3A3831] hover:text-white'

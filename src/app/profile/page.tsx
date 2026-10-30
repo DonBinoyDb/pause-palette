@@ -46,10 +46,10 @@ export default function ProfilePage() {
         
         {/* Header */}
         <div className="mb-20 text-center">
-          <h1 className="font-serif text-3xl md:text-4xl text-gray-900 tracking-wide mb-3">
+          <h1 className="font-garamond text-3xl md:text-4xl text-gray-900 tracking-wide mb-3">
             My Account
           </h1>
-          <p className="text-gray-500 italic text-sm font-serif">
+          <p className="text-gray-500 italic text-sm font-garamond">
             Welcome back, {session.user?.email}
           </p>
         </div>

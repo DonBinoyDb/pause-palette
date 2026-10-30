@@ -74,7 +74,7 @@ export default function CartPage() {
         <div className="flex flex-col sm:flex-row justify-between sm:items-end mb-6 md:mb-8 border-b border-[#E8E6E1] pb-4 md:pb-5 gap-3">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-[#2C2B29] tracking-tight">
+              <h1 className="font-garamond text-2xl sm:text-3xl md:text-4xl text-[#2C2B29] tracking-tight">
                 Your Bag
               </h1>
               <span className="text-[11px] font-sans font-semibold tracking-wider px-2.5 py-0.5 rounded-full bg-[#EFECE6] text-[#5C5A58]">
@@ -99,7 +99,7 @@ export default function CartPage() {
             <div className="w-14 h-14 rounded-full bg-[#EFECE6] flex items-center justify-center text-[#8B8985] mb-5">
               <ShoppingBag size={22} strokeWidth={1.5} />
             </div>
-            <p className="font-serif text-2xl text-[#2C2B29] mb-3">Your bag is currently empty.</p>
+            <p className="font-garamond text-2xl text-[#2C2B29] mb-3">Your bag is currently empty.</p>
             <p className="text-[#8B8985] text-xs max-w-sm mb-8">
               Discover our latest pieces and timeless essentials to begin curating your wardrobe.
             </p>

@@ -252,7 +252,7 @@ export default function NewInSection({
 
                   {/* Product Details (Generous, balanced typography) */}
                   <div className="flex flex-col px-0.5">
-                    <h3 className="font-serif text-[15px] md:text-[17px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-snug">
+                    <h3 className="font-garamond text-[15px] md:text-[17px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-snug">
                       {product.name}
                     </h3>
                     <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic mt-0.5">

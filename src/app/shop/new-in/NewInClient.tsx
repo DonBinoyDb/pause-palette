@@ -113,7 +113,7 @@ export default function NewInClient({ products }: { products: Product[] }) {
 
       {sortedProducts.length === 0 ? (
         <div className="py-20 text-center">
-          <p className="text-gray-500 italic font-serif">No pieces found in this category.</p>
+          <p className="text-gray-500 italic font-garamond">No pieces found in this category.</p>
         </div>
       ) : (
         <ProductGrid products={sortedProducts} />

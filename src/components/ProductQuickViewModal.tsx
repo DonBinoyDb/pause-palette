@@ -150,7 +150,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
 
             {/* Description */}
             <p 
-              className="text-[13px] md:text-[14px] text-gray-500 leading-relaxed mb-5 font-serif line-clamp-3"
+              className="text-[13px] md:text-[14px] text-gray-500 leading-relaxed mb-5 font-garamond line-clamp-3"
               style={{ fontFamily: "'EB Garamond', Garamond, serif" }}
             >
               {product.description || "A thoughtfully designed piece for slow living, carrying original hand-drawn artwork, colour, and timeless craftsmanship."}
@@ -160,7 +160,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 font-medium">Select Size</span>
-                <span className="text-[11px] text-gray-400 font-serif italic">Standard Fit</span>
+                <span className="text-[11px] text-gray-400 font-garamond italic">Standard Fit</span>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {defaultSizes.map((size) => (

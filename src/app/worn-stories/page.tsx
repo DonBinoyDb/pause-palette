@@ -22,10 +22,10 @@ export default async function WornStoriesPage() {
           <div className="lg:col-span-7 xl:col-span-7 flex flex-col">
             {/* Header Section (Left-aligned & slightly decreased font size) */}
             <div className="text-left mb-10">
-              <h1 className="font-serif text-[22px] tracking-[0.15em] text-gray-700 uppercase mb-3">
+              <h1 className="font-garamond text-[22px] tracking-[0.15em] text-gray-700 uppercase mb-3">
                 Worn Stories
               </h1>
-              <p className="font-serif italic text-gray-600 text-[13px] mb-4">
+              <p className="font-garamond italic text-gray-600 text-[13px] mb-4">
                 Your words, your moments, your Pause Palette.
               </p>
               <p className="text-[12px] text-gray-500 max-w-xl leading-relaxed">

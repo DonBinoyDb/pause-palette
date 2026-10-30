@@ -21,7 +21,7 @@ function LogoIllustration({ isMobile }: { isMobile?: boolean }) {
 function FromOurSketchbook() {
   return (
     <div className="space-y-5 text-gray-500 text-[14px] leading-[1.8]">
-      <h2 className="font-serif text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4">
+      <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4">
         FROM OUR SKETCHBOOK TO YOUR SOUL
       </h2>
       <p>
@@ -47,7 +47,7 @@ function FromOurSketchbook() {
 function BeyondTheSketchbook() {
   return (
     <div className="space-y-5 text-gray-500 text-[14px] leading-[1.8] lg:pr-12">
-      <h2 className="font-serif text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4 lg:mb-8">
+      <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4 lg:mb-8">
         BEYOND THE SKETCHBOOK
       </h2>
       <p>
@@ -67,7 +67,7 @@ function BeyondTheSketchbook() {
 function ArtOfMaking() {
   return (
     <div className="space-y-5 text-gray-500 text-[14px] leading-[1.8] lg:pr-12 lg:pt-12">
-      <h2 className="font-serif text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4 lg:mb-8">
+      <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4 lg:mb-8">
         THE ART OF MAKING
       </h2>
       <p>We believe beautiful things do not need to be hurried.</p>
@@ -125,7 +125,7 @@ export default function OurStoryPage() {
           {/* MOBILE VIEW (lg:hidden) */}
           <div className="flex lg:hidden flex-col gap-12 pt-4">
             {/* 1. OUR STORY title at the top */}
-            <h1 className="font-serif text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] text-left">
+            <h1 className="font-garamond text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] text-left">
               OUR STORY
             </h1>
 
@@ -164,7 +164,7 @@ export default function OurStoryPage() {
             <div className="flex flex-col gap-16">
               {/* OUR STORY Text & Intro */}
               <div className="pt-4">
-                <h1 className="font-serif text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] mb-8">
+                <h1 className="font-garamond text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] mb-8">
                   OUR STORY
                 </h1>
                 <FromOurSketchbook />
@@ -180,7 +180,7 @@ export default function OurStoryPage() {
 
         {/* AN OPEN CANVAS Section */}
         <div className="max-w-4xl mx-auto text-center space-y-5 text-gray-500 text-[14px] leading-[1.8] py-24 lg:py-32 px-6">
-          <h2 className="font-serif text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-6">
+          <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-6">
             AN OPEN CANVAS
           </h2>
           <p>

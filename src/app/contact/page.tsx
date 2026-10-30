@@ -29,7 +29,7 @@ export default function ContactPage() {
         <div className="max-w-2xl mx-auto flex flex-col items-center">
           
           {/* Header */}
-          <h1 className="font-sans text-3xl md:text-4xl text-gray-900 mb-8 tracking-widest uppercase">
+          <h1 className="font-garamond text-3xl md:text-4xl text-gray-900 mb-8 tracking-widest uppercase">
             Contact
           </h1>
           

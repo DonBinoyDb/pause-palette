@@ -117,7 +117,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
           {/* Right: Product Details (sticky) */}
           <div className="w-full lg:w-5/12 sticky top-32 py-4">
-            <h1 className="font-serif text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
+            <h1 className="font-garamond text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
             <div className="flex items-center gap-2 mb-4">
                <p className="text-sm tracking-wide text-gray-500 font-garamond italic">
                  {product.category} {product.gender?.length > 0 ? `| ${product.gender.join(', ')}` : ''}
@@ -282,7 +282,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             </button>
             
             <div className="px-8 py-10 flex-1">
-              <h2 className="text-center font-serif text-xl tracking-widest text-gray-800 mb-2">CHOOSE YOUR SILHOUETTE</h2>
+              <h2 className="text-center font-garamond text-xl tracking-widest text-gray-800 mb-2">CHOOSE YOUR SILHOUETTE</h2>
               <p className="text-center text-sm text-gray-600 mb-10">Select the silhouette you prefer for this illustration.</p>
 
               {/* Dynamic Fits */}
@@ -301,7 +301,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
                       </div>
-                      <p className="font-serif text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
+                      <p className="font-garamond text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
                     </div>
                   ))}
                 </div>
@@ -317,7 +317,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               </div>
               <button 
                 onClick={() => setIsSilhouetteModalOpen(false)}
-                className="w-full bg-[#3A3831] hover:bg-[#2A2821] text-white py-4 font-serif tracking-widest text-sm transition-colors"
+                className="w-full bg-[#3A3831] hover:bg-[#2A2821] text-white py-4 font-garamond tracking-widest text-sm transition-colors"
               >
                 CONFIRM SILHOUETTE
               </button>
@@ -341,7 +341,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h2 className="font-serif text-xl tracking-widest text-gray-900">FIT GUIDE</h2>
+            <h2 className="font-garamond text-xl tracking-widest text-gray-900">FIT GUIDE</h2>
             <button 
               onClick={() => setIsFitGuideOpen(false)}
               className="p-2 text-gray-400 hover:text-gray-800 transition-colors bg-gray-50 rounded-full"

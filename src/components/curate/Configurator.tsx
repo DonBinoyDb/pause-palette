@@ -132,10 +132,6 @@ export default function Configurator() {
     }
   }, [technique, pricing.pieces]);
 
-  if (loading) {
-    return <div className="py-24 text-center text-sm font-garamond text-gray-400 tracking-wider">Loading curator experience...</div>;
-  }
-
   // Safe number parsing helper
   const safeNumber = (val: any, fallback = 0): number => {
     if (val === undefined || val === null || val === "") return fallback;
@@ -302,6 +298,10 @@ export default function Configurator() {
     });
     toast.success("Theme request submitted and added to cart!");
   };
+
+  if (loading) {
+    return <div className="py-24 text-center text-sm font-garamond text-gray-400 tracking-wider">Loading curator experience...</div>;
+  }
 
   return (
     <div className="w-full flex flex-col font-garamond text-gray-900">

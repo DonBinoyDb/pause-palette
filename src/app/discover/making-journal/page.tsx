@@ -21,7 +21,7 @@ export default async function MakingJournalPage() {
 
           {/* Text Left */}
           <div className="md:w-[42%] pt-32 md:pt-56 flex flex-col z-10">
-            <h1 className="font-serif text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-1">
+            <h1 className="font-garamond text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-1">
               THE MAKING JOURNAL
             </h1>
             <p className="italic font-bold text-gray-600 text-[16px] md:text-[17px] mb-2 leading-[1.6]">
@@ -78,7 +78,7 @@ export default async function MakingJournalPage() {
                 className="w-16 h-16 md:w-20 md:h-20 object-contain"
               />
             </div>
-            <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               DRAWN BY HAND
             </h3>
             <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
@@ -97,7 +97,7 @@ export default async function MakingJournalPage() {
                 className="w-14 h-14 md:w-16 md:h-16 object-contain"
               />
             </div>
-            <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               CRAFTED WITH INTENTION
             </h3>
             <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
@@ -116,7 +116,7 @@ export default async function MakingJournalPage() {
                 className="w-20 h-20 md:w-26 md:h-26 object-contain scale-125"
               />
             </div>
-            <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               NATURALLY CHOSEN
             </h3>
             <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
@@ -135,7 +135,7 @@ export default async function MakingJournalPage() {
                 className="w-16 h-16 md:w-20 md:h-20 object-contain"
               />
             </div>
-            <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
               DESIGNED & MADE IN INDIA
             </h3>
             <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">

@@ -47,7 +47,7 @@ export default function JournalGridClient({ journals }: { journals: Journal[] })
                 />
               )}
               <div>
-                <h3 className="font-serif text-sm text-gray-800 mb-2 font-medium tracking-wide uppercase">{journal.title}</h3>
+                <h3 className="font-garamond text-sm text-gray-800 mb-2 font-medium tracking-wide uppercase">{journal.title}</h3>
                 <p className="text-[12px] text-gray-500 leading-relaxed text-justify whitespace-pre-wrap">
                   {journal.content}
                 </p>

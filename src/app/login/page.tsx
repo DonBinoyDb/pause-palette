@@ -87,7 +87,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[390px] mx-auto flex flex-col items-center my-auto">
         {/* Headers */}
         <div className="text-center mb-9 w-full">
-          <h1 className="text-[30px] md:text-[34px] font-serif text-gray-900 mb-2 tracking-tight">
+          <h1 className="text-[30px] md:text-[34px] font-garamond text-gray-900 mb-2 tracking-tight">
             {isLogin ? "Welcome Back!" : "Create Account"}
           </h1>
           <p
@@ -195,13 +195,13 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Submit Button (Garamond font) */}
+          {/* Submit Button (Cart count blue) */}
           <button
             suppressHydrationWarning
             type="submit"
             disabled={loading}
             style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, Georgia, serif" }}
-            className="w-full bg-[#111111] text-white rounded-full font-garamond tracking-[0.16em] uppercase text-[15px] py-4 mt-4 hover:bg-black/85 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
+            className="w-full bg-[#4A7DAF] text-white rounded-full font-garamond tracking-[0.16em] uppercase text-[15px] py-4 mt-4 hover:bg-[#3d6892] transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
           >
             {loading ? "Authenticating..." : isLogin ? "LOG IN" : "SIGN UP"}
           </button>

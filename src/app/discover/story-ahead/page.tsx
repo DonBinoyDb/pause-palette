@@ -13,12 +13,12 @@ export default function StoryAheadPage() {
           {/* --- Section 1: Canvas & Palette --- */}
           <div className="md:col-span-7 flex flex-col gap-12 lg:gap-16">
             
-            <h1 className="text-[18px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+            <h1 className="font-garamond text-[18px] tracking-[0.15em] text-gray-500 uppercase font-medium">
               THE STORY AHEAD
             </h1>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
+              <h2 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 OUR FAVOURITE CANVAS
               </h2>
               <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
@@ -35,7 +35,7 @@ export default function StoryAheadPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
+              <h2 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 OUR PALETTE
               </h2>
               <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
@@ -54,8 +54,8 @@ export default function StoryAheadPage() {
           </div>
           <div className="md:col-span-5 w-full aspect-[2/3] md:aspect-auto overflow-hidden bg-gray-50">
             <img 
-              src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&h=1200&q=80" 
-              alt="Color swatches and fabrics" 
+              src="/images/stry_ahead1.png" 
+              alt="The Story Ahead - Pause Palette" 
               className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
             />
           </div>
@@ -64,7 +64,7 @@ export default function StoryAheadPage() {
           <div className="md:col-span-7 flex flex-col justify-center gap-16 lg:gap-24">
             
             <div className="flex flex-col gap-4">
-              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
+              <h2 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 A SLOWER WAY FORWARD
               </h2>
               <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
@@ -81,7 +81,7 @@ export default function StoryAheadPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
+              <h2 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 MADE TO ORDER
               </h2>
               <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
@@ -97,8 +97,8 @@ export default function StoryAheadPage() {
           </div>
           <div className="md:col-span-5 w-full aspect-[2/3] md:aspect-auto overflow-hidden bg-gray-50">
             <img 
-              src="https://images.unsplash.com/photo-1520006403909-838d6b92c22e?auto=format&fit=crop&w=800&h=1200&q=80" 
-              alt="Shirts hanging on line" 
+              src="/images/stry_ahead2.png" 
+              alt="A Slower Way Forward" 
               className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
             />
           </div>
@@ -107,7 +107,7 @@ export default function StoryAheadPage() {
           <div className="md:col-span-7 flex flex-col justify-center gap-16 lg:gap-24">
             
             <div className="flex flex-col gap-4">
-              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
+              <h2 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 THOUGHTFUL PACKAGING
               </h2>
               <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
@@ -117,21 +117,21 @@ export default function StoryAheadPage() {
                 <p>
                   From recyclable mailers and wrapping to thank-you notes printed on seed paper that can be planted and grown, each detail is chosen with greater consideration for what comes after.
                 </p>
-                <p className="font-serif italic text-[12px] text-gray-600">
+                <p className="font-garamond italic text-[12px] text-gray-600">
                   A thoughtful ending to every order — and a small gesture towards a better tomorrow.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
+              <h2 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
                 LOOKING AHEAD
               </h2>
               <div className="text-[15px] text-gray-600 leading-[1.8] text-justify flex flex-col gap-5">
                 <p>
                   As Pause Palette grows, we hope to keep creating with greater thought — exploring new materials, colours and possibilities while staying true to the values that shape how we make.
                 </p>
-                <p className="font-serif italic text-[12px] text-gray-600">
+                <p className="font-garamond italic text-[12px] text-gray-600">
                   A slower, more considered future — one story at a time.
                 </p>
               </div>
@@ -141,29 +141,29 @@ export default function StoryAheadPage() {
           <div className="md:col-span-5 grid grid-cols-2 gap-2 w-full">
             <div className="aspect-[2/3] w-full overflow-hidden bg-gray-50">
               <img 
-                src="https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&w=400&h=600&q=80" 
-                alt="Folded shirts in packaging" 
+                src="/images/stry_ahead3.png" 
+                alt="Story Ahead Detail 1" 
                 className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
               />
             </div>
             <div className="aspect-[2/3] w-full overflow-hidden bg-gray-50">
               <img 
-                src="https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&fit=crop&w=400&h=600&q=80" 
-                alt="Packaging material" 
+                src="/images/stry_ahead4.png" 
+                alt="Story Ahead Detail 2" 
                 className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
               />
             </div>
             <div className="aspect-[2/3] w-full overflow-hidden bg-gray-50">
               <img 
-                src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=400&h=600&q=80" 
-                alt="Stacked mailers" 
+                src="/images/stry_ahead5.png" 
+                alt="Story Ahead Detail 3" 
                 className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
               />
             </div>
             <div className="aspect-[2/3] w-full overflow-hidden bg-gray-50">
               <img 
-                src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&h=600&q=80" 
-                alt="Paper bag packaging" 
+                src="/images/stry_ahead6.png" 
+                alt="Story Ahead Detail 4" 
                 className="w-full h-full object-cover opacity-90 transition-opacity hover:opacity-100" 
               />
             </div>
@@ -185,7 +185,7 @@ export default function StoryAheadPage() {
                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
                />
              </div>
-             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+             <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
                DRAWN BY HAND
              </h3>
              <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
@@ -204,7 +204,7 @@ export default function StoryAheadPage() {
                  className="w-14 h-14 md:w-16 md:h-16 object-contain"
                />
              </div>
-             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+             <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
                CRAFTED WITH INTENTION
              </h3>
              <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
@@ -223,7 +223,7 @@ export default function StoryAheadPage() {
                  className="w-20 h-20 md:w-26 md:h-26 object-contain scale-125"
                />
              </div>
-             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+             <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
                NATURALLY CHOSEN
              </h3>
              <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
@@ -242,7 +242,7 @@ export default function StoryAheadPage() {
                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
                />
              </div>
-             <h3 className="font-serif text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+             <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
                DESIGNED & MADE IN INDIA
              </h3>
              <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">

@@ -62,7 +62,7 @@ export default async function CollectionInnerPage({ params }: { params: Promise<
 
           {/* Right: Collection Details */}
           <div className="w-full md:w-1/2 flex flex-col justify-center py-0 md:py-4">
-            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl text-gray-800 mb-1 md:mb-2 text-center md:text-left">{collectionData.name}</h1>
+            <h1 className="font-garamond text-3xl md:text-4xl lg:text-5xl text-gray-800 mb-1 md:mb-2 text-center md:text-left">{collectionData.name}</h1>
             <p className="text-[11px] md:text-[13px] tracking-[0.15em] text-gray-400 uppercase mb-4 md:mb-8 text-center md:text-left">Collection</p>
             
             <p className="text-[15px] md:text-[17px] text-gray-500 leading-relaxed mb-6 whitespace-pre-wrap text-center md:text-left">
