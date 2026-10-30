@@ -16,6 +16,7 @@ interface Product {
   description?: string | null;
   sizes?: string[];
   collection?: { name: string } | null;
+  colors?: { name: string; hex: string; images: string[] }[];
 }
 
 interface ProductQuickViewModalProps {
@@ -27,15 +28,19 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
   const { addToCart } = useShop();
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [selectedSize, setSelectedSize] = useState<string>("M");
+  const [selectedColorIndex, setSelectedColorIndex] = useState<number>(0);
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
     if (product) {
-      setSelectedImage(product.images?.[0] || "");
       setSelectedSize(product.sizes?.[0] || "M");
+      setSelectedColorIndex(0);
       setAdded(false);
       // Lock body scroll
       document.body.style.overflow = "hidden";
+      
+      const firstColorImage = product.colors?.[0]?.images?.[0];
+      setSelectedImage(firstColorImage || product.images?.[0] || "");
     }
     return () => {
       document.body.style.overflow = "unset";
@@ -54,6 +59,16 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
   if (!product) return null;
 
   const defaultSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["XS", "S", "M", "L", "XL"];
+  const colors = product.colors || [];
+  const activeColor = colors[selectedColorIndex];
+
+  const handleSelectColor = (idx: number) => {
+    setSelectedColorIndex(idx);
+    const colorImg = colors[idx]?.images?.[0];
+    if (colorImg) {
+      setSelectedImage(colorImg);
+    }
+  };
 
   const handleAddToCart = () => {
     addToCart({
@@ -63,6 +78,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
       image: selectedImage || product.images?.[0] || "",
       size: selectedSize,
       silhouette: "Classic",
+      color: activeColor ? activeColor.name : undefined,
     });
 
     setAdded(true);
@@ -155,6 +171,40 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             >
               {product.description || "A thoughtfully designed piece for slow living, carrying original hand-drawn artwork, colour, and timeless craftsmanship."}
             </p>
+
+            {/* Colour Selector */}
+            {colors.length > 0 && (
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 font-medium">Select Colour</span>
+                  <span className="text-[11px] text-gray-700 font-medium">{activeColor?.name}</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {colors.map((col, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectColor(idx)}
+                      title={col.name}
+                      aria-label={`Select ${col.name}`}
+                      className={`h-7 px-2.5 text-[10px] tracking-wider uppercase rounded-sm border transition-all flex items-center gap-1.5 ${
+                        selectedColorIndex === idx
+                          ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-2xs"
+                          : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
+                      }`}
+                    >
+                      {col.hex && (
+                        <span 
+                          className="w-2.5 h-2.5 rounded-full border border-black/10 inline-block" 
+                          style={{ backgroundColor: col.hex }} 
+                        />
+                      )}
+                      <span>{col.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Size Selector */}
             <div className="mb-6">

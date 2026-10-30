@@ -49,7 +49,11 @@ export default function CartPage() {
         if (item.curatedDetails.colorName) message += `   Linen: ${item.curatedDetails.colorName}\n`;
         if (item.curatedDetails.theme) message += `   Theme: "${item.curatedDetails.theme}"\n`;
       } else {
-        message += `   Size: ${item.size} | Fit: ${item.silhouette.replace(/-/g, ' ')}\n`;
+        let specs = `   Size: ${item.size} | Fit: ${item.silhouette.replace(/-/g, ' ')}`;
+        if (item.color) {
+          specs += ` | Colour: ${item.color}`;
+        }
+        message += `${specs}\n`;
       }
       message += `   Quantity: ${item.quantity}\n`;
       message += `   Price: ₹${(item.price * item.quantity).toLocaleString()}\n\n`;
@@ -198,10 +202,16 @@ export default function CartPage() {
                               )}
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] tracking-wider uppercase text-[#8B8985] mt-1">
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10px] sm:text-[11px] tracking-wider uppercase text-[#8B8985] mt-1">
                               <span>Size: <strong className="text-[#2C2B29] font-medium">{item.size}</strong></span>
                               <span className="w-1 h-1 rounded-full bg-[#D1CFCA]" />
                               <span>Fit: <strong className="text-[#2C2B29] font-medium">{item.silhouette.replace(/-/g, ' ')}</strong></span>
+                              {item.color && (
+                                <>
+                                  <span className="w-1 h-1 rounded-full bg-[#D1CFCA]" />
+                                  <span>Colour: <strong className="text-[#4E7185] bg-[#EAF0F6] px-1.5 py-0.5 rounded-xs font-semibold">{item.color}</strong></span>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
@@ -292,15 +302,15 @@ export default function CartPage() {
                   </span>
                 </div>
                 
-                <button 
-                  onClick={handleWhatsAppCheckout}
+                <Link 
+                  href="/checkout"
                   className="w-full group bg-[#2C2B29] text-white py-3.5 px-5 flex items-center justify-between hover:bg-black transition-all duration-300 rounded-xs shadow-xs"
                 >
                   <span className="text-xs tracking-[0.16em] uppercase font-medium">
-                    Checkout via WhatsApp
+                    Proceed to Checkout
                   </span>
                   <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
-                </button>
+                </Link>
                 
                 <p className="mt-4 text-center text-[10px] text-[#8B8985] italic font-sans">
                   Orders are personally coordinated and verified via WhatsApp.

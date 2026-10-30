@@ -20,22 +20,46 @@ export async function GET(request: Request) {
       where: { userId: user.id },
       include: {
         product: {
-          select: { name: true, price: true, images: true }
+          select: { name: true, price: true, images: true, colors: true }
         }
       }
     });
 
     // Transform to match ShopContext's CartItem interface
-    const formattedCart = cartItems.map(item => ({
-      id: `${item.productId}-${item.size}-${item.silhouette}`,
-      productId: item.productId,
-      name: item.product.name,
-      price: item.product.price,
-      image: item.product.images[0] || "",
-      size: item.size,
-      silhouette: item.silhouette,
-      quantity: item.quantity,
-    }));
+    const formattedCart = cartItems.map(item => {
+      let silhouette = item.silhouette;
+      let color: string | undefined = undefined;
+
+      if (item.silhouette && item.silhouette.includes(":::")) {
+        const parts = item.silhouette.split(":::");
+        silhouette = parts[0];
+        color = parts[1];
+      }
+
+      // Pick image: if color matches one in product.colors, use that color's image
+      let itemImage = item.product.images[0] || "";
+      if (color && Array.isArray(item.product.colors)) {
+        const matchingColor = (item.product.colors as any[]).find(
+          c => c.name && c.name.toLowerCase() === color?.toLowerCase()
+        );
+        if (matchingColor?.images?.[0]) {
+          itemImage = matchingColor.images[0];
+        }
+      }
+
+      const colorKey = color ? `-${color}` : "";
+      return {
+        id: `${item.productId}-${item.size}-${silhouette}${colorKey}`,
+        productId: item.productId,
+        name: item.product.name,
+        price: item.product.price,
+        image: itemImage,
+        size: item.size,
+        silhouette: silhouette,
+        color: color,
+        quantity: item.quantity,
+      };
+    });
 
     return NextResponse.json(formattedCart);
   } catch (error) {
@@ -59,7 +83,7 @@ export async function POST(request: Request) {
     if (!user) return new NextResponse("User not found", { status: 404 });
 
     const body = await request.json();
-    const { productId, size, silhouette, quantity } = body;
+    const { productId, size, silhouette, color, quantity } = body;
 
     if (!productId || !size || !silhouette || quantity === undefined) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -70,6 +94,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, isCurated: true });
     }
 
+    const dbSilhouette = color ? `${silhouette}:::${color}` : silhouette;
+
     // Upsert the cart item
     const cartItem = await prisma.cartItem.upsert({
       where: {
@@ -77,7 +103,7 @@ export async function POST(request: Request) {
           userId: user.id,
           productId,
           size,
-          silhouette
+          silhouette: dbSilhouette
         }
       },
       update: {
@@ -87,7 +113,7 @@ export async function POST(request: Request) {
         userId: user.id,
         productId,
         size,
-        silhouette,
+        silhouette: dbSilhouette,
         quantity
       }
     });
@@ -124,14 +150,15 @@ export async function PUT(request: Request) {
 
     if (dbItems.length > 0) {
       await prisma.$transaction(
-        dbItems.map((item: any) => 
-          prisma.cartItem.upsert({
+        dbItems.map((item: any) => {
+          const dbSilhouette = item.color ? `${item.silhouette}:::${item.color}` : item.silhouette;
+          return prisma.cartItem.upsert({
             where: {
               userId_productId_size_silhouette: {
                 userId: user.id,
                 productId: item.productId,
                 size: item.size,
-                silhouette: item.silhouette
+                silhouette: dbSilhouette
               }
             },
             update: {
@@ -141,11 +168,11 @@ export async function PUT(request: Request) {
               userId: user.id,
               productId: item.productId,
               size: item.size,
-              silhouette: item.silhouette,
+              silhouette: dbSilhouette,
               quantity: item.quantity
             }
-          })
-        )
+          });
+        })
       );
     }
 
@@ -174,6 +201,7 @@ export async function DELETE(request: Request) {
     const productId = searchParams.get("productId");
     const size = searchParams.get("size");
     const silhouette = searchParams.get("silhouette");
+    const color = searchParams.get("color");
 
     if (!productId || !size || !silhouette) {
       return new NextResponse("Missing required fields", { status: 400 });
@@ -183,14 +211,14 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    await prisma.cartItem.delete({
+    const dbSilhouette = color ? `${silhouette}:::${color}` : silhouette;
+
+    await prisma.cartItem.deleteMany({
       where: {
-        userId_productId_size_silhouette: {
-          userId: user.id,
-          productId,
-          size,
-          silhouette
-        }
+        userId: user.id,
+        productId,
+        size,
+        silhouette: dbSilhouette
       }
     });
 

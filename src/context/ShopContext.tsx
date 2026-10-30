@@ -18,13 +18,14 @@ export interface CuratedDetails {
 }
 
 export interface CartItem {
-  id: string; // Unique ID for the cart item (product ID + size + silhouette)
+  id: string; // Unique ID for the cart item (product ID + size + silhouette + color)
   productId: string;
   name: string;
   price: number;
   image: string;
   size: string;
   silhouette: string;
+  color?: string;
   quantity: number;
   curatedDetails?: CuratedDetails;
 }
@@ -86,6 +87,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
                   productId: pendingAction.item.productId,
                   size: pendingAction.item.size,
                   silhouette: pendingAction.item.silhouette,
+                  color: pendingAction.item.color,
                   quantity: 1
                 })
               });
@@ -177,7 +179,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const cartItemId = `${newItem.productId}-${newItem.size}-${newItem.silhouette}`;
+    const colorKey = newItem.color ? `-${newItem.color}` : "";
+    const cartItemId = `${newItem.productId}-${newItem.size}-${newItem.silhouette}${colorKey}`;
     
     let newQuantity = 1;
     
@@ -202,6 +205,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
             productId: newItem.productId,
             size: newItem.size,
             silhouette: newItem.silhouette,
+            color: newItem.color,
             quantity: newQuantity
           })
         });
@@ -217,7 +221,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     if (status === 'authenticated' && itemToRemove) {
       try {
-        await fetch(`/api/cart?productId=${itemToRemove.productId}&size=${itemToRemove.size}&silhouette=${itemToRemove.silhouette}`, {
+        const colorParam = itemToRemove.color ? `&color=${encodeURIComponent(itemToRemove.color)}` : "";
+        await fetch(`/api/cart?productId=${itemToRemove.productId}&size=${itemToRemove.size}&silhouette=${encodeURIComponent(itemToRemove.silhouette)}${colorParam}`, {
           method: 'DELETE'
         });
       } catch (error) {
@@ -247,6 +252,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
               productId: itemToUpdate.productId,
               size: itemToUpdate.size,
               silhouette: itemToUpdate.silhouette,
+              color: itemToUpdate.color,
               quantity: quantity
             })
           });

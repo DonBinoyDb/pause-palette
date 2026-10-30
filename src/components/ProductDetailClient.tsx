@@ -57,13 +57,18 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       return;
     }
 
+    const activeColor = (colors.length > 0 && selectedColorIndex !== null && colors[selectedColorIndex])
+      ? colors[selectedColorIndex]
+      : null;
+
     addToCart({
       productId: product.id,
       name: product.name,
       price: product.price,
       image: displayImages[0],
       size: selectedSize,
-      silhouette: selectedSilhouette
+      silhouette: selectedSilhouette,
+      color: activeColor ? activeColor.name : undefined,
     });
     
     setIsAdded(true);
@@ -131,26 +136,39 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             {/* Colour Options */}
             {colors.length > 0 && (
               <div className="mb-8">
-                <p className="text-sm text-gray-500 mb-3">Colour Options:</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm text-gray-500">Colour:</span>
+                  <span className="text-sm text-gray-900 font-medium">
+                    {colors[selectedColorIndex]?.name || "Original"}
+                  </span>
+                </div>
                 <div className="flex flex-wrap gap-3">
                   {colors.map((color, idx) => (
-                    <div 
+                    <button
                       key={idx}
+                      type="button"
                       onClick={() => setSelectedColorIndex(idx)}
                       title={color.name}
-                      className={`w-10 h-12 border p-0.5 cursor-pointer transition-colors group ${selectedColorIndex === idx ? 'border-gray-900' : 'border-gray-200 hover:border-gray-400'}`}
+                      aria-label={`Select color ${color.name}`}
+                      className={`w-11 h-14 border p-0.5 cursor-pointer transition-all group rounded-xs relative ${
+                        selectedColorIndex === idx 
+                          ? 'border-gray-900 ring-2 ring-[#79A7D3]/40 shadow-xs scale-105' 
+                          : 'border-gray-200 hover:border-gray-400 opacity-80 hover:opacity-100'
+                      }`}
                     >
                       <div 
-                        className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 overflow-hidden"
+                        className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 overflow-hidden rounded-2xs"
                       >
                         {color.images.length > 0 ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
                           <img src={color.images[0]} alt={color.name} className={`w-full h-full object-cover transition-opacity ${selectedColorIndex === idx ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`} />
+                        ) : color.hex ? (
+                          <div className="w-full h-full" style={{ backgroundColor: color.hex }} />
                         ) : (
-                          <span>Img</span>
+                          <span>{color.name.slice(0, 3)}</span>
                         )}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>

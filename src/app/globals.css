@@ -25,10 +25,11 @@
   --foreground: #09090b;
 }
 
+/* Pause Palette uses a curated editorial light/linen aesthetic */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #000000;
-    --foreground: #ffffff;
+    --background: #ffffff;
+    --foreground: #09090b;
   }
 }
 
