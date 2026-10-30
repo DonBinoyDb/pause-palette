@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES } from "@/lib/curatorDefaults";
+import { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES, getSilhouetteSizes } from "@/lib/curatorDefaults";
 
-export { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES };
+export { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES, getSilhouetteSizes };
 
 export async function GET() {
   try {
@@ -32,6 +32,12 @@ export async function GET() {
     if (!silhouettes || silhouettes.length === 0 || !silhouettes.some((s) => s.id === "cuban-collar" || s.id === "classic-point-collar")) {
       silhouettes = DEFAULT_SILHOUETTES;
     }
+
+    // Ensure every silhouette has a populated sizes array
+    silhouettes = silhouettes.map((sil: any) => ({
+      ...sil,
+      sizes: getSilhouetteSizes(sil, pricing.sizeValues),
+    }));
 
     const embroiderySilhouettes = (visibilityData.modes?.embroidery?.silhouettes || []).filter((id: string) =>
       silhouettes.some((s) => s.id === id)

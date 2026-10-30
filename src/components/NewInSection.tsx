@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { useShop } from "@/context/ShopContext";
-import ProductQuickViewModal from "./ProductQuickViewModal";
 
 interface Product {
   id: string;
@@ -36,9 +35,9 @@ export default function NewInSection({
 }: NewInSectionProps) {
   const { toggleSaved, isSaved } = useShop();
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -47,10 +46,12 @@ export default function NewInSection({
     if (!el) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 5);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
-
     const maxScroll = scrollWidth - clientWidth;
+    
+    setHasOverflow(maxScroll > 10);
+    setCanScrollLeft(scrollLeft > 5);
+    setCanScrollRight(scrollLeft < maxScroll - 5);
+
     if (maxScroll > 0) {
       setScrollProgress((scrollLeft / maxScroll) * 100);
     } else {
@@ -64,17 +65,18 @@ export default function NewInSection({
     return () => window.removeEventListener("resize", checkScroll);
   }, [checkScroll, products]);
 
-  // Auto slide interval (pauses on hover, touch, or when modal is open)
+  // Auto slide interval (pauses on hover or touch)
   useEffect(() => {
-    if (isPaused || selectedProduct !== null || products.length <= 1) return;
+    if (isPaused || !hasOverflow || products.length <= 4) return;
 
     const timer = setInterval(() => {
       const el = sliderRef.current;
       if (!el) return;
 
       const card = el.firstElementChild as HTMLElement | null;
-      const cardWidth = card?.offsetWidth || 250;
-      const step = cardWidth + 24;
+      const cardWidth = card?.offsetWidth || 280;
+      const gap = window.innerWidth >= 768 ? 24 : 16;
+      const step = cardWidth + gap;
 
       const { scrollLeft, scrollWidth, clientWidth } = el;
       if (scrollLeft + clientWidth >= scrollWidth - 15) {
@@ -83,17 +85,20 @@ export default function NewInSection({
       } else {
         el.scrollBy({ left: step, behavior: "smooth" });
       }
-    }, 3800);
+    }, 4000);
 
     return () => clearInterval(timer);
-  }, [isPaused, selectedProduct, products.length]);
+  }, [isPaused, hasOverflow, products.length]);
 
   const scroll = (direction: "left" | "right") => {
     const el = sliderRef.current;
     if (!el) return;
     const card = el.firstElementChild as HTMLElement | null;
-    const cardWidth = card?.offsetWidth || 250;
-    const scrollAmount = (cardWidth + 24) * 2;
+    const cardWidth = card?.offsetWidth || 280;
+    const gap = window.innerWidth >= 768 ? 24 : 16;
+    // On desktop, scroll 2 cards per click for pleasant pacing
+    const cardsToAdvance = window.innerWidth >= 1024 ? 2 : 1;
+    const scrollAmount = (cardWidth + gap) * cardsToAdvance;
     el.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
@@ -106,8 +111,8 @@ export default function NewInSection({
   const targetBtnText = buttonText?.trim() ? buttonText : "Explore All";
 
   return (
-    <section className="bg-white pt-8 md:pt-12 pb-16 md:pb-24 border-t border-gray-100 overflow-hidden">
-      <div className="w-full px-6 md:px-10 lg:px-20">
+    <section className="bg-white pt-8 md:pt-14 pb-16 md:pb-24 border-t border-gray-100 overflow-hidden">
+      <div className="w-full px-6 md:px-10 lg:px-20 max-w-[1700px] mx-auto">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
@@ -134,29 +139,31 @@ export default function NewInSection({
           
           {/* Header Controls: Slide Arrows & Explore All Link */}
           <div className="flex items-center gap-4 self-end md:self-auto">
-            {/* Slide Arrows */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => scroll("left")}
-                disabled={!canScrollLeft}
-                aria-label="Previous products"
-                className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-black transition-all duration-300 disabled:opacity-25 disabled:cursor-not-allowed hover:scale-105 active:scale-95 bg-white shadow-xs"
-              >
-                <ChevronLeft className="w-4 h-4 stroke-[1.75]" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scroll("right")}
-                disabled={!canScrollRight}
-                aria-label="Next products"
-                className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-black transition-all duration-300 disabled:opacity-25 disabled:cursor-not-allowed hover:scale-105 active:scale-95 bg-white shadow-xs"
-              >
-                <ChevronRight className="w-4 h-4 stroke-[1.75]" />
-              </button>
-            </div>
+            {/* Slide Arrows (visible when more items than screen width) */}
+            {hasOverflow && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scroll("left")}
+                  disabled={!canScrollLeft}
+                  aria-label="Previous products"
+                  className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-black transition-all duration-300 disabled:opacity-25 disabled:cursor-not-allowed hover:scale-105 active:scale-95 bg-white shadow-xs"
+                >
+                  <ChevronLeft className="w-4 h-4 stroke-[1.75]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scroll("right")}
+                  disabled={!canScrollRight}
+                  aria-label="Next products"
+                  className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-black transition-all duration-300 disabled:opacity-25 disabled:cursor-not-allowed hover:scale-105 active:scale-95 bg-white shadow-xs"
+                >
+                  <ChevronRight className="w-4 h-4 stroke-[1.75]" />
+                </button>
+              </div>
+            )}
 
-            <div className="h-4 w-px bg-gray-200 hidden md:block" />
+            {hasOverflow && <div className="h-4 w-px bg-gray-200 hidden md:block" />}
 
             <Link 
               href={targetLink}
@@ -168,7 +175,7 @@ export default function NewInSection({
           </div>
         </div>
 
-        {/* Products Sliding Track */}
+        {/* Products Sliding Track: Exactly 4 cards at a time on desktop */}
         <div
           className="relative"
           onMouseEnter={() => setIsPaused(true)}
@@ -187,13 +194,13 @@ export default function NewInSection({
               const categoryName = product.collection?.name || "Pause Palette";
 
               return (
-                <div
+                <Link
                   key={product.id}
-                  className="w-[185px] sm:w-[215px] md:w-[240px] lg:w-[255px] shrink-0 snap-start group flex flex-col cursor-pointer select-none"
-                  onClick={() => setSelectedProduct(product)}
+                  href={`/product/${product.slug}`}
+                  className="w-[75vw] sm:w-[calc((100%-16px)/2)] md:w-[calc((100%-48px)/3)] lg:w-[calc((100%-72px)/4)] shrink-0 snap-start group flex flex-col cursor-pointer select-none"
                 >
                   {/* Image Container with Smooth Slide & Zoom Micro-animations */}
-                  <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden rounded-sm mb-3">
+                  <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden rounded-sm mb-3.5">
                     {/* Primary Image */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -219,6 +226,7 @@ export default function NewInSection({
                       type="button"
                       suppressHydrationWarning
                       onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
                         toggleSaved({
                           productId: product.id,
@@ -227,7 +235,7 @@ export default function NewInSection({
                           image: mainImage,
                         });
                       }}
-                      className={`absolute top-2.5 right-2.5 z-10 w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm transition-all duration-300 ${
+                      className={`absolute top-3 right-3 z-10 w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm transition-all duration-300 shadow-2xs ${
                         isSaved(product.id)
                           ? "text-red-500 opacity-100"
                           : "text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-gray-900 hover:scale-110"
@@ -235,43 +243,45 @@ export default function NewInSection({
                       aria-label="Save to Wishlist"
                     >
                       <Heart
-                        className={`w-3.5 h-3.5 md:w-4 md:h-4 ${
+                        className={`w-4 h-4 ${
                           isSaved(product.id) ? "fill-current text-red-500" : "stroke-[1.5]"
                         }`}
                       />
                     </button>
                   </div>
 
-                  {/* Product Details (Reduced, balanced font sizes) */}
+                  {/* Product Details (Generous, balanced typography) */}
                   <div className="flex flex-col px-0.5">
-                    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.16em] text-gray-400 font-sans truncate mb-0.5">
-                      {categoryName}
-                    </span>
-                    <h3 className="font-serif text-[13px] md:text-[15px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-snug">
+                    <h3 className="font-serif text-[15px] md:text-[17px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-snug">
                       {product.name}
                     </h3>
-                    <p className="font-serif text-[12px] md:text-[13px] text-gray-900 font-medium mt-1">
-                      ₹ {product.price.toLocaleString("en-IN")}
+                    <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic mt-0.5">
+                      {categoryName}
+                    </p>
+                    <p className="font-sans font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums mt-1">
+                      ₹{product.price.toLocaleString("en-IN")}
                     </p>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
 
-          {/* Bottom Slide Progress Indicator */}
-          <div className="flex items-center justify-between mt-5 pt-2">
-            <div className="w-24 md:w-36 h-[2px] bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gray-800 transition-all duration-300 ease-out rounded-full"
-                style={{ width: `${Math.max(15, scrollProgress)}%` }}
-              />
+          {/* Bottom Slide Progress Indicator (visible when there is overflow to scroll) */}
+          {hasOverflow && (
+            <div className="flex items-center justify-between mt-6 pt-2">
+              <div className="w-28 md:w-44 h-[2px] bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gray-800 transition-all duration-300 ease-out rounded-full"
+                  style={{ width: `${Math.max(20, scrollProgress)}%` }}
+                />
+              </div>
+              
+              <span className="text-[10px] tracking-[0.15em] uppercase text-gray-400 font-sans">
+                Slide to explore ({products.length})
+              </span>
             </div>
-            
-            <span className="text-[10px] tracking-[0.15em] uppercase text-gray-400 font-sans">
-              Slide to explore ({products.length})
-            </span>
-          </div>
+          )}
         </div>
 
         {/* Mobile View All Button */}
@@ -286,12 +296,6 @@ export default function NewInSection({
         </div>
 
       </div>
-
-      {/* Quick View Pop-up Modal */}
-      <ProductQuickViewModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
     </section>
   );
 }

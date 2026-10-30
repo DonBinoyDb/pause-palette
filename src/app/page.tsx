@@ -52,7 +52,7 @@ export default async function Home() {
 
     // Only query products if New Arrivals section is enabled
     if (newArrivalsSettings.isEnabled) {
-      const limit = newArrivalsSettings.limit || 4;
+      const limit = Math.max(newArrivalsSettings.limit || 0, 8);
       const customIds = newArrivalsSettings.productIds || [];
 
       if (customIds.length > 0) {

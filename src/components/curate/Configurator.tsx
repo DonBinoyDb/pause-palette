@@ -11,6 +11,50 @@ type Audience = "men" | "women";
 type Technique = "printed" | "embroidered";
 type Size = string;
 
+function getSilhouetteSizes(
+  sil: any,
+  globalSizeValues?: Record<string, number>
+) {
+  if (sil?.sizes && Array.isArray(sil.sizes) && sil.sizes.length > 0) {
+    return sil.sizes.map((s: any) => ({
+      size: String(s.size),
+      price: Number(s.price) || 0,
+      enabled: s.enabled !== false,
+    }));
+  }
+  const fallback = globalSizeValues || DEFAULT_PRICING.sizeValues;
+  const base = Number(sil?.basePrice) || 500;
+  return Object.entries(fallback).map(([sz, adj]) => ({
+    size: sz,
+    price: base + Number(adj || 0),
+    enabled: true,
+  }));
+}
+
+function getActiveSilhouetteSizes(
+  sil: any,
+  globalSizeValues?: Record<string, number>
+) {
+  return getSilhouetteSizes(sil, globalSizeValues).filter((s: any) => s.enabled);
+}
+
+function getSilhouettePriceForSize(
+  sil: any,
+  size: string,
+  globalSizeValues?: Record<string, number>
+): number {
+  if (!sil) return 500;
+  if (sil?.sizes && Array.isArray(sil.sizes) && sil.sizes.length > 0) {
+    const found = sil.sizes.find((s: any) => s.size === size);
+    if (found && typeof found.price === "number") {
+      return Number(found.price);
+    }
+  }
+  const base = Number(sil.basePrice) || 500;
+  const adj = globalSizeValues?.[size] ?? 0;
+  return base + Number(adj);
+}
+
 export default function Configurator() {
   const { addToCart } = useShop();
 
@@ -54,13 +98,13 @@ export default function Configurator() {
 
   const modes = settings?.modes || DEFAULT_MODES;
   const pricing = settings?.pricing || DEFAULT_PRICING;
-  const availableSizes = Object.keys(pricing.sizeValues || DEFAULT_PRICING.sizeValues);
   const silhouettes = (settings?.silhouettes?.length ? settings.silhouettes : DEFAULT_SILHOUETTES) as Array<{
     id: string;
     name: string;
     basePrice: number;
     svg: string;
     image?: string;
+    sizes?: Array<{ size: string; price: number; enabled?: boolean }>;
   }>;
   const linenColors = (pricing.linenColors?.length ? pricing.linenColors : DEFAULT_PRICING.linenColors) as Array<{
     id: string;
@@ -144,6 +188,16 @@ export default function Configurator() {
     svg: "",
   };
 
+  const activeSilhouetteSizes = getActiveSilhouetteSizes(activeSilhouette, pricing.sizeValues);
+  const availableSizes = activeSilhouetteSizes.map((s: any) => s.size);
+
+  // Sync selected size if the currently chosen size is not available for this silhouette
+  useEffect(() => {
+    if (availableSizes.length > 0 && !availableSizes.includes(size)) {
+      setSize(availableSizes[0]);
+    }
+  }, [selectedSilhouetteId, availableSizes, size]);
+
   const activeColor = (filteredLinenColors.find((c) => c.id === selectedColorId) || filteredLinenColors[0] || linenColors[0]) || {
     id: "black",
     name: "Black",
@@ -156,8 +210,7 @@ export default function Configurator() {
     ? safeNumber(pricing.techniqueValues?.printed, 200)
     : safeNumber(pricing.techniqueValues?.embroidered, 500);
 
-  const sizeVal = safeNumber(pricing.sizeValues?.[size], 0);
-  const silBasePrice = safeNumber(activeSilhouette.basePrice, 500);
+  const silAndSizePrice = getSilhouettePriceForSize(activeSilhouette, size, pricing.sizeValues);
   const productBasePrice = safeNumber(activePiece.basePrice, technique === "printed" ? 1800 : 2200);
   const linenAdjustment = safeNumber(activeColor.adjustment, 0);
 
@@ -165,16 +218,16 @@ export default function Configurator() {
 
   if (mode === "illustration") {
     if (technique === "printed") {
-      calculatedPrice = productBasePrice + techniqueVal + silBasePrice + sizeVal;
+      calculatedPrice = productBasePrice + techniqueVal + silAndSizePrice;
     } else {
-      calculatedPrice = productBasePrice + techniqueVal + silBasePrice + sizeVal + linenAdjustment;
+      calculatedPrice = productBasePrice + techniqueVal + silAndSizePrice + linenAdjustment;
     }
   } else if (mode === "embroidery") {
     const baseEmbroideryFee = safeNumber(modes.embroidery?.startingPrice, 2000);
-    calculatedPrice = baseEmbroideryFee + silBasePrice + sizeVal + linenAdjustment;
+    calculatedPrice = baseEmbroideryFee + silAndSizePrice + linenAdjustment;
   } else if (mode === "solid") {
     const baseSolidPrice = safeNumber(modes.solid?.basePrice, 2000);
-    calculatedPrice = baseSolidPrice + silBasePrice + sizeVal + linenAdjustment;
+    calculatedPrice = baseSolidPrice + silAndSizePrice + linenAdjustment;
   }
 
   const handleAddToCart = () => {
@@ -473,6 +526,8 @@ export default function Configurator() {
           <div className="flex flex-wrap gap-3">
             {(filteredSilhouettes.length ? filteredSilhouettes : silhouettes).map((sil) => {
               const isSelected = selectedSilhouetteId ? selectedSilhouetteId === sil.id : activeSilhouette.id === sil.id;
+              const silActiveSizes = getActiveSilhouetteSizes(sil, pricing.sizeValues);
+              const sizeSummary = silActiveSizes.map((s: any) => s.size).join(", ");
               return (
                 <button
                   key={sil.id}
@@ -487,9 +542,16 @@ export default function Configurator() {
                   <div className="flex-1 w-full flex items-center justify-center p-1 text-gray-700">
                     {renderSilhouetteIcon(sil)}
                   </div>
-                  <span className="text-[11px] font-garamond text-gray-800 leading-tight">
-                    {sil.name}
-                  </span>
+                  <div className="w-full flex flex-col items-center">
+                    <span className="text-[11px] font-garamond text-gray-800 leading-tight">
+                      {sil.name}
+                    </span>
+                    {sizeSummary && (
+                      <span className="text-[9px] font-sans text-gray-400 mt-0.5 truncate max-w-full">
+                        {sizeSummary}
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -498,25 +560,36 @@ export default function Configurator() {
 
         {/* STEP: Choose your Size */}
         <div className="mb-6 w-full">
-          <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
-            Choose your Size
-          </label>
+          <div className="flex items-center justify-between mb-0.5">
+            <label className="block text-xs font-garamond font-medium text-gray-900">
+              Choose your Size
+            </label>
+            {activeSilhouette && (
+              <span className="text-[11px] font-garamond text-gray-500 italic">
+                Available for {activeSilhouette.name}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3 mt-1.5">
-            <div className="flex gap-1.5">
-              {availableSizes.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setSize(s)}
-                  className={`w-8 h-8 rounded-sm border flex items-center justify-center text-xs font-garamond uppercase tracking-wider transition-all cursor-pointer ${
-                    size === s
-                      ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 font-medium bg-white"
-                      : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-1.5">
+              {availableSizes.map((s: string) => {
+                const sPrice = getSilhouettePriceForSize(activeSilhouette, s, pricing.sizeValues);
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSize(s)}
+                    className={`min-w-8 h-8 px-2.5 rounded-sm border flex items-center justify-center text-xs font-garamond uppercase tracking-wider transition-all cursor-pointer ${
+                      size === s
+                        ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 font-medium bg-white shadow-2xs"
+                        : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
+                    }`}
+                    title={`${s} (₹${sPrice})`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
             </div>
             <button
               type="button"

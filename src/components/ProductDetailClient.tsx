@@ -119,16 +119,13 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           <div className="w-full lg:w-5/12 sticky top-32 py-4">
             <h1 className="font-serif text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
             <div className="flex items-center gap-2 mb-4">
-               <p className="text-sm tracking-wide text-gray-500 italic">
+               <p className="text-sm tracking-wide text-gray-500 font-garamond italic">
                  {product.category} {product.gender?.length > 0 ? `| ${product.gender.join(', ')}` : ''}
                </p>
             </div>
             
-            <p 
-              className="font-garamond text-2xl md:text-3xl text-gray-800 mb-6"
-              style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, serif" }}
-            >
-              ₹ {product.price}
+            <p className="font-sans font-medium text-2xl md:text-3xl text-gray-900 tracking-tight tabular-nums mb-6">
+              ₹{product.price.toLocaleString("en-IN")}
             </p>
 
             {/* Colour Options */}

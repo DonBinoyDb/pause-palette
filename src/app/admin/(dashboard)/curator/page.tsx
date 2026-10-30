@@ -9,6 +9,26 @@ import StickySaveBar from "@/components/admin/StickySaveBar";
 
 type Tab = "illustration" | "embroidery" | "solid";
 
+function getSilhouetteSizes(
+  sil: any,
+  globalSizeValues?: Record<string, number>
+) {
+  if (sil?.sizes && Array.isArray(sil.sizes) && sil.sizes.length > 0) {
+    return sil.sizes.map((s: any) => ({
+      size: String(s.size),
+      price: Number(s.price) || 0,
+      enabled: s.enabled !== false,
+    }));
+  }
+  const fallback = globalSizeValues || DEFAULT_PRICING.sizeValues;
+  const base = Number(sil?.basePrice) || 500;
+  return Object.entries(fallback).map(([sz, adj]) => ({
+    size: sz,
+    price: base + Number(adj || 0),
+    enabled: true,
+  }));
+}
+
 export default function CuratorSettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("illustration");
   const [loading, setLoading] = useState(true);
@@ -47,10 +67,13 @@ export default function CuratorSettingsPage() {
   const [newColorHex, setNewColorHex] = useState("#8A9A86");
   const [newColorAdjustment, setNewColorAdjustment] = useState("0");
 
-  // Modal State for adding new size
-  const [isSizeModalOpen, setIsSizeModalOpen] = useState(false);
-  const [newSizeName, setNewSizeName] = useState("");
-  const [newSizeAdjustment, setNewSizeAdjustment] = useState("0");
+  // Modal State for Customizing Silhouette Sizes & Pricing
+  const [isSilSizesModalOpen, setIsSilSizesModalOpen] = useState(false);
+  const [editingSilId, setEditingSilId] = useState<string | null>(null);
+  const [editingSilSizes, setEditingSilSizes] = useState<Array<{ size: string; price: number; enabled: boolean }>>([]);
+  const [editingSilBasePrice, setEditingSilBasePrice] = useState<number>(500);
+  const [newCustomSizeName, setNewCustomSizeName] = useState("");
+  const [newCustomSizePrice, setNewCustomSizePrice] = useState("500");
 
   // Two tabs inside Original Illustration: Printed vs Embroidered
   const [illustrationTab, setIllustrationTab] = useState<"printed" | "embroidered">("printed");
@@ -173,19 +196,6 @@ export default function CuratorSettingsPage() {
         techniqueValues: {
           ...prev.pricing.techniqueValues,
           [technique]: value,
-        },
-      },
-    }));
-  };
-
-  const handleSizeAdjustmentChange = (sizeKey: string, value: number) => {
-    setSettings((prev) => ({
-      ...prev,
-      pricing: {
-        ...prev.pricing,
-        sizeValues: {
-          ...prev.pricing.sizeValues,
-          [sizeKey]: value,
         },
       },
     }));
@@ -414,47 +424,6 @@ export default function CuratorSettingsPage() {
       },
     }));
     setIsPieceModalOpen(false);
-    toast.success("Piece added successfully!");
-  };
-
-  const confirmAddSize = () => {
-    if (!newSizeName.trim()) {
-      toast.error("Please enter a size name.");
-      return;
-    }
-    const name = newSizeName.trim().toUpperCase();
-    const adj = Number(newSizeAdjustment) || 0;
-    setSettings((prev) => ({
-      ...prev,
-      pricing: {
-        ...prev.pricing,
-        sizeValues: {
-          ...prev.pricing.sizeValues,
-          [name]: adj,
-        },
-      },
-    }));
-    setIsSizeModalOpen(false);
-    setNewSizeName("");
-    setNewSizeAdjustment("0");
-    toast.success(`Size "${name}" added!`);
-  };
-
-  const removeSize = (sz: string) => {
-    if (confirm(`Remove size "${sz}"?`)) {
-      setSettings((prev) => {
-        const nextSizes = { ...prev.pricing.sizeValues } as Record<string, number>;
-        delete nextSizes[sz];
-        return {
-          ...prev,
-          pricing: {
-            ...prev.pricing,
-            sizeValues: nextSizes,
-          },
-        };
-      });
-      toast.success(`Size "${sz}" removed.`);
-    }
   };
 
   const confirmAddSilhouette = () => {
@@ -468,6 +437,9 @@ export default function CuratorSettingsPage() {
     }
 
     const id = newSilName.toLowerCase().replace(/\s+/g, "-");
+    const basePriceNum = Number(newSilPrice) || 500;
+    const initialSizes = getSilhouetteSizes({ basePrice: basePriceNum }, settings.pricing.sizeValues);
+
     setSettings((prev) => ({
       ...prev,
       silhouettes: [
@@ -475,7 +447,8 @@ export default function CuratorSettingsPage() {
         {
           id,
           name: newSilName.trim(),
-          basePrice: Number(newSilPrice) || 500,
+          basePrice: basePriceNum,
+          sizes: initialSizes,
           svg: newSilSvg,
           ...(newSilSvg.startsWith("http") || newSilSvg.startsWith("/") ? { image: newSilSvg } : {}),
         },
@@ -502,6 +475,184 @@ export default function CuratorSettingsPage() {
     setNewSilPrice("500");
     setNewSilSvg("");
     toast.success("Silhouette added! Click 'Save Changes' to apply.");
+  };
+
+  const openSilSizesModal = (sil: any) => {
+    setEditingSilId(sil.id);
+    const currentSizes = getSilhouetteSizes(sil, settings.pricing.sizeValues);
+    setEditingSilSizes(JSON.parse(JSON.stringify(currentSizes)));
+    setEditingSilBasePrice(Number(sil.basePrice) || 500);
+    setNewCustomSizeName("");
+    setNewCustomSizePrice(String(sil.basePrice || 500));
+    setIsSilSizesModalOpen(true);
+  };
+
+  const toggleEditingSilSizeEnabled = (sz: string) => {
+    setEditingSilSizes((prev) =>
+      prev.map((item) =>
+        item.size === sz ? { ...item, enabled: !item.enabled } : item
+      )
+    );
+  };
+
+  const handleEditingSilSizePriceChange = (sz: string, price: number) => {
+    setEditingSilSizes((prev) =>
+      prev.map((item) =>
+        item.size === sz ? { ...item, price } : item
+      )
+    );
+  };
+
+  const handleAddCustomSizeToSil = () => {
+    if (!newCustomSizeName.trim()) {
+      toast.error("Please enter a size name (e.g. S, XL, 3XL).");
+      return;
+    }
+    const cleanName = newCustomSizeName.trim().toUpperCase();
+    if (editingSilSizes.some((item) => item.size.toUpperCase() === cleanName)) {
+      toast.error(`Size ${cleanName} already exists in this silhouette.`);
+      return;
+    }
+    const priceNum = Number(newCustomSizePrice) || editingSilBasePrice;
+    setEditingSilSizes((prev) => [
+      ...prev,
+      { size: cleanName, price: priceNum, enabled: true },
+    ]);
+    setNewCustomSizeName("");
+    toast.success(`Added size ${cleanName} to silhouette.`);
+  };
+
+  const handleRemoveSizeFromSil = (sz: string) => {
+    setEditingSilSizes((prev) => prev.filter((item) => item.size !== sz));
+  };
+
+  const handleSaveSilSizes = () => {
+    if (!editingSilId) return;
+    setSettings((prev) => ({
+      ...prev,
+      silhouettes: prev.silhouettes.map((s: any) =>
+        s.id === editingSilId
+          ? {
+              ...s,
+              basePrice: editingSilBasePrice,
+              sizes: editingSilSizes,
+            }
+          : s
+      ),
+    }));
+    setIsSilSizesModalOpen(false);
+    toast.success("Silhouette sizes updated! Remember to click 'Save Changes' to apply.");
+  };
+
+  const quickSetSilSizes = (preset: "all" | "sl" | "s_m_l_xl") => {
+    if (preset === "all") {
+      setEditingSilSizes((prev) => prev.map((s) => ({ ...s, enabled: true })));
+    } else if (preset === "sl") {
+      setEditingSilSizes((prev) =>
+        prev.map((s) => ({
+          ...s,
+          enabled: s.size.toUpperCase() === "S" || s.size.toUpperCase() === "L",
+        }))
+      );
+    } else if (preset === "s_m_l_xl") {
+      setEditingSilSizes((prev) =>
+        prev.map((s) => ({
+          ...s,
+          enabled: ["S", "M", "L", "XL"].includes(s.size.toUpperCase()),
+        }))
+      );
+    }
+  };
+
+  const renderSilhouetteCard = (sil: any, modeKey: "illustration" | "embroidery" | "solid") => {
+    const isEnabled = (settings.modes[modeKey]?.silhouettes || []).includes(sil.id);
+    const silSizes = getSilhouetteSizes(sil, settings.pricing.sizeValues);
+    const activeSizes = silSizes.filter((s: any) => s.enabled);
+
+    return (
+      <div
+        key={sil.id}
+        className={`p-4 rounded-xl border transition-all flex flex-col justify-between bg-white ${
+          isEnabled ? "border-gray-300 ring-1 ring-gray-200 shadow-sm" : "border-gray-200 opacity-60"
+        }`}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isEnabled}
+              onChange={() => toggleModeSilhouette(modeKey, sil.id)}
+              className="rounded border-gray-300 text-[#79A7D3] focus:ring-[#79A7D3] cursor-pointer"
+            />
+            <span className="font-garamond text-xs uppercase tracking-wider font-semibold text-gray-900">
+              {sil.name}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-3 text-gray-700">
+          {renderSilIcon(sil)}
+          <label className="text-[11px] text-[#79A7D3] hover:text-[#5b84ac] flex items-center gap-1 cursor-pointer font-medium mt-2">
+            <Upload className="w-3 h-3" />
+            <span>{uploadingSilId === sil.id ? "Uploading..." : "Upload / Replace Icon"}</span>
+            <input
+              type="file"
+              accept="image/*,.svg"
+              disabled={uploadingSilId === sil.id}
+              className="hidden"
+              onChange={(e) => handleUploadSilhouetteIcon(sil.id, e)}
+            />
+          </label>
+        </div>
+
+        {/* Sizes & Pricing Summary Badge */}
+        <div className="my-2.5 p-2 bg-gray-50/90 border border-gray-200/80 rounded-lg">
+          <div className="flex items-center justify-between text-[11px] mb-1.5">
+            <span className="text-gray-500 font-medium">Available Sizes:</span>
+            <span className="text-[10px] font-bold text-gray-700 bg-white px-1.5 py-0.5 rounded border border-gray-200">
+              {activeSizes.length} active
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
+            {activeSizes.length > 0 ? (
+              activeSizes.map((s: any) => (
+                <span
+                  key={s.size}
+                  className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] text-gray-800 font-medium whitespace-nowrap shadow-2xs"
+                >
+                  <strong className="text-gray-900">{s.size}</strong>: ₹{s.price}
+                </span>
+              ))
+            ) : (
+              <span className="text-[10px] text-red-500 italic">No sizes enabled</span>
+            )}
+          </div>
+        </div>
+
+        {/* Customize Sizes & Prices Button */}
+        <button
+          type="button"
+          onClick={() => openSilSizesModal(sil)}
+          className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-[#EEF4FA] hover:bg-[#E0ECF8] text-[#3B6D9E] border border-[#CCDFF2] rounded-lg text-xs font-semibold transition-colors cursor-pointer mb-2.5 shadow-2xs"
+        >
+          <Scissors className="w-3.5 h-3.5" />
+          <span>Customize Sizes & Prices</span>
+        </button>
+
+        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+          <span className="text-gray-500">Base Price:</span>
+          <div className="flex items-center gap-1">
+            <span className="text-gray-400">₹</span>
+            <input
+              type="number"
+              value={sil.basePrice}
+              onChange={(e) => handleSilhouetteBasePriceChange(sil.id, Number(e.target.value))}
+              className="w-20 px-2 py-1 bg-gray-50 border border-gray-300 rounded text-right font-semibold text-gray-900 focus:bg-white focus:ring-1 focus:ring-[#79A7D3] outline-none"
+            />
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const confirmAddColor = () => {
@@ -856,108 +1007,7 @@ export default function CuratorSettingsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {settings.silhouettes.map((sil: any) => {
-                    const isEnabled = (settings.modes.illustration?.silhouettes || []).includes(sil.id);
-                    return (
-                      <div
-                        key={sil.id}
-                        className={`p-4 rounded-xl border transition-all flex flex-col justify-between h-52 bg-white ${
-                          isEnabled ? "border-gray-300 ring-1 ring-gray-200 shadow-sm" : "border-gray-200 opacity-60"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isEnabled}
-                              onChange={() => toggleModeSilhouette("illustration", sil.id)}
-                              className="rounded border-gray-300 text-[#79A7D3] focus:ring-[#79A7D3] cursor-pointer"
-                            />
-                            <span className="font-garamond text-xs uppercase tracking-wider font-semibold text-gray-900">
-                              {sil.name}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex-1 flex flex-col items-center justify-center p-2 text-gray-700">
-                          {renderSilIcon(sil)}
-                          <label className="text-[11px] text-[#79A7D3] hover:text-[#5b84ac] flex items-center gap-1 cursor-pointer font-medium mt-2">
-                            <Upload className="w-3 h-3" />
-                            <span>{uploadingSilId === sil.id ? "Uploading..." : "Upload / Replace Icon"}</span>
-                            <input
-                              type="file"
-                              accept="image/*,.svg"
-                              disabled={uploadingSilId === sil.id}
-                              className="hidden"
-                              onChange={(e) => handleUploadSilhouetteIcon(sil.id, e)}
-                            />
-                          </label>
-                        </div>
-
-                        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
-                          <span className="text-gray-500">Silhouette Base Price:</span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-gray-400">₹</span>
-                            <input
-                              type="number"
-                              value={sil.basePrice}
-                              onChange={(e) => handleSilhouetteBasePriceChange(sil.id, Number(e.target.value))}
-                              className="w-20 px-2 py-1 bg-gray-50 border border-gray-300 rounded text-right font-semibold text-gray-900 focus:bg-white focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Step 5: Choose your Size */}
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-semibold">5</div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">Choose your Size (Backend Size Value)</h4>
-                      <p className="text-xs text-gray-500">
-                        Add custom sizes and set price adjustments (e.g. XS: -₹100, M: ₹0, XL: +₹200).
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsSizeModalOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Size
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                  {Object.keys(settings.pricing.sizeValues || {}).map((sz) => (
-                    <div key={sz} className="p-3 rounded-lg border border-gray-200 bg-gray-50/70 text-center flex flex-col gap-1.5 relative group">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-900">{sz}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeSize(sz)}
-                          className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
-                          title="Remove size"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <div className="flex items-center justify-center gap-1">
-                        <span className="text-xs text-gray-500">₹</span>
-                        <input
-                          type="number"
-                          value={(settings.pricing.sizeValues as Record<string, number>)?.[sz] ?? 0}
-                          onChange={(e) => handleSizeAdjustmentChange(sz, Number(e.target.value))}
-                          className="w-16 px-1.5 py-1 bg-white border border-gray-300 rounded text-center text-xs font-medium focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                        />
-                      </div>
-                    </div>
-                  ))}
+                  {settings.silhouettes.map((sil: any) => renderSilhouetteCard(sil, "illustration"))}
                 </div>
               </div>
 
@@ -1138,116 +1188,15 @@ export default function CuratorSettingsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {settings.silhouettes.map((sil: any) => {
-                    const isEnabled = (settings.modes.illustration?.silhouettes || []).includes(sil.id);
-                    return (
-                      <div
-                        key={sil.id}
-                        className={`p-4 rounded-xl border transition-all flex flex-col justify-between h-52 bg-white ${
-                          isEnabled ? "border-gray-300 ring-1 ring-gray-200 shadow-sm" : "border-gray-200 opacity-60"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isEnabled}
-                              onChange={() => toggleModeSilhouette("illustration", sil.id)}
-                              className="rounded border-gray-300 text-[#79A7D3] focus:ring-[#79A7D3] cursor-pointer"
-                            />
-                            <span className="font-garamond text-xs uppercase tracking-wider font-semibold text-gray-900">
-                              {sil.name}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex-1 flex flex-col items-center justify-center p-2 text-gray-700">
-                          {renderSilIcon(sil)}
-                          <label className="text-[11px] text-[#79A7D3] hover:text-[#5b84ac] flex items-center gap-1 cursor-pointer font-medium mt-2">
-                            <Upload className="w-3 h-3" />
-                            <span>{uploadingSilId === sil.id ? "Uploading..." : "Upload / Replace Icon"}</span>
-                            <input
-                              type="file"
-                              accept="image/*,.svg"
-                              disabled={uploadingSilId === sil.id}
-                              className="hidden"
-                              onChange={(e) => handleUploadSilhouetteIcon(sil.id, e)}
-                            />
-                          </label>
-                        </div>
-
-                        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
-                          <span className="text-gray-500">Silhouette Base Price:</span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-gray-400">₹</span>
-                            <input
-                              type="number"
-                              value={sil.basePrice}
-                              onChange={(e) => handleSilhouetteBasePriceChange(sil.id, Number(e.target.value))}
-                              className="w-20 px-2 py-1 bg-gray-50 border border-gray-300 rounded text-right font-semibold text-gray-900 focus:bg-white focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {settings.silhouettes.map((sil: any) => renderSilhouetteCard(sil, "illustration"))}
                 </div>
               </div>
 
-              {/* Step 5: Choose your Size */}
+              {/* Step 5: Choose your Linen colour */}
               <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-semibold">5</div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-900">Choose your Size (Backend Size Value)</h4>
-                      <p className="text-xs text-gray-500">
-                        Add custom sizes and set price adjustments (e.g. XS: -₹100, M: ₹0, XL: +₹200).
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsSizeModalOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Size
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                  {Object.keys(settings.pricing.sizeValues || {}).map((sz) => (
-                    <div key={sz} className="p-3 rounded-lg border border-gray-200 bg-gray-50/70 text-center flex flex-col gap-1.5 relative group">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-900">{sz}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeSize(sz)}
-                          className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
-                          title="Remove size"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <div className="flex items-center justify-center gap-1">
-                        <span className="text-xs text-gray-500">₹</span>
-                        <input
-                          type="number"
-                          value={(settings.pricing.sizeValues as Record<string, number>)?.[sz] ?? 0}
-                          onChange={(e) => handleSizeAdjustmentChange(sz, Number(e.target.value))}
-                          className="w-16 px-1.5 py-1 bg-white border border-gray-300 rounded text-center text-xs font-medium focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Step 6: Choose your Linen colour */}
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-semibold">6</div>
                     <div>
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-semibold text-gray-900">Choose your Linen colour</h4>
@@ -1387,116 +1336,15 @@ export default function CuratorSettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {settings.silhouettes.map((sil: any) => {
-                const isEnabled = (settings.modes.embroidery?.silhouettes || []).includes(sil.id);
-                return (
-                  <div
-                    key={sil.id}
-                    className={`p-4 rounded-xl border transition-all flex flex-col justify-between h-52 bg-white ${
-                      isEnabled ? "border-gray-300 ring-1 ring-gray-200 shadow-sm" : "border-gray-200 opacity-60"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={isEnabled}
-                          onChange={() => toggleModeSilhouette("embroidery", sil.id)}
-                          className="rounded border-gray-300 text-[#79A7D3] focus:ring-[#79A7D3] cursor-pointer"
-                        />
-                        <span className="font-garamond text-xs uppercase tracking-wider font-semibold text-gray-900">
-                          {sil.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center justify-center p-2 text-gray-700">
-                      {renderSilIcon(sil)}
-                      <label className="text-[11px] text-[#79A7D3] hover:text-[#5b84ac] flex items-center gap-1 cursor-pointer font-medium mt-2">
-                        <Upload className="w-3 h-3" />
-                        <span>{uploadingSilId === sil.id ? "Uploading..." : "Upload / Replace Icon"}</span>
-                        <input
-                          type="file"
-                          accept="image/*,.svg"
-                          disabled={uploadingSilId === sil.id}
-                          className="hidden"
-                          onChange={(e) => handleUploadSilhouetteIcon(sil.id, e)}
-                        />
-                      </label>
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
-                      <span className="text-gray-500">Silhouette Base Price:</span>
-                      <div className="flex items-center gap-1">
-                        <span className="text-gray-400">₹</span>
-                        <input
-                          type="number"
-                          value={sil.basePrice}
-                          onChange={(e) => handleSilhouetteBasePriceChange(sil.id, Number(e.target.value))}
-                          className="w-20 px-2 py-1 bg-gray-50 border border-gray-300 rounded text-right font-semibold text-gray-900 focus:bg-white focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {settings.silhouettes.map((sil: any) => renderSilhouetteCard(sil, "embroidery"))}
             </div>
           </div>
 
-          {/* Step 3: Choose your Size */}
+          {/* Step 3: Choose your Linen colour */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-semibold">3</div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Choose your Size (Backend Size Value)</h4>
-                  <p className="text-xs text-gray-500">
-                    Size adjustments added to or subtracted from the starting price (e.g. XS: -₹100, S: ₹0, M: ₹0, L: +₹100, XL: +₹200).
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSizeModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Size
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {Object.keys(settings.pricing.sizeValues || {}).map((sz) => (
-                <div key={sz} className="p-3 rounded-lg border border-gray-200 bg-gray-50/70 text-center flex flex-col gap-1.5 relative group">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">{sz}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSize(sz)}
-                      className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
-                      title="Remove size"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-xs text-gray-500">₹</span>
-                    <input
-                      type="number"
-                      value={(settings.pricing.sizeValues as Record<string, number>)?.[sz] ?? 0}
-                      onChange={(e) => handleSizeAdjustmentChange(sz, Number(e.target.value))}
-                      className="w-16 px-1.5 py-1 bg-white border border-gray-300 rounded text-center text-xs font-medium focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Step 4: Choose your Linen colour */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-semibold">4</div>
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900">Choose your Linen colour (Backend Linen Colour Value)</h4>
                   <p className="text-xs text-gray-500">
@@ -1694,116 +1542,15 @@ export default function CuratorSettingsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {settings.silhouettes.map((sil: any) => {
-                const isEnabled = (settings.modes.solid?.silhouettes || []).includes(sil.id);
-                return (
-                  <div
-                    key={sil.id}
-                    className={`p-4 rounded-xl border transition-all flex flex-col justify-between h-52 bg-white ${
-                      isEnabled ? "border-gray-300 ring-1 ring-gray-200 shadow-sm" : "border-gray-200 opacity-60"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={isEnabled}
-                          onChange={() => toggleModeSilhouette("solid", sil.id)}
-                          className="rounded border-gray-300 text-[#79A7D3] focus:ring-[#79A7D3] cursor-pointer"
-                        />
-                        <span className="font-garamond text-xs uppercase tracking-wider font-semibold text-gray-900">
-                          {sil.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center justify-center p-2 text-gray-700">
-                      {renderSilIcon(sil)}
-                      <label className="text-[11px] text-[#79A7D3] hover:text-[#5b84ac] flex items-center gap-1 cursor-pointer font-medium mt-2">
-                        <Upload className="w-3 h-3" />
-                        <span>{uploadingSilId === sil.id ? "Uploading..." : "Upload / Replace Icon"}</span>
-                        <input
-                          type="file"
-                          accept="image/*,.svg"
-                          disabled={uploadingSilId === sil.id}
-                          className="hidden"
-                          onChange={(e) => handleUploadSilhouetteIcon(sil.id, e)}
-                        />
-                      </label>
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
-                      <span className="text-gray-500">Silhouette Base Price:</span>
-                      <div className="flex items-center gap-1">
-                        <span className="text-gray-400">₹</span>
-                        <input
-                          type="number"
-                          value={sil.basePrice}
-                          onChange={(e) => handleSilhouetteBasePriceChange(sil.id, Number(e.target.value))}
-                          className="w-20 px-2 py-1 bg-gray-50 border border-gray-300 rounded text-right font-semibold text-gray-900 focus:bg-white focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {settings.silhouettes.map((sil: any) => renderSilhouetteCard(sil, "solid"))}
             </div>
           </div>
 
-          {/* Step 3: Choose your Size */}
+          {/* Step 3: Choose your Linen colour */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-[#4E7185] text-white flex items-center justify-center text-xs font-semibold">3</div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-900">Choose your Size (Backend Size Value)</h4>
-                  <p className="text-xs text-gray-500">
-                    Size adjustments added to or subtracted from the base price (e.g. XS: -₹100, S: ₹0, M: ₹0, L: +₹100, XL: +₹200).
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsSizeModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Size
-              </button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-              {Object.keys(settings.pricing.sizeValues || {}).map((sz) => (
-                <div key={sz} className="p-3 rounded-lg border border-gray-200 bg-gray-50/70 text-center flex flex-col gap-1.5 relative group">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">{sz}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeSize(sz)}
-                      className="text-gray-400 hover:text-red-500 p-0.5 cursor-pointer opacity-70 group-hover:opacity-100 transition-opacity"
-                      title="Remove size"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-center gap-1">
-                    <span className="text-xs text-gray-500">₹</span>
-                    <input
-                      type="number"
-                      value={(settings.pricing.sizeValues as Record<string, number>)?.[sz] ?? 0}
-                      onChange={(e) => handleSizeAdjustmentChange(sz, Number(e.target.value))}
-                      className="w-16 px-1.5 py-1 bg-white border border-gray-300 rounded text-center text-xs font-medium focus:ring-1 focus:ring-[#79A7D3] outline-none"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Step 4: Choose your Linen colour */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#4E7185] text-white flex items-center justify-center text-xs font-semibold">4</div>
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900">Choose your Linen colour (Backend Linen Colour Value)</h4>
                   <p className="text-xs text-gray-500">
@@ -2163,8 +1910,187 @@ export default function CuratorSettingsPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: ADD LINEN COLOUR                                                   */}
+      {/* MODAL: CUSTOMIZE SILHOUETTE SIZES & PRICING                                */}
       {/* ========================================================================= */}
+      {isSilSizesModalOpen && editingSilId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in-up">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-gray-200 flex items-start justify-between bg-gray-50/70">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#79A7D3]" />
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 font-garamond">
+                    Customize Silhouette Sizes & Pricing
+                  </h3>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Configure available sizes and individual prices for{" "}
+                  <strong className="text-gray-800">
+                    {settings.silhouettes.find((s: any) => s.id === editingSilId)?.name || "Silhouette"}
+                  </strong>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSilSizesModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
+              {/* Quick Presets */}
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <span className="text-xs font-medium text-gray-600">Quick Size Presets:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => quickSetSilSizes("sl")}
+                    className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                    title="Enable only S and L sizes"
+                  >
+                    Only S & L
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => quickSetSilSizes("s_m_l_xl")}
+                    className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                    title="Enable S, M, L, XL sizes"
+                  >
+                    S, M, L, XL
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => quickSetSilSizes("all")}
+                    className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
+                  >
+                    Enable All
+                  </button>
+                </div>
+              </div>
+
+              {/* Sizes List */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-medium text-gray-500 px-1">
+                  <span>Available / Size</span>
+                  <span>Price (₹)</span>
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                  {editingSilSizes.map((item) => (
+                    <div
+                      key={item.size}
+                      className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-colors ${
+                        item.enabled
+                          ? "bg-white border-gray-300 shadow-2xs"
+                          : "bg-gray-50/70 border-gray-200 opacity-60"
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={item.enabled}
+                          onChange={() => toggleEditingSilSizeEnabled(item.size)}
+                          className="w-4 h-4 rounded border-gray-300 text-[#79A7D3] focus:ring-[#79A7D3] cursor-pointer"
+                        />
+                        <div className="flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center font-bold text-xs text-gray-900 font-garamond">
+                            {item.size}
+                          </span>
+                          <span className="text-xs text-gray-600 font-medium">
+                            {item.enabled ? (
+                              <span className="text-green-700 text-[11px] font-semibold">Available</span>
+                            ) : (
+                              <span className="text-gray-400 text-[11px]">Disabled</span>
+                            )}
+                          </span>
+                        </div>
+                      </label>
+
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 bg-gray-50 border border-gray-300 rounded-lg px-2 py-1 focus-within:ring-1 focus-within:ring-[#79A7D3] focus-within:bg-white">
+                          <span className="text-xs text-gray-400">₹</span>
+                          <input
+                            type="number"
+                            value={item.price}
+                            disabled={!item.enabled}
+                            onChange={(e) => handleEditingSilSizePriceChange(item.size, Number(e.target.value))}
+                            className="w-20 bg-transparent text-right text-xs font-semibold text-gray-900 outline-none disabled:text-gray-400"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSizeFromSil(item.size)}
+                          className="text-gray-300 hover:text-red-500 p-1 transition-colors cursor-pointer"
+                          title="Remove size from this silhouette"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add New Custom Size */}
+              <div className="p-3 rounded-xl border border-dashed border-gray-300 bg-gray-50/50 space-y-2">
+                <span className="text-xs font-semibold text-gray-700 block">Add New Size to Silhouette</span>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Size (e.g. 3XL, Free Size)"
+                    value={newCustomSizeName}
+                    onChange={(e) => setNewCustomSizeName(e.target.value)}
+                    className="flex-1 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-[#79A7D3]"
+                  />
+                  <div className="flex items-center gap-1 px-2 py-1.5 bg-white border border-gray-300 rounded-lg w-full sm:w-28">
+                    <span className="text-xs text-gray-400">₹</span>
+                    <input
+                      type="number"
+                      placeholder="Price"
+                      value={newCustomSizePrice}
+                      onChange={(e) => setNewCustomSizePrice(e.target.value)}
+                      className="w-full text-right text-xs font-semibold outline-none"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddCustomSizeToSil}
+                    className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-medium hover:bg-gray-800 transition-colors shrink-0 cursor-pointer"
+                  >
+                    Add Size
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-gray-200 bg-gray-50/70 flex items-center justify-between gap-3">
+              <span className="text-[11px] text-gray-500">
+                {editingSilSizes.filter((s) => s.enabled).length} sizes will be available
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsSilSizesModalOpen(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-white transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveSilSizes}
+                  className="px-5 py-2 bg-[#79A7D3] text-white rounded-lg text-xs font-semibold hover:bg-[#6092c2] transition-colors cursor-pointer shadow-xs"
+                >
+                  Apply Sizes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {isColorModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4">
@@ -2244,68 +2170,8 @@ export default function CuratorSettingsPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: ADD SIZE                                                           */}
+      {/* MODAL: ADD SIZE (OBSOLETE - REMOVED)                                       */}
       {/* ========================================================================= */}
-      {isSizeModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 font-garamond">
-                Add Size
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsSizeModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-gray-700 block mb-1">Size Name / Label</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 3XL, XXXL, Custom"
-                  value={newSizeName}
-                  onChange={(e) => setNewSizeName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-[#79A7D3]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-gray-700 block mb-1">Price Adjustment (₹)</label>
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={newSizeAdjustment}
-                  onChange={(e) => setNewSizeAdjustment(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-[#79A7D3]"
-                />
-                <p className="text-[11px] text-gray-400 mt-1">Can be 0, positive (+100) or negative (-100).</p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={() => setIsSizeModalOpen(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmAddSize}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-medium hover:bg-black cursor-pointer"
-              >
-                Add Size
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Floating Sticky Save Bar */}
       <StickySaveBar

@@ -185,7 +185,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <Link href="/cart" suppressHydrationWarning className="hover:opacity-70 transition-opacity relative" aria-label="Cart">
             <ShoppingCart className="w-5 h-5 stroke-[1.5]" />
             {cartItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-gray-900 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
+              <span className="absolute -top-1.5 -right-2 bg-[#4A7DAF] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-sans font-bold shadow-xs">
                 {cartItemCount}
               </span>
             )}
@@ -193,7 +193,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <Link href="/saved" suppressHydrationWarning className="hover:opacity-70 transition-opacity relative" aria-label="Saved items">
             <Bookmark className="w-5 h-5 stroke-[1.5]" />
             {savedItemCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-gray-900 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-serif">
+              <span className="absolute -top-1.5 -right-2 bg-[#4A7DAF] text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-sans font-bold shadow-xs">
                 {savedItemCount}
               </span>
             )}
