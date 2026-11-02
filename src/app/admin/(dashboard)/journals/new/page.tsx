@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import StickySaveBar from "@/components/admin/StickySaveBar";
+import FileErrorModal from "@/components/admin/FileErrorModal";
 
 export default function NewJournalItem() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function NewJournalItem() {
   
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
   
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -24,10 +26,17 @@ export default function NewJournalItem() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const file = files[0];
+    if (file.size > 2 * 1024 * 1024) {
+      setFileError("The selected image exceeds the 2MB size limit. Please choose a smaller image under 2MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", files[0]);
+      formData.append("file", file);
       
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -202,6 +211,8 @@ export default function NewJournalItem() {
         label="Save Entry"
         subtext={isPublished ? "Published Entry" : "Draft Entry"}
       />
+
+      <FileErrorModal error={fileError} onClose={() => setFileError(null)} />
     </form>
   );
 }

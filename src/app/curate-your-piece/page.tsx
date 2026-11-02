@@ -9,10 +9,10 @@ export default function CurateYourPiecePage() {
       
       <main className="flex-1 pt-24 md:pt-32 pb-16 md:pb-24">
         <div className="max-w-5xl mx-auto px-6 flex flex-col items-center">
-          <h1 className="font-garamond text-2xl md:text-3xl tracking-[0.14em] uppercase text-center mb-4 md:mb-5 text-gray-900 font-normal">
-            CURATE YOUR PIECE
+          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase text-center mb-3">
+            Curate Your Piece
           </h1>
-          <p className="text-sm md:text-base font-garamond text-gray-600 text-center max-w-2xl mx-auto mb-10 md:mb-14 leading-relaxed">
+          <p className="text-[15px] md:text-[16.5px] font-garamond text-gray-600 text-center max-w-2xl mx-auto mb-10 md:mb-14 leading-relaxed">
             Create a Pause Piece tailored that reflects your style and individuality through thoughtful choices of silhouette, custom embroidery, and artisanal detail.
           </p>
           

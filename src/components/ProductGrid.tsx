@@ -68,16 +68,16 @@ export default function ProductGrid({
             </div>
 
             {/* Product Info */}
-            <div className="flex flex-col md:flex-row justify-between items-start px-1 mt-1 md:mt-2">
-              <div className="w-full pr-2">
-                <h3 className="font-garamond text-[14px] md:text-lg text-gray-900 group-hover:text-gray-600 transition-colors mb-0.5 md:mb-1 truncate font-normal">
+            <div className="flex justify-between items-start gap-2 px-0.5 mt-2">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-garamond text-[15px] md:text-[17px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-tight">
                   {product.name}
                 </h3>
-                <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic">
+                <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic leading-tight mt-0.5">
                   {shopProduct.category}
                 </p>
               </div>
-              <p className="font-sans font-medium text-[13px] md:text-sm text-gray-900 tracking-tight tabular-nums mt-1 md:mt-0 whitespace-nowrap">
+              <p className="font-sans font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums whitespace-nowrap shrink-0 pt-0.5">
                 ₹{product.price.toLocaleString("en-IN")}
               </p>
             </div>

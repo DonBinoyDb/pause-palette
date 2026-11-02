@@ -30,6 +30,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   // Force text-gray-900 when mobile menu is open so the close button (and icons) are visible against the white overlay
   const textColor = mobileMenuOpen ? "text-gray-900" : (variant === "light" ? "text-white" : "text-gray-900");
   const isWhiteLogo = variant === "light" && !mobileMenuOpen;
+  const navOptionsColor = variant === "light" ? "text-white" : "text-[#4A7DAF]";
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           </div>
 
           {/* Left Links (Desktop Only) */}
-          <nav className="hidden md:flex items-center gap-5 lg:gap-8 xl:gap-10 mt-2 text-xs tracking-[0.16em] uppercase">
+          <nav className={`hidden md:flex items-center gap-5 lg:gap-8 xl:gap-10 mt-2 text-xs tracking-[0.16em] uppercase ${navOptionsColor}`}>
             
             {/* Shop Dropdown */}
             <div className="relative group py-2">
@@ -220,7 +221,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
 
           <nav className="flex flex-col gap-8 text-sm">
             <div>
-              <div className="text-[#79A7D3] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">SHOP</div>
+              <div className="text-[#4A7DAF] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">SHOP</div>
               <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
                 <Link href="/shop/new-in" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">New In</Link>
                 <Link href="/shop/all" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">All</Link>
@@ -232,7 +233,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             </div>
 
             <div>
-              <div className="text-[#79A7D3] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">DISCOVER</div>
+              <div className="text-[#4A7DAF] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">DISCOVER</div>
               <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
                 <Link href="/discover/story-ahead" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Story Ahead</Link>
                 <Link href="/discover/our-story" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Our Story</Link>
@@ -250,7 +251,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-2.5 hover:text-black transition-colors font-medium text-gray-900"
                   >
-                    <LayoutDashboard className="w-4 h-4 text-[#79A7D3]" /> Admin Dashboard
+                    <LayoutDashboard className="w-4 h-4 text-[#4A7DAF]" /> Admin Dashboard
                   </Link>
                 ) : (
                   <Link

@@ -34,7 +34,7 @@ export default function StorySection() {
           </Link>
 
           {/* The Making Journal */}
-          <Link href="/discover/making-journal" className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left gap-6 md:gap-10 group">
+          <Link href="/discover/making-journal" className="flex flex-col md:flex-row items-start text-left gap-6 md:gap-10 group">
             {/* SVG Illustration */}
             <div className="w-64 h-64 relative shrink-0 transition-transform duration-500 group-hover:scale-105">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -45,9 +45,9 @@ export default function StorySection() {
               />
             </div>
 
-            <div className="pt-2 md:pt-0 flex flex-col items-center md:items-start">
-              <h2 className="text-[13px] tracking-[0.2em] text-gray-500 uppercase mb-4 group-hover:text-gray-900 transition-colors leading-none md:mt-1">THE MAKING JOURNAL</h2>
-              <p className="text-[17px] leading-relaxed text-gray-800 text-balance mb-6" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
+            <div className="pt-2 md:pt-0 flex flex-col items-start text-left pl-[5px]">
+              <h2 className="text-[13px] tracking-[0.2em] text-gray-500 uppercase mb-4 group-hover:text-gray-900 transition-colors leading-none md:mt-1 text-left">THE MAKING JOURNAL</h2>
+              <p className="text-[17px] leading-relaxed text-gray-800 text-left mb-6" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
                 A glimpse into the process behind<br />
                 every piece.<br />
               </p>

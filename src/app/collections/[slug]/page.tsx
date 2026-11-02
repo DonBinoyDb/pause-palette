@@ -43,7 +43,7 @@ export default async function CollectionInnerPage({ params }: { params: Promise<
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="pt-24 md:pt-32 pb-8 md:pb-16 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
+      <div className="pt-24 md:pt-32 pb-8 md:pb-16 px-4 md:px-8 lg:px-16 w-full">
         
         {/* Collection Hero Section */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-12 lg:gap-20 mb-12 md:mb-24">

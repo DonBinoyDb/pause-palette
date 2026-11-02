@@ -115,6 +115,12 @@ export default function HeroBannerManager() {
 
     const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|ogg)$/i.test(file.name);
 
+    if (!isVideo && file.size > 2 * 1024 * 1024) {
+      toast.error("Image exceeds the 2MB size limit. Please choose an image under 2MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", file);
 

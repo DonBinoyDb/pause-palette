@@ -34,6 +34,7 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [isPublished, setIsPublished] = useState(false);
   const [isNew, setIsNew] = useState(true);
+  const [imageFit, setImageFit] = useState<"cover" | "contain">("cover");
   const [dispatchInfo, setDispatchInfo] = useState("Thoughtfully made to order - Dispatches in 12-15 business days.");
 
   const [fitGuideDescription, setFitGuideDescription] = useState("");
@@ -316,6 +317,7 @@ export default function NewProductPage() {
           sizes,
           isPublished,
           isNew,
+          imageFit,
           dispatchInfo,
           images,
           fitGuideDescription,
@@ -395,6 +397,16 @@ export default function NewProductPage() {
             </button>
           </div>
 
+          <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden" title="Portrait image fitting: Fill Frame (Cover) or Full Image (Contain)">
+            <button 
+              type="button"
+              onClick={() => setImageFit(imageFit === "cover" ? "contain" : "cover")}
+              className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${imageFit === "contain" ? 'bg-amber-50 text-amber-800 font-semibold' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <span>{imageFit === "contain" ? "Fit: Full Portrait" : "Fit: Fill Frame"}</span>
+            </button>
+          </div>
+
           <button 
             type="submit"
             disabled={loading || uploading}
@@ -463,7 +475,7 @@ export default function NewProductPage() {
                     {src ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="Main" className="object-cover w-full h-full" />
+                        <img src={src} alt="Main" className={`w-full h-full ${imageFit === "contain" ? "object-contain bg-white" : "object-cover"}`} />
                         <button 
                           type="button"
                           onClick={() => removeImage(idx)}

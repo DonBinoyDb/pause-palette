@@ -327,10 +327,10 @@ export default function Configurator() {
               className="h-20 w-auto max-w-full object-contain"
             />
           </div>
-          <h2 className="text-xs font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-1.5">
+          <h2 className="text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-2">
             {modes.illustration?.title || "ORIGINAL ILLUSTRATION"}
           </h2>
-          <p className="text-[11px] text-gray-500 font-garamond leading-relaxed">
+          <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
             {modes.illustration?.description || "Begin with one of our existing Pause Palette designs and curate the piece through your preferred technique, silhouette, size and choice of collar, options."}
           </p>
         </button>
@@ -353,10 +353,10 @@ export default function Configurator() {
               className="h-20 w-auto max-w-full object-contain"
             />
           </div>
-          <h2 className="text-xs font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-1.5">
+          <h2 className="text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-2">
             {modes.embroidery?.title || "THEME-BASED EMBROIDERY"}
           </h2>
-          <p className="text-[11px] text-gray-500 font-garamond leading-relaxed">
+          <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
             {modes.embroidery?.description || "Choose yarn to breathe into our available linen colour tone share the theme you'd like us to explore and interpret through embroidery."}
           </p>
         </button>
@@ -377,10 +377,10 @@ export default function Configurator() {
               <div className="w-6 h-6 rounded-full bg-[#B57864] absolute bottom-1.5 left-1.5" />
             </div>
           </div>
-          <h2 className="text-xs font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-1.5">
+          <h2 className="text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-2">
             {modes.solid?.title || "SOLID LINEN"}
           </h2>
-          <p className="text-[11px] text-gray-500 font-garamond leading-relaxed">
+          <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
             {modes.solid?.description || "Choose your preferred silhouette, size and exclusive linen shade to create a pure, unornamented expression of our 100% natural, soft, breathable Belgian flax."}
           </p>
         </button>
@@ -394,27 +394,27 @@ export default function Configurator() {
       <div className="w-full flex flex-col items-start text-left">
         
         {/* Mode Heading */}
-        <h3 className="text-xs font-garamond font-semibold tracking-[0.16em] uppercase text-gray-900 mb-6">
+        <h3 className="text-[16px] md:text-[17px] font-garamond font-semibold tracking-[0.18em] uppercase text-gray-900 mb-6">
           {mode === "illustration" && "ORIGINAL ILLUSTRATION"}
           {mode === "embroidery" && "THEME-BASED EMBROIDERY"}
           {mode === "solid" && "SOLID LINEN"}
         </h3>
 
         {/* STEP: Who is it for? */}
-        <div className="mb-6 w-full">
-          <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
+        <div className="mb-7 w-full">
+          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
             Who is it for?
           </label>
-          <p className="text-[11px] font-garamond italic text-gray-500 mb-2.5">
+          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
             Select the fit you're designing for
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2.5">
             <button
               type="button"
               onClick={() => setAudience("men")}
-              className={`px-6 py-1.5 rounded-sm border text-xs font-garamond tracking-wider transition-all cursor-pointer ${
+              className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                 audience === "men"
-                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white"
+                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
               }`}
             >
@@ -423,9 +423,9 @@ export default function Configurator() {
             <button
               type="button"
               onClick={() => setAudience("women")}
-              className={`px-6 py-1.5 rounded-sm border text-xs font-garamond tracking-wider transition-all cursor-pointer ${
+              className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                 audience === "women"
-                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white"
+                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
               }`}
             >
@@ -436,20 +436,20 @@ export default function Configurator() {
 
         {/* STEP (Illustration only): Technique */}
         {mode === "illustration" && (
-          <div className="mb-6 w-full">
-            <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
+          <div className="mb-7 w-full">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
               Technique
             </label>
-            <p className="text-[11px] font-garamond italic text-gray-500 mb-2.5">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
               Choose how the illustration is rendered
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
               <button
                 type="button"
                 onClick={() => setTechnique("printed")}
-                className={`px-6 py-1.5 rounded-sm border text-xs font-garamond tracking-wider transition-all cursor-pointer ${
+                className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                   technique === "printed"
-                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white"
+                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
                     : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                 }`}
               >
@@ -458,9 +458,9 @@ export default function Configurator() {
               <button
                 type="button"
                 onClick={() => setTechnique("embroidered")}
-                className={`px-6 py-1.5 rounded-sm border text-xs font-garamond tracking-wider transition-all cursor-pointer ${
+                className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                   technique === "embroidered"
-                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white"
+                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
                     : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                 }`}
               >
@@ -472,14 +472,14 @@ export default function Configurator() {
 
         {/* STEP (Illustration only): Choose from our pieces */}
         {mode === "illustration" && (
-          <div className="mb-6 w-full">
-            <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
+          <div className="mb-7 w-full">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
               Choose from our pieces
             </label>
-            <p className="text-[11px] font-garamond italic text-gray-500 mb-2.5">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
               Select an existing Pause Palette design
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3.5">
               {currentPieces.map((piece: any) => {
                 const isSelected = selectedPieceId ? selectedPieceId === piece.id : activePiece.id === piece.id;
                 return (
@@ -490,7 +490,7 @@ export default function Configurator() {
                     className="flex flex-col items-start text-left cursor-pointer group"
                   >
                     <div
-                      className={`relative w-20 sm:w-24 aspect-[3/4] rounded-sm overflow-hidden bg-gray-50 border transition-all ${
+                      className={`relative w-22 sm:w-26 aspect-[3/4] rounded-sm overflow-hidden bg-gray-50 border transition-all ${
                         isSelected
                           ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
                           : "border-gray-200 hover:border-gray-300"
@@ -505,7 +505,7 @@ export default function Configurator() {
                         />
                       )}
                     </div>
-                    <span className="text-[11px] font-garamond text-gray-700 mt-1.5 max-w-[88px] truncate leading-tight">
+                    <span className="text-[14px] font-garamond text-gray-800 mt-2 max-w-[104px] truncate leading-tight font-medium">
                       {piece.name}
                     </span>
                   </button>
@@ -516,14 +516,14 @@ export default function Configurator() {
         )}
 
         {/* STEP: Choose your Silhouette */}
-        <div className="mb-6 w-full">
-          <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
+        <div className="mb-7 w-full">
+          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
             Choose your Silhouette
           </label>
-          <p className="text-[11px] font-garamond italic text-gray-500 mb-2.5">
+          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
             Every piece is cut and sewn to your chosen silhouette
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3.5">
             {(filteredSilhouettes.length ? filteredSilhouettes : silhouettes).map((sil) => {
               const isSelected = selectedSilhouetteId ? selectedSilhouetteId === sil.id : activeSilhouette.id === sil.id;
               const silActiveSizes = getActiveSilhouetteSizes(sil, pricing.sizeValues);
@@ -533,9 +533,9 @@ export default function Configurator() {
                   key={sil.id}
                   type="button"
                   onClick={() => setSelectedSilhouetteId(sil.id)}
-                  className={`w-28 sm:w-32 h-36 sm:h-40 p-2.5 rounded-md border flex flex-col items-center justify-between text-center transition-all cursor-pointer bg-white ${
+                  className={`w-32 sm:w-36 h-40 sm:h-44 p-3 rounded-md border flex flex-col items-center justify-between text-center transition-all cursor-pointer bg-white ${
                     isSelected
-                      ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
+                      ? "border-[#79A7D3] ring-1 ring-[#79A7D3] shadow-xs"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
@@ -543,11 +543,11 @@ export default function Configurator() {
                     {renderSilhouetteIcon(sil)}
                   </div>
                   <div className="w-full flex flex-col items-center">
-                    <span className="text-[11px] font-garamond text-gray-800 leading-tight">
+                    <span className="text-[14.5px] md:text-[15px] font-garamond text-gray-900 leading-tight font-medium">
                       {sil.name}
                     </span>
                     {sizeSummary && (
-                      <span className="text-[9px] font-sans text-gray-400 mt-0.5 truncate max-w-full">
+                      <span className="text-[11.5px] font-sans text-gray-400 mt-1 truncate max-w-full">
                         {sizeSummary}
                       </span>
                     )}
@@ -559,19 +559,19 @@ export default function Configurator() {
         </div>
 
         {/* STEP: Choose your Size */}
-        <div className="mb-6 w-full">
-          <div className="flex items-center justify-between mb-0.5">
-            <label className="block text-xs font-garamond font-medium text-gray-900">
+        <div className="mb-7 w-full">
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900">
               Choose your Size
             </label>
             {activeSilhouette && (
-              <span className="text-[11px] font-garamond text-gray-500 italic">
+              <span className="text-[14px] font-garamond text-gray-500 italic">
                 Available for {activeSilhouette.name}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-3 mt-1.5">
-            <div className="flex flex-wrap gap-1.5">
+          <div className="flex items-center gap-4 mt-2">
+            <div className="flex flex-wrap gap-2">
               {availableSizes.map((s: string) => {
                 const sPrice = getSilhouettePriceForSize(activeSilhouette, s, pricing.sizeValues);
                 return (
@@ -579,9 +579,9 @@ export default function Configurator() {
                     key={s}
                     type="button"
                     onClick={() => setSize(s)}
-                    className={`min-w-8 h-8 px-2.5 rounded-sm border flex items-center justify-center text-xs font-garamond uppercase tracking-wider transition-all cursor-pointer ${
+                    className={`min-w-10 h-10 px-3 rounded-sm border flex items-center justify-center text-[14.5px] font-garamond uppercase tracking-wider transition-all cursor-pointer ${
                       size === s
-                        ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 font-medium bg-white shadow-2xs"
+                        ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 font-semibold bg-white shadow-2xs"
                         : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                     }`}
                     title={`${s} (₹${sPrice})`}
@@ -594,7 +594,7 @@ export default function Configurator() {
             <button
               type="button"
               onClick={() => setShowSizeGuide(true)}
-              className="text-xs text-gray-400 underline font-garamond hover:text-gray-800 transition-colors cursor-pointer"
+              className="text-[14px] text-gray-500 underline font-garamond hover:text-gray-900 transition-colors cursor-pointer"
             >
               Size guide
             </button>
@@ -603,14 +603,14 @@ export default function Configurator() {
 
         {/* STEP (Embroidery, Solid, or Embroidered Illustration): Choose your Linen colour */}
         {(mode === "embroidery" || mode === "solid" || (mode === "illustration" && technique === "embroidered")) && (
-          <div className="mb-6 w-full">
-            <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
+          <div className="mb-7 w-full">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
               Choose your Linen colour
             </label>
-            <p className="text-[11px] font-garamond italic text-gray-500 mb-2.5">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
               Available in 100% pure Belgian linen
             </p>
-            <div className="flex flex-wrap gap-5 items-center pt-0.5">
+            <div className="flex flex-wrap gap-6 items-center pt-1">
               {(filteredLinenColors.length ? filteredLinenColors : linenColors).map((color) => {
                 const isSelected = selectedColorId ? selectedColorId === color.id : activeColor.id === color.id;
                 return (
@@ -618,15 +618,15 @@ export default function Configurator() {
                     key={color.id}
                     type="button"
                     onClick={() => setSelectedColorId(color.id)}
-                    className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                    className="flex flex-col items-center gap-2 group cursor-pointer"
                   >
                     <div
-                      className={`w-5 h-5 rounded-full border transition-all ${
+                      className={`w-6 h-6 rounded-full border transition-all ${
                         isSelected ? "ring-2 ring-offset-2 ring-[#79A7D3] scale-110" : "border-gray-300 hover:scale-105"
                       }`}
                       style={{ backgroundColor: color.hex }}
                     />
-                    <span className="text-[10px] font-garamond uppercase tracking-wider text-gray-600">
+                    <span className="text-[13px] font-garamond uppercase tracking-wider text-gray-700 font-medium">
                       {color.name}
                     </span>
                   </button>
@@ -638,37 +638,37 @@ export default function Configurator() {
 
         {/* STEP (Embroidery only): Share your theme */}
         {mode === "embroidery" && (
-          <div className="mb-6 w-full max-w-xl">
-            <label className="block text-xs font-garamond font-medium text-gray-900 mb-0.5">
+          <div className="mb-7 w-full max-w-xl">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
               Share your theme
             </label>
-            <p className="text-[11px] font-garamond italic text-gray-500 mb-2">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-2.5">
               Tell us about your theme, idea or inspiration...
             </p>
-            <div className="border border-gray-200 rounded-md p-3 focus-within:border-[#79A7D3] transition-colors bg-white">
+            <div className="border border-gray-200 rounded-md p-3.5 focus-within:border-[#79A7D3] transition-colors bg-white">
               <textarea
                 rows={4}
                 value={themeText}
                 onChange={(e) => setThemeText(e.target.value)}
                 placeholder={modes.embroidery?.placeholder || "Tell us about your theme, idea or inspiration..."}
-                className="w-full text-xs font-garamond outline-none resize-none placeholder-gray-400 text-gray-800 bg-transparent leading-relaxed"
+                className="w-full text-[14.5px] md:text-[15px] font-garamond outline-none resize-none placeholder-gray-400 text-gray-800 bg-transparent leading-relaxed"
               />
-              <div className="flex justify-end pt-2 border-t border-gray-100">
+              <div className="flex justify-end pt-2.5 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={handleShareTheme}
                   disabled={themeSubmitted}
-                  className="px-5 py-1.5 border border-gray-300 text-xs font-garamond uppercase tracking-wider text-gray-800 hover:border-gray-900 transition-colors rounded-sm cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2 border border-gray-300 text-[13.5px] md:text-[14px] font-garamond uppercase tracking-wider text-gray-800 hover:border-gray-900 transition-colors rounded-sm cursor-pointer disabled:opacity-50"
                 >
                   {themeSubmitted ? "Theme Submitted ✓" : "Share your theme"}
                 </button>
               </div>
             </div>
 
-            <p className="text-[11px] font-garamond text-gray-500 mt-2">
+            <p className="text-[14px] font-garamond text-gray-600 mt-2.5">
               Theme-based pieces start at ₹{calculatedPrice.toLocaleString()}+. Final pricing is confirmed after we discuss your embroidery design.
             </p>
-            <p className="text-[11px] font-garamond italic text-gray-400 mt-1">
+            <p className="text-[13px] md:text-[13.5px] font-garamond italic text-gray-500 mt-1">
               Each piece is made to order. Please allow 10-14 days for crafting and dispatch.
             </p>
           </div>
@@ -676,38 +676,38 @@ export default function Configurator() {
 
         {/* STEP (Illustration & Solid): Your Piece Summary Card */}
         {(mode === "illustration" || mode === "solid") && (
-          <div className="mt-4 mb-4 w-full">
-            <label className="block text-xs font-garamond font-medium text-gray-900 mb-2">
+          <div className="mt-5 mb-5 w-full">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-2.5">
               Your Piece
             </label>
-            <div className="border border-gray-200 rounded-md p-4 sm:p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center max-w-xl bg-white">
+            <div className="border border-gray-200 rounded-md p-5 sm:p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center max-w-xl bg-white shadow-2xs">
               {/* Left Preview: Active Silhouette Image */}
-              <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-md border border-gray-200 flex items-center justify-center p-2 bg-white shrink-0 text-gray-800">
+              <div className="w-22 h-26 sm:w-26 sm:h-30 rounded-md border border-gray-200 flex items-center justify-center p-2 bg-white shrink-0 text-gray-800">
                 {renderSilhouetteIcon(activeSilhouette)}
               </div>
 
               {/* Right specs */}
-              <div className="flex-1 w-full text-xs font-garamond text-gray-700 space-y-1">
-                <div className="grid grid-cols-[85px_1fr] gap-x-2">
+              <div className="flex-1 w-full text-[14.5px] md:text-[15px] font-garamond text-gray-800 space-y-1.5">
+                <div className="grid grid-cols-[105px_1fr] gap-x-2">
                   <span className="text-gray-400">Audience</span>
-                  <span className="capitalize">{audience}</span>
+                  <span className="capitalize font-medium">{audience}</span>
                 </div>
 
                 {mode === "illustration" && (
                   <>
-                    <div className="grid grid-cols-[85px_1fr] gap-x-2">
+                    <div className="grid grid-cols-[105px_1fr] gap-x-2">
                       <span className="text-gray-400">Technique</span>
-                      <span className="capitalize">{technique}</span>
+                      <span className="capitalize font-medium">{technique}</span>
                     </div>
-                    <div className="grid grid-cols-[85px_1fr] gap-x-2 items-center">
+                    <div className="grid grid-cols-[105px_1fr] gap-x-2 items-center">
                       <span className="text-gray-400">Piece</span>
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex items-center gap-1.5 font-medium">
                         {activePiece.image && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={activePiece.image}
                             alt={activePiece.name}
-                            className="w-4 h-4 rounded-full object-cover inline-block border border-gray-200"
+                            className="w-4.5 h-4.5 rounded-full object-cover inline-block border border-gray-200"
                           />
                         )}
                         {activePiece.name}
@@ -716,43 +716,43 @@ export default function Configurator() {
                   </>
                 )}
 
-                <div className="grid grid-cols-[85px_1fr] gap-x-2">
+                <div className="grid grid-cols-[105px_1fr] gap-x-2">
                   <span className="text-gray-400">Silhouette</span>
-                  <span>{activeSilhouette.name}</span>
+                  <span className="font-medium">{activeSilhouette.name}</span>
                 </div>
 
-                <div className="grid grid-cols-[85px_1fr] gap-x-2">
+                <div className="grid grid-cols-[105px_1fr] gap-x-2">
                   <span className="text-gray-400">Size</span>
-                  <span>{size}</span>
+                  <span className="font-medium">{size}</span>
                 </div>
 
                 {(mode === "solid" || (mode === "illustration" && technique === "embroidered")) && (
-                  <div className="grid grid-cols-[85px_1fr] gap-x-2">
+                  <div className="grid grid-cols-[105px_1fr] gap-x-2">
                     <span className="text-gray-400">Linen colour</span>
-                    <span>{activeColor.name}</span>
+                    <span className="font-medium">{activeColor.name}</span>
                   </div>
                 )}
 
-                <div className="grid grid-cols-[85px_1fr] gap-x-2 pt-2 border-t border-gray-100 mt-2 font-medium text-gray-900 text-sm">
-                  <span className="text-gray-500 font-normal text-xs">Price</span>
+                <div className="grid grid-cols-[105px_1fr] gap-x-2 pt-2.5 border-t border-gray-100 mt-2.5 font-semibold text-gray-900 text-[16px] md:text-[17px]">
+                  <span className="text-gray-500 font-normal text-[14.5px]">Price</span>
                   <span>₹ {calculatedPrice.toLocaleString()}</span>
                 </div>
               </div>
             </div>
 
             {/* Add to Cart button */}
-            <div className="mt-3">
+            <div className="mt-4">
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="px-6 py-2 border border-gray-300 text-xs font-garamond uppercase tracking-wider text-gray-800 hover:border-gray-900 transition-colors rounded-sm cursor-pointer"
+                className="px-7 py-2.5 border border-gray-300 text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider text-gray-900 hover:border-gray-900 transition-colors rounded-sm cursor-pointer font-medium"
               >
                 Add to Cart
               </button>
             </div>
 
             {/* Dispatch notice */}
-            <p className="text-[11px] font-garamond italic text-gray-400 mt-3">
+            <p className="text-[13.5px] md:text-[14px] font-garamond italic text-gray-500 mt-3.5">
               Each piece is made to order. Please allow 10-14 days for crafting and dispatch.
             </p>
           </div>
@@ -773,11 +773,11 @@ export default function Configurator() {
             <h3 className="font-garamond text-xl font-medium tracking-wider uppercase text-gray-900 mb-2">
               Size Guide (Inches)
             </h3>
-            <p className="text-xs text-gray-500 font-garamond mb-6">
+            <p className="text-[14px] text-gray-500 font-garamond mb-6">
               Our pieces feature a relaxed, comfortable silhouette. Refer to the garment dimensions below.
             </p>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs font-garamond text-left border-collapse">
+              <table className="w-full text-[14px] font-garamond text-left border-collapse">
                 <thead>
                   <tr className="border-b border-gray-200 text-gray-400 uppercase tracking-wider">
                     <th className="py-2.5 pr-4">Size</th>
@@ -800,7 +800,7 @@ export default function Configurator() {
             <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
               <button
                 onClick={() => setShowSizeGuide(false)}
-                className="px-6 py-2 rounded-full bg-gray-900 text-white text-xs font-garamond uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+                className="px-6 py-2 rounded-full bg-gray-900 text-white text-[13.5px] font-garamond uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
               >
                 Close
               </button>

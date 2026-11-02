@@ -76,14 +76,18 @@ export async function PUT(
         isNew: data.isNew ?? true,
         dispatchInfo: data.dispatchInfo !== undefined ? data.dispatchInfo : undefined,
         images: data.images || [],
+        imageFit: data.imageFit !== undefined ? data.imageFit : undefined,
       },
     });
 
     return NextResponse.json(product);
-  } catch (error) {
+  } catch (error: any) {
     console.error("PUT /api/products/[id] error:", error);
     return NextResponse.json(
-      { error: "Failed to update product" },
+      { 
+        error: error?.message || "Failed to update product",
+        details: String(error)
+      },
       { status: 500 }
     );
   }

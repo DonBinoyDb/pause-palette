@@ -250,15 +250,17 @@ export default function NewInSection({
                     </button>
                   </div>
 
-                  {/* Product Details (Generous, balanced typography) */}
-                  <div className="flex flex-col px-0.5">
-                    <h3 className="font-garamond text-[15px] md:text-[17px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-snug">
-                      {product.name}
-                    </h3>
-                    <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic mt-0.5">
-                      {categoryName}
-                    </p>
-                    <p className="font-sans font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums mt-1">
+                  {/* Product Details (Price on side, consistent typography) */}
+                  <div className="flex justify-between items-start gap-2 px-0.5 mt-2">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-garamond text-[15px] md:text-[17px] text-gray-900 group-hover:text-gray-600 transition-colors truncate font-normal leading-tight">
+                        {product.name}
+                      </h3>
+                      <p className="text-[12px] md:text-[14px] text-gray-500 truncate font-garamond italic leading-tight mt-0.5">
+                        {categoryName}
+                      </p>
+                    </div>
+                    <p className="font-sans font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums whitespace-nowrap shrink-0 pt-0.5">
                       ₹{product.price.toLocaleString("en-IN")}
                     </p>
                   </div>

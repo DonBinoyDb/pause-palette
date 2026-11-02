@@ -278,6 +278,12 @@ export default function CuratorSettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File exceeds the 2MB size limit. Please choose a file under 2MB.");
+      e.target.value = "";
+      return;
+    }
+
     try {
       setUploadingSilId(silId);
       toast.loading("Uploading silhouette icon...", { id: `sil-upload-${silId}` });
@@ -329,6 +335,12 @@ export default function CuratorSettingsPage() {
   const handleNewSilUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File exceeds the 2MB size limit. Please choose a file under 2MB.");
+      e.target.value = "";
+      return;
+    }
 
     try {
       setNewSilUploading(true);

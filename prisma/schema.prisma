@@ -89,6 +89,7 @@ model Product {
   description   String?     @db.Text
   price         Float
   images        String[]
+  imageFit      String?     @default("cover")
   hasSilhouette Boolean     @default(false)
   fits          Json?       // e.g., [{ name: "Fit Name", iconUrl: "url" }]
   accordions    Json?       // e.g., [{ title: "Details", content: "..." }]

@@ -19,15 +19,12 @@ export default async function ShopAllPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="pt-32 pb-24 px-6 md:px-12 lg:px-24 container mx-auto">
+      <div className="pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full">
         
-        <header className="mb-14 flex flex-col items-center text-center">
-          <h1 className="font-garamond text-2xl md:text-3xl text-gray-500 font-normal tracking-wide mb-3">
+        <header className="mb-10 md:mb-14 flex flex-col items-center text-center">
+          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase">
             All Pieces
           </h1>
-          <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans">
-            Thoughtfully designed, slowly crafted. Explore our complete archive of illustrated stories.
-          </p>
         </header>
 
         <ShopAllClient products={products} />

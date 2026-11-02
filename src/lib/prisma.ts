@@ -4,12 +4,24 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  pool: Pool | undefined;
+};
+
+const getPool = () => {
+  if (!globalForPrisma.pool) {
+    const connectionString = process.env.DATABASE_URL;
+    globalForPrisma.pool = new Pool({
+      connectionString,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
+  }
+  return globalForPrisma.pool;
 };
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
-
-  const pool = new Pool({ connectionString });
+  const pool = getPool();
   const adapter = new PrismaPg(pool);
   
   return new PrismaClient({
@@ -19,7 +31,7 @@ const createPrismaClient = () => {
 };
 
 const getPrismaClient = (): PrismaClient => {
-  if (globalForPrisma.prisma && (globalForPrisma.prisma as any).storeSettings) {
+  if (globalForPrisma.prisma) {
     return globalForPrisma.prisma;
   }
   const fresh = createPrismaClient();

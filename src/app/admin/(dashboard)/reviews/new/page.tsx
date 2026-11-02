@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import StickySaveBar from "@/components/admin/StickySaveBar";
+import FileErrorModal from "@/components/admin/FileErrorModal";
 
 export default function NewReviewItem() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function NewReviewItem() {
   
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
   
   const [customerName, setCustomerName] = useState("");
   const [reviewText, setReviewText] = useState("");
@@ -25,10 +27,17 @@ export default function NewReviewItem() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const file = files[0];
+    if (file.size > 2 * 1024 * 1024) {
+      setFileError("The selected image exceeds the 2MB size limit. Please choose a smaller image under 2MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", files[0]);
+      formData.append("file", file);
       
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -203,6 +212,8 @@ export default function NewReviewItem() {
         label="Save Review"
         subtext="New Customer Story"
       />
+
+      <FileErrorModal error={fileError} onClose={() => setFileError(null)} />
     </form>
   );
 }

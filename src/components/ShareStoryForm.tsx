@@ -11,6 +11,21 @@ export default function ShareStoryForm() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) {
+      setFile(null);
+      return;
+    }
+    if (selected.size > 2 * 1024 * 1024) {
+      toast.error("Photo exceeds the 2MB size limit. Please choose a photo under 2MB.");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+    setFile(selected);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -19,6 +34,11 @@ export default function ShareStoryForm() {
     }
     if (!message.trim()) {
       toast.error("Please share your message or story.");
+      return;
+    }
+
+    if (file && file.size > 2 * 1024 * 1024) {
+      toast.error("Photo exceeds the 2MB size limit. Please choose a photo under 2MB.");
       return;
     }
 
@@ -75,31 +95,29 @@ export default function ShareStoryForm() {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <div className="mb-6">
-        <h2 className="font-serif text-[15px] tracking-[0.14em] text-gray-700 uppercase mb-2">
-          Share Your Story
-        </h2>
-        <p className="font-serif italic text-gray-600 text-[13px] mb-3 leading-snug">
-          Is a piece of Pause Palette already part of your story?
-        </p>
-        <p className="text-[12px] text-gray-500 leading-relaxed mb-1.5">
-          Tell us how you wore it, where it went with you, or simply what you loved about it — and, if you wish, share a photograph from the moment.
-        </p>
-        <p className="text-[12px] text-gray-500 italic">
-          Your story could become part of Worn Stories.
-        </p>
-      </div>
+    <div className="max-w-xl mx-auto text-center mb-16 w-full">
+      <h2 className="font-garamond text-base tracking-[0.12em] text-gray-700 uppercase mb-3">
+        Share Your Story
+      </h2>
+      <p className="font-garamond italic text-gray-600 text-base md:text-lg mb-4">
+        Is a piece of Pause Palette already part of your story?
+      </p>
+      <p className="font-garamond text-[14px] text-gray-500 leading-relaxed mb-8">
+        Tell us how you wore it, where it went with you, or simply what you loved about it — and, if you wish, share a photograph from the moment.
+        <br />
+        <br />
+        Your story could become part of Worn Stories.
+      </p>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 text-left">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-left">
         <input
           suppressHydrationWarning
           type="text"
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[12px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 bg-white transition-colors"
+          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[13px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 bg-white"
         />
         <input
           suppressHydrationWarning
@@ -107,7 +125,7 @@ export default function ShareStoryForm() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[12px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 bg-white transition-colors"
+          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[13px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 bg-white"
         />
         <input
           suppressHydrationWarning
@@ -115,7 +133,7 @@ export default function ShareStoryForm() {
           placeholder="Phone (optional)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[12px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 bg-white transition-colors"
+          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[13px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 bg-white"
         />
 
         {/* File Upload Input */}
@@ -124,19 +142,17 @@ export default function ShareStoryForm() {
             type="file"
             id="photo-upload"
             accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={handleFileChange}
             className="hidden"
           />
           <label
             htmlFor="photo-upload"
-            className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[12px] text-gray-400 flex justify-between items-center cursor-pointer hover:border-gray-400 italic bg-white transition-colors"
+            className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[13px] text-gray-400 flex justify-between items-center cursor-pointer hover:border-gray-400 italic bg-white"
           >
-            <span className="truncate max-w-[220px]">
+            <span className="truncate max-w-[280px]">
               {file ? file.name : "Upload Photo (optional)"}
             </span>
-            <span className="text-gray-500 text-[11px] font-sans not-italic shrink-0 ml-2">
-              Choose file
-            </span>
+            <span className="text-gray-500 font-sans not-italic">Choose file</span>
           </label>
         </div>
 
@@ -145,14 +161,14 @@ export default function ShareStoryForm() {
           rows={4}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-[12px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 resize-none bg-white transition-colors"
+          className="w-full border border-gray-300 rounded-sm px-4 py-3 text-[13px] text-gray-700 focus:outline-none focus:border-gray-400 italic placeholder:text-gray-400 resize-none mb-2 bg-white"
         ></textarea>
 
         <button
           suppressHydrationWarning
           type="submit"
           disabled={loading}
-          className="w-full border border-[#8FB1D0] text-[#7A9BB9] font-serif italic py-2.5 rounded-sm hover:bg-[#F4F8FB] transition-colors text-[13px] mt-1 disabled:opacity-60 cursor-pointer"
+          className="w-full border border-[#8FB1D0] text-[#7A9BB9] font-garamond italic py-2.5 rounded-sm hover:bg-[#F4F8FB] transition-colors text-sm cursor-pointer disabled:opacity-60"
         >
           {loading ? "Sending..." : "Send your Story"}
         </button>

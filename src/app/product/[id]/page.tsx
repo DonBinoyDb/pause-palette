@@ -26,6 +26,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     price: product.price,
     description: product.description || "",
     images: product.images,
+    imageFit: product.imageFit || "cover",
     category: product.collection?.name || "Uncategorized",
     hasSilhouette: product.hasSilhouette,
     fits: (product.fits as {name: string, iconUrl: string}[]) || [],

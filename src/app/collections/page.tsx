@@ -24,11 +24,11 @@ export default async function CollectionsPage() {
       <Navbar variant="dark" />
       
       {/* Page Content */}
-      <div className="pt-28 md:pt-36 pb-20 px-6 md:px-12 lg:px-20 container mx-auto w-full max-w-[1500px]">
+      <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full">
         
         {/* Header Section */}
         <header className="mb-16 md:mb-20 flex flex-col items-center text-center">
-          <h1 className="font-garamond text-3xl md:text-4xl text-gray-700 font-normal tracking-wide mb-3">
+          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-3">
             Our Collections
           </h1>
           <p className="text-gray-400 text-[12px] md:text-[13px] tracking-widest font-sans uppercase mb-2">

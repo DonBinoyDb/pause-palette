@@ -28,6 +28,17 @@ export default function ReviewIllustration({ type, photoUrl, text }: Omit<Review
   const photoStyles = isGirl ? girlPhotoStyles : boyPhotoStyles;
   const textStyles = isGirl ? girlTextStyles : boyTextStyles;
 
+  // Dynamically scale font size and padding according to review text length
+  const length = text ? text.trim().length : 0;
+  let fontSizeClasses = "text-[12px] sm:text-[13px] md:text-[14px] leading-relaxed";
+  if (length > 180) {
+    fontSizeClasses = "text-[8.5px] sm:text-[9.5px] md:text-[10px] leading-[1.25]";
+  } else if (length > 110) {
+    fontSizeClasses = "text-[10px] sm:text-[10.5px] md:text-[11.5px] leading-tight";
+  } else if (length > 60) {
+    fontSizeClasses = "text-[11px] sm:text-[12px] md:text-[12.5px] leading-snug";
+  }
+
   return (
     <div className="relative flex justify-center w-full">
       <img 
@@ -45,13 +56,13 @@ export default function ReviewIllustration({ type, photoUrl, text }: Omit<Review
             className="w-full h-full object-cover" 
           />
         ) : (
-          <span className="font-sans text-gray-400 text-xs">No Photo</span>
+          <span className="font-garamond text-gray-400 text-xs">No Photo</span>
         )}
       </div>
 
       {/* Text Area (Right Quote Card) */}
-      <div className={`absolute ${textStyles} flex items-center justify-center p-2 md:p-4 lg:p-6 text-center overflow-hidden`}>
-        <p className="font-serif italic text-gray-700 text-xs md:text-sm lg:text-base xl:text-lg leading-relaxed">
+      <div className={`absolute ${textStyles} flex items-center justify-center p-2 sm:p-2.5 md:p-3 text-center overflow-hidden`}>
+        <p className={`font-garamond italic text-gray-700 max-h-full w-full break-words line-clamp-6 ${fontSizeClasses}`}>
           "{text}"
         </p>
       </div>

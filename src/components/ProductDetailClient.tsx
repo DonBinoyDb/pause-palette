@@ -24,9 +24,11 @@ type ProductDetails = {
   fitGuideImage?: string;
   colors?: {name: string, hex: string, images: string[]}[];
   dispatchInfo?: string | null;
+  imageFit?: "cover" | "contain" | string;
 };
 
 export default function ProductDetailClient({ product }: { product: ProductDetails }) {
+  const isContain = product.imageFit === "contain";
   const [selectedSize, setSelectedSize] = useState("S");
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isSilhouetteModalOpen, setIsSilhouetteModalOpen] = useState(false);
@@ -92,7 +94,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="pt-24 md:pt-32 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
+      <div className="pt-24 md:pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full">
         
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
           
@@ -102,9 +104,9 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             {/* Thumbnails (sticky) */}
             <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 sticky top-32 h-fit">
               {displayImages.map((src, idx) => (
-                <div key={idx} className="aspect-[3/4] w-full relative bg-gray-100 cursor-pointer overflow-hidden border border-transparent hover:border-gray-300">
+                <div key={idx} className={`aspect-[3/4] w-full relative ${isContain ? 'bg-[#FBFBFA]' : 'bg-gray-100'} cursor-pointer overflow-hidden border border-transparent hover:border-gray-300`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={`Thumbnail ${idx+1}`} className="object-cover w-full h-full" />
+                  <img src={src} alt={`Thumbnail ${idx+1}`} className={`${isContain ? 'object-contain' : 'object-cover'} w-full h-full`} />
                 </div>
               ))}
             </div>
@@ -112,9 +114,9 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             {/* Main Images (stacked on desktop, carousel on mobile) */}
             <div className="flex-1 flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 hide-scrollbar">
               {displayImages.map((src, idx) => (
-                <div key={idx} className="aspect-[3/4] w-full shrink-0 md:shrink relative bg-gray-100 snap-start">
+                <div key={idx} className={`w-full shrink-0 md:shrink relative ${isContain ? 'aspect-[3/4] md:aspect-auto md:min-h-[520px] bg-[#FBFBFA] flex items-center justify-center' : 'aspect-[3/4] bg-gray-100'} snap-start`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={`Product Image ${idx+1}`} className="object-cover w-full h-full" />
+                  <img src={src} alt={`Product Image ${idx+1}`} className={`${isContain ? 'object-contain max-h-[85vh] w-full h-auto' : 'object-cover w-full h-full'}`} />
                 </div>
               ))}
             </div>
