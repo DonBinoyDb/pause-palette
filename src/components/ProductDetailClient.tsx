@@ -225,10 +225,10 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               <button 
                 onClick={handleAddToCart}
                 suppressHydrationWarning 
-                className={`flex-1 border font-serif text-lg tracking-wide py-4 px-4 transition-colors ${
+                className={`flex-1 border font-serif text-lg tracking-wide py-4 px-4 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] ${
                   isAdded 
                     ? 'border-green-500 bg-green-50 text-green-700' 
-                    : 'border-[#8FB1D0] text-[#7A9BB9] hover:bg-[#F4F8FB]'
+                    : 'border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6895C2] text-white font-medium'
                 }`}
               >
                 {isAdded ? 'Added to Cart' : 'Add To Cart'}
@@ -241,7 +241,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                   price: product.price,
                   image: displayImages[0]
                 })} 
-                className={`flex items-center justify-center w-16 shrink-0 border transition-all hover:scale-[1.02] ${isSaved(product.id) ? 'border-red-200 bg-red-50 text-red-500' : 'border-[#8FB1D0] bg-white hover:bg-[#F4F8FB] text-[#7A9BB9]'}`}
+                className={`flex items-center justify-center w-16 shrink-0 border transition-all hover:scale-[1.02] cursor-pointer ${isSaved(product.id) ? 'border-red-200 bg-red-50 text-red-500' : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3]'}`}
               >
                 <span className="text-2xl leading-none pt-0.5">{isSaved(product.id) ? '♥' : '♡'}</span>
               </button>

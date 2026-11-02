@@ -658,7 +658,11 @@ export default function Configurator() {
                   type="button"
                   onClick={handleShareTheme}
                   disabled={themeSubmitted}
-                  className="px-6 py-2 border border-gray-300 text-[13.5px] md:text-[14px] font-garamond uppercase tracking-wider text-gray-800 hover:border-gray-900 transition-colors rounded-sm cursor-pointer disabled:opacity-50"
+                  className={`px-6 py-2 border text-[13.5px] md:text-[14px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer disabled:opacity-50 font-medium ${
+                    themeSubmitted
+                      ? "border-green-300 bg-green-50 text-green-700"
+                      : "border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6895C2] text-white shadow-xs"
+                  }`}
                 >
                   {themeSubmitted ? "Theme Submitted ✓" : "Share your theme"}
                 </button>
@@ -745,7 +749,7 @@ export default function Configurator() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="px-7 py-2.5 border border-gray-300 text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider text-gray-900 hover:border-gray-900 transition-colors rounded-sm cursor-pointer font-medium"
+                className="px-8 py-3 bg-[#79A7D3] hover:bg-[#6895C2] text-white border border-[#79A7D3] text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer font-medium shadow-xs"
               >
                 Add to Cart
               </button>

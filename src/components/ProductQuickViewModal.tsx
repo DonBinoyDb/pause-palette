@@ -236,10 +236,10 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             <button
               type="button"
               onClick={handleAddToCart}
-              className={`w-full py-3 px-6 rounded text-[11px] tracking-[0.25em] uppercase font-semibold transition-all duration-300 flex items-center justify-center gap-2 border ${
+              className={`w-full py-3 px-6 rounded text-[11px] tracking-[0.25em] uppercase font-semibold transition-all duration-300 flex items-center justify-center gap-2 border cursor-pointer ${
                 added 
-                  ? "bg-[#79A7D3] border-[#79A7D3] text-white shadow-sm" 
-                  : "bg-white text-gray-900 border-gray-900 hover:bg-[#79A7D3] hover:border-[#79A7D3] hover:text-white active:scale-[0.99]"
+                  ? "bg-[#6895C2] border-[#6895C2] text-white shadow-sm" 
+                  : "bg-[#79A7D3] border-[#79A7D3] text-white hover:bg-[#6895C2] active:scale-[0.99] shadow-sm"
               }`}
             >
               {added ? (

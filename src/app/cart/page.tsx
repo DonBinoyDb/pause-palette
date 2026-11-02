@@ -35,33 +35,44 @@ export default function CartPage() {
 
   const handleWhatsAppCheckout = () => {
     const phoneNumber = whatsappNumber || "917907629021"; 
-    let message = "Hello, I would like to purchase the following items from my cart:\n\n";
-    
+    const orderId = `PP-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    let message = "Hello Pause Palette!\n\n";
+    message += "A new order has been placed through the website.\n\n";
+    message += "ORDER DETAILS\n";
+    message += `Order ID: ${orderId}\n\n`;
+
     cart.forEach((item, index) => {
-      message += `${index + 1}. ${item.name}\n`;
-      if (item.curatedDetails) {
-        message += `   Type: Curated Piece (${item.curatedDetails.modeTitle})\n`;
-        message += `   Fit: ${item.curatedDetails.audience}\n`;
-        if (item.curatedDetails.technique) message += `   Technique: ${item.curatedDetails.technique}\n`;
-        if (item.curatedDetails.pieceName) message += `   Piece: ${item.curatedDetails.pieceName}\n`;
-        message += `   Silhouette: ${item.curatedDetails.silhouetteName}\n`;
-        message += `   Size: ${item.size}\n`;
-        if (item.curatedDetails.colorName) message += `   Linen: ${item.curatedDetails.colorName}\n`;
-        if (item.curatedDetails.theme) message += `   Theme: "${item.curatedDetails.theme}"\n`;
-      } else {
-        let specs = `   Size: ${item.size} | Fit: ${item.silhouette.replace(/-/g, ' ')}`;
-        if (item.color) {
-          specs += ` | Colour: ${item.color}`;
-        }
-        message += `${specs}\n`;
+      const code = item.curatedDetails?.isCurated
+        ? (item.curatedDetails.mode ? `PP-CUR-${item.curatedDetails.mode.toUpperCase()}` : "PP-CURATED")
+        : (item.productId ? `PP-${item.productId.slice(-6).toUpperCase()}` : "PP-PIECE");
+
+      const technique = item.curatedDetails?.technique 
+        || (item.curatedDetails?.mode === "embroidery" ? "Theme Embroidery" : item.curatedDetails?.mode === "illustration" ? "Original Print" : item.curatedDetails?.mode === "solid" ? "Pure Solid Linen" : "Handcrafted");
+
+      const silhouette = item.curatedDetails?.silhouetteName 
+        || (item.silhouette ? item.silhouette.replace(/-/g, " ") : "Signature Fit");
+
+      const colour = item.curatedDetails?.colorName 
+        || item.color 
+        || "Standard";
+
+      if (cart.length > 1) {
+        message += `[Item ${index + 1}]\n`;
       }
-      message += `   Quantity: ${item.quantity}\n`;
-      message += `   Price: ₹${(item.price * item.quantity).toLocaleString()}\n\n`;
+      message += `Product Code : ${code}\n`;
+      message += `Product: ${item.name}\n`;
+      message += `Technique: ${technique}\n`;
+      message += `Silhouette: ${silhouette}\n`;
+      message += `Size: ${item.size}\n`;
+      message += `Linen Colour: ${colour}\n`;
+      message += `Quantity: ${item.quantity}\n\n`;
     });
-    
-    message += `Estimated Total: ₹${cartTotal.toLocaleString()}\n\n`;
-    message += "Please let me know the next steps for payment and shipping.";
-    
+
+    message += `ORDER TOTAL: ₹${cartTotal.toLocaleString("en-IN")}\n\n`;
+    message += "Payment pending.\n\n";
+    message += "Please share the payment instructions with the customer.";
+
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
   };
@@ -304,9 +315,9 @@ export default function CartPage() {
                 
                 <Link 
                   href="/checkout"
-                  className="w-full group bg-[#2C2B29] text-white py-3.5 px-5 flex items-center justify-between hover:bg-black transition-all duration-300 rounded-xs shadow-xs"
+                  className="w-full group bg-[#79A7D3] hover:bg-[#6895C2] text-white py-3.5 px-5 flex items-center justify-between transition-all duration-300 rounded-xs shadow-xs"
                 >
-                  <span className="text-xs tracking-[0.16em] uppercase font-medium">
+                  <span className="text-xs tracking-[0.16em] uppercase font-semibold">
                     Proceed to Checkout
                   </span>
                   <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />

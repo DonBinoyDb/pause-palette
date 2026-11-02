@@ -4,6 +4,7 @@ import "./globals.css";
 import { ShopProvider } from "@/context/ShopContext";
 import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from "react-hot-toast";
+import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 
 const sindieEldora = localFont({
   src: '../../public/fonts/SindieEldoraDemoRegular.ttf',
@@ -42,6 +43,7 @@ export default function RootLayout({
           <ShopProvider>
             <Toaster position="top-right" />
             {children}
+            <FloatingWhatsApp />
           </ShopProvider>
         </AuthProvider>
       </body>

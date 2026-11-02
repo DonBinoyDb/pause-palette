@@ -230,55 +230,63 @@ export default function CheckoutPage() {
     }
 
     const phoneNumber = whatsappNumber || "917907629021";
-    const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const orderId = `PP-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    let message = "✨ *NEW ORDER REQUEST - PAUSE PALETTE* ✨\n\n";
-
-    message += "👤 *CUSTOMER & CONTACT DETAILS*\n";
-    message += `• *Name:* ${formData.fullName.trim()}\n`;
-    message += `• *Email:* ${formData.email.trim()}\n`;
-    message += `• *Phone / WhatsApp:* ${formData.phone.trim()}\n\n`;
-
-    message += "📍 *SHIPPING ADDRESS*\n";
-    message += `• *Address:* ${formData.addressLine1.trim()}\n`;
-    if (formData.addressLine2.trim()) {
-      message += `• *Apartment / Landmark:* ${formData.addressLine2.trim()}\n`;
-    }
-    message += `• *City:* ${formData.city.trim()}\n`;
-    message += `• *State:* ${formData.state.trim()}\n`;
-    message += `• *PIN Code:* ${formData.pincode.trim()}\n`;
-    message += `• *Country:* ${formData.country || "India"}\n\n`;
-
-    if (formData.orderNotes.trim()) {
-      message += `📝 *ORDER NOTES / REQUESTS:*\n"${formData.orderNotes.trim()}"\n\n`;
-    }
-
-    message += `🛍️ *ORDER ITEMS (${totalQuantity} ${totalQuantity === 1 ? "item" : "items"}):*\n`;
+    let message = "Hello Pause Palette!\n\n";
+    message += "A new order has been placed through the website.\n\n";
+    message += "ORDER DETAILS\n";
+    message += `Order ID: ${orderId}\n\n`;
 
     cart.forEach((item, index) => {
-      message += `\n${index + 1}. *${item.name}*\n`;
-      if (item.curatedDetails) {
-        message += `   • Type: Curated Piece (${item.curatedDetails.modeTitle})\n`;
-        message += `   • Fit: ${item.curatedDetails.audience}\n`;
-        if (item.curatedDetails.technique) message += `   • Technique: ${item.curatedDetails.technique}\n`;
-        if (item.curatedDetails.pieceName) message += `   • Piece: ${item.curatedDetails.pieceName}\n`;
-        message += `   • Silhouette: ${item.curatedDetails.silhouetteName}\n`;
-        message += `   • Size: ${item.size}\n`;
-        if (item.curatedDetails.colorName) message += `   • Linen: ${item.curatedDetails.colorName}\n`;
-        if (item.curatedDetails.theme) message += `   • Theme: "${item.curatedDetails.theme}"\n`;
-      } else {
-        let specs = `   • Size: ${item.size} | Fit: ${item.silhouette.replace(/-/g, " ")}`;
-        if (item.color) {
-          specs += ` | Colour: ${item.color}`;
-        }
-        message += `${specs}\n`;
+      const code = item.curatedDetails?.isCurated
+        ? (item.curatedDetails.mode ? `PP-CUR-${item.curatedDetails.mode.toUpperCase()}` : "PP-CURATED")
+        : (item.productId ? `PP-${item.productId.slice(-6).toUpperCase()}` : "PP-PIECE");
+
+      const technique = item.curatedDetails?.technique 
+        || (item.curatedDetails?.mode === "embroidery" ? "Theme Embroidery" : item.curatedDetails?.mode === "illustration" ? "Original Print" : item.curatedDetails?.mode === "solid" ? "Pure Solid Linen" : "Handcrafted");
+
+      const silhouette = item.curatedDetails?.silhouetteName 
+        || (item.silhouette ? item.silhouette.replace(/-/g, " ") : "Signature Fit");
+
+      const colour = item.curatedDetails?.colorName 
+        || item.color 
+        || "Standard";
+
+      if (cart.length > 1) {
+        message += `[Item ${index + 1}]\n`;
       }
-      message += `   • Quantity: ${item.quantity}\n`;
-      message += `   • Price: ₹${(item.price * item.quantity).toLocaleString("en-IN")}\n`;
+      message += `Product Code : ${code}\n`;
+      message += `Product: ${item.name}\n`;
+      message += `Technique: ${technique}\n`;
+      message += `Silhouette: ${silhouette}\n`;
+      message += `Size: ${item.size}\n`;
+      message += `Linen Colour: ${colour}\n`;
+      message += `Quantity: ${item.quantity}\n\n`;
     });
 
-    message += `\n💰 *ESTIMATED TOTAL:* ₹${cartTotal.toLocaleString("en-IN")}\n\n`;
-    message += "Please confirm the order and share payment details. Thank you!";
+    message += `ORDER TOTAL: ₹${cartTotal.toLocaleString("en-IN")}\n\n`;
+
+    message += "CUSTOMER DETAILS\n";
+    message += `Name: ${formData.fullName.trim()}\n`;
+    message += `Phone: ${formData.phone.trim()}\n`;
+    message += `Email: ${formData.email.trim()}\n\n`;
+
+    const addressLines = [
+      formData.addressLine1.trim(),
+      formData.addressLine2?.trim() || "",
+      `${formData.city.trim()}, ${formData.state.trim()} - ${formData.pincode.trim()}`,
+      formData.country || "India"
+    ].filter(Boolean).join("\n");
+
+    message += "SHIPPING ADDRESS\n";
+    message += `${addressLines}\n\n`;
+
+    if (formData.orderNotes?.trim()) {
+      message += `Order Notes: ${formData.orderNotes.trim()}\n\n`;
+    }
+
+    message += "Payment pending.\n\n";
+    message += "Please share the payment instructions with the customer.";
 
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, "_blank");
@@ -662,10 +670,10 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={handlePlaceOrder}
                   disabled={isSubmitting}
-                  className="w-full group bg-[#2C2B29] text-white py-3.5 px-5 flex items-center justify-between hover:bg-black transition-all duration-300 rounded-xs shadow-xs disabled:opacity-60 cursor-pointer"
+                  className="w-full group bg-[#79A7D3] hover:bg-[#6895C2] text-white py-3.5 px-5 flex items-center justify-between transition-all duration-300 rounded-xs shadow-xs disabled:opacity-60 cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <MessageCircle size={16} className="text-[#79A7D3]" />
+                    <MessageCircle size={16} className="text-white" />
                     <span className="text-xs tracking-[0.16em] uppercase font-semibold">
                       Complete Order via WhatsApp
                     </span>
