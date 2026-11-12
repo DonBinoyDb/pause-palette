@@ -94,12 +94,12 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="pt-24 md:pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full">
+      <div className="pt-20 md:pt-32 pb-24 px-0 md:px-8 lg:px-16 w-full">
         
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
           
           {/* Left: Images Section */}
-          <div className="w-full lg:w-7/12 flex gap-4 md:gap-8">
+          <div className="w-full lg:w-7/12 flex gap-0 md:gap-8">
             
             {/* Thumbnails (sticky) */}
             <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 sticky top-32 h-fit">
@@ -112,7 +112,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             </div>
 
             {/* Main Images (stacked on desktop, carousel on mobile) */}
-            <div className="flex-1 flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 hide-scrollbar">
+            <div className="flex-1 flex flex-row md:flex-col gap-0 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 hide-scrollbar">
               {displayImages.map((src, idx) => (
                 <div key={idx} className={`w-full shrink-0 md:shrink relative ${isContain ? 'aspect-[3/4] md:aspect-auto md:min-h-[520px] bg-[#FBFBFA] flex items-center justify-center' : 'aspect-[3/4] bg-gray-100'} snap-start`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,7 +123,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           </div>
 
           {/* Right: Product Details (sticky) */}
-          <div className="w-full lg:w-5/12 sticky top-32 py-4">
+          <div className="w-full lg:w-5/12 sticky top-32 py-4 px-4 md:px-0">
             <h1 className="font-garamond text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
             <div className="flex items-center gap-2 mb-4">
                <p className="text-sm tracking-wide text-gray-500 font-garamond italic">

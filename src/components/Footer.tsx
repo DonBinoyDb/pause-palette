@@ -8,8 +8,9 @@ export default function Footer() {
           
           {/* Column 1: Logo & Description */}
           <div className="md:col-span-5">
-            <h2 className="text-3xl text-gray-500 mb-2 font-brand font-light">
-              Pause palette
+            <h2 className="text-3xl text-gray-500 mb-2 font-light">
+              <span className="font-brand">Pause palette</span>
+              <span className="font-serif">.</span>
             </h2>
             <p className="italic text-gray-500 mb-2 text-[15px]" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
               From Our Sketchbook to your Soul.

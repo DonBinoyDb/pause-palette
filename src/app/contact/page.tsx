@@ -25,23 +25,25 @@ export default function ContactPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-40 pb-32">
+      <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-32 pb-24">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
           
           {/* Header */}
-          <h1 className="font-garamond text-3xl md:text-4xl text-gray-900 mb-8 tracking-widest uppercase">
-            Contact
-          </h1>
-          
-          {/* Subheader */}
-          <div className="text-center mb-12 w-full max-w-lg">
-            <p className="font-sans italic text-gray-800 text-[15px] leading-relaxed mb-1 font-medium">
-              Questions about a piece, an order, customisation, or a collabora-<br className="hidden md:block" />tion — we'd be glad to hear from you.
-            </p>
-            <p className="font-sans italic text-gray-500 text-[14px] leading-relaxed">
-              Reach us through the channel that feels easiest, and we'll get back to<br className="hidden md:block" />you as soon as we can.
-            </p>
-          </div>
+          <header className="mb-14 flex flex-col items-center text-center">
+            <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-normal tracking-[0.2em] uppercase mb-3">
+              Contact
+            </h1>
+            
+            {/* Subheader */}
+            <div className="text-center w-full max-w-lg">
+              <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans leading-relaxed mb-1">
+                Questions about a piece, an order, customisation, or a collaboration — we'd be glad to hear from you.
+              </p>
+              <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans leading-relaxed">
+                Reach us through the channel that feels easiest, and we'll get back to you as soon as we can.
+              </p>
+            </div>
+          </header>
 
           {/* Form */}
           <form className="w-full max-w-lg flex flex-col gap-4 mb-3">

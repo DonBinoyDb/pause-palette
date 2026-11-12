@@ -140,28 +140,28 @@ export default function Configurator() {
   };
 
   // Helper to render silhouette icon whether it is uploaded image URL or SVG markup
-  const renderSilhouetteIcon = (sil: any) => {
+  const renderSilhouetteIcon = (sil: any, sizeClass = "w-32 h-32 sm:w-38 sm:h-38") => {
     const isUrl = sil?.image || (sil?.svg && (sil.svg.startsWith("http") || sil.svg.startsWith("/") || sil.svg.startsWith("data:")));
     if (isUrl) {
       return (
         <img
           src={sil.image || sil.svg}
           alt={sil.name}
-          className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
+          className={`${sizeClass} object-contain`}
         />
       );
     }
     if (sil?.svg && sil.svg.includes("<svg")) {
       return (
         <div
-          className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-gray-700"
+          className={`${sizeClass} flex items-center justify-center text-gray-700 [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain`}
           dangerouslySetInnerHTML={{ __html: sil.svg }}
         />
       );
     }
     return (
-      <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-gray-400">
-        <svg className="w-12 h-12 stroke-current" fill="none" viewBox="0 0 24 24">
+      <div className={`${sizeClass} flex items-center justify-center text-gray-400`}>
+        <svg className="w-16 h-16 stroke-current" fill="none" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16m-7 6h7" />
         </svg>
       </div>
@@ -479,7 +479,7 @@ export default function Configurator() {
             <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
               Select an existing Pause Palette design
             </p>
-            <div className="flex flex-wrap gap-3.5">
+            <div className="flex flex-wrap gap-5">
               {currentPieces.map((piece: any) => {
                 const isSelected = selectedPieceId ? selectedPieceId === piece.id : activePiece.id === piece.id;
                 return (
@@ -490,7 +490,7 @@ export default function Configurator() {
                     className="flex flex-col items-start text-left cursor-pointer group"
                   >
                     <div
-                      className={`relative w-22 sm:w-26 aspect-[3/4] rounded-sm overflow-hidden bg-gray-50 border transition-all ${
+                      className={`relative w-40 sm:w-48 aspect-[3/4] rounded-sm overflow-hidden bg-gray-50 border transition-all ${
                         isSelected
                           ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
                           : "border-gray-200 hover:border-gray-300"
@@ -505,7 +505,7 @@ export default function Configurator() {
                         />
                       )}
                     </div>
-                    <span className="text-[14px] font-garamond text-gray-800 mt-2 max-w-[104px] truncate leading-tight font-medium">
+                    <span className="text-[15px] font-garamond text-gray-800 mt-2.5 max-w-[160px] sm:max-w-[192px] truncate leading-tight font-medium">
                       {piece.name}
                     </span>
                   </button>
@@ -523,7 +523,7 @@ export default function Configurator() {
           <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
             Every piece is cut and sewn to your chosen silhouette
           </p>
-          <div className="flex flex-wrap gap-3.5">
+          <div className="flex flex-wrap gap-5">
             {(filteredSilhouettes.length ? filteredSilhouettes : silhouettes).map((sil) => {
               const isSelected = selectedSilhouetteId ? selectedSilhouetteId === sil.id : activeSilhouette.id === sil.id;
               const silActiveSizes = getActiveSilhouetteSizes(sil, pricing.sizeValues);
@@ -533,21 +533,21 @@ export default function Configurator() {
                   key={sil.id}
                   type="button"
                   onClick={() => setSelectedSilhouetteId(sil.id)}
-                  className={`w-32 sm:w-36 h-40 sm:h-44 p-3 rounded-md border flex flex-col items-center justify-between text-center transition-all cursor-pointer bg-white ${
+                  className={`w-44 sm:w-52 h-56 sm:h-64 p-4 rounded-md border flex flex-col items-center justify-between text-center transition-all cursor-pointer bg-white ${
                     isSelected
                       ? "border-[#79A7D3] ring-1 ring-[#79A7D3] shadow-xs"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <div className="flex-1 w-full flex items-center justify-center p-1 text-gray-700">
-                    {renderSilhouetteIcon(sil)}
+                  <div className="flex-1 w-full flex items-center justify-center p-2 text-gray-700">
+                    {renderSilhouetteIcon(sil, "w-32 h-32 sm:w-38 sm:h-38")}
                   </div>
                   <div className="w-full flex flex-col items-center">
-                    <span className="text-[14.5px] md:text-[15px] font-garamond text-gray-900 leading-tight font-medium">
+                    <span className="text-[15px] sm:text-[16px] font-garamond text-gray-900 leading-tight font-medium">
                       {sil.name}
                     </span>
                     {sizeSummary && (
-                      <span className="text-[11.5px] font-sans text-gray-400 mt-1 truncate max-w-full">
+                      <span className="text-[12px] sm:text-[12.5px] font-sans text-gray-400 mt-1.5 truncate max-w-full">
                         {sizeSummary}
                       </span>
                     )}

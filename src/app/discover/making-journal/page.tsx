@@ -73,9 +73,10 @@ export default async function MakingJournalPage() {
               <Image
                 src="/images/pencil_icon.png"
                 alt="Drawn by Hand"
-                width={96}
-                height={96}
+                width={80}
+                height={100}
                 className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
             <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">

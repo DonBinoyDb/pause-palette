@@ -22,7 +22,7 @@ export default async function NewInPage() {
       <div className="pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full">
         
         <header className="mb-14 flex flex-col items-center text-center">
-          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-3">
+          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-normal tracking-[0.2em] uppercase mb-3">
             New In
           </h1>
           <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans">

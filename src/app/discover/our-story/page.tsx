@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 
 function LogoIllustration({ isMobile }: { isMobile?: boolean }) {
   return (
-    <div className={`w-full flex ${isMobile ? "justify-center py-2" : "justify-center lg:justify-end pr-12 lg:pr-24 lg:pt-12"}`}>
+    <div className={`w-full flex ${isMobile ? "justify-center py-2" : "justify-center lg:pr-12 lg:pt-12"}`}>
       <div className={`relative ${isMobile ? "w-[200px] h-[200px]" : "w-[230px] h-[230px]"}`}>
         <Image
           src="/images/logo1.png"
@@ -47,7 +47,7 @@ function FromOurSketchbook() {
 function BeyondTheSketchbook() {
   return (
     <div className="space-y-5 text-gray-500 text-[14px] leading-[1.8] lg:pr-12">
-      <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4 lg:mb-8">
+      <h2 className="font-garamond text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] mb-4 lg:mb-8">
         BEYOND THE SKETCHBOOK
       </h2>
       <p>
@@ -67,7 +67,7 @@ function BeyondTheSketchbook() {
 function ArtOfMaking() {
   return (
     <div className="space-y-5 text-gray-500 text-[14px] leading-[1.8] lg:pr-12 lg:pt-12">
-      <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-4 lg:mb-8">
+      <h2 className="font-garamond text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] mb-4 lg:mb-8">
         THE ART OF MAKING
       </h2>
       <p>We believe beautiful things do not need to be hurried.</p>
@@ -90,24 +90,26 @@ function ArtOfMaking() {
 
 function StoryImages() {
   return (
-    <div className="flex flex-col gap-8 md:gap-16">
+    <div className="flex flex-col gap-6 md:gap-8">
       {/* Reading Image */}
-      <div className="w-full aspect-[4/3] relative mt-4">
+      <div className="w-full aspect-[3/2] relative mt-2 overflow-hidden bg-gray-50">
         <Image 
-          src="/images/coverpic2.jpg" 
+          src="/images/story-reading.jpg" 
           alt="Person reading" 
           fill 
           className="object-cover" 
+          sizes="(max-width: 1024px) 100vw, 50vw"
         />
       </div>
 
       {/* Embroidered Shirt Image */}
-      <div className="w-full aspect-[4/3] relative">
+      <div className="w-full aspect-[3/2] relative overflow-hidden bg-gray-50">
         <Image 
-          src="/images/add.png" 
+          src="/images/story-embroidered.jpg" 
           alt="Embroidered shirt details" 
           fill 
           className="object-cover" 
+          sizes="(max-width: 1024px) 100vw, 50vw"
         />
       </div>
     </div>
@@ -180,7 +182,7 @@ export default function OurStoryPage() {
 
         {/* AN OPEN CANVAS Section */}
         <div className="max-w-4xl mx-auto text-center space-y-5 text-gray-500 text-[14px] leading-[1.8] py-24 lg:py-32 px-6">
-          <h2 className="font-garamond text-[#8c8c8c] text-[13px] font-semibold uppercase tracking-[0.15em] mb-6">
+          <h2 className="font-garamond text-[#8c8c8c] text-[16px] font-semibold uppercase tracking-[0.2em] mb-6">
             AN OPEN CANVAS
           </h2>
           <p>
@@ -192,12 +194,14 @@ export default function OurStoryPage() {
         </div>
 
         {/* Full Width Footer Image */}
-        <div className="w-full h-[50vh] lg:h-[70vh] min-h-[400px] lg:min-h-[500px] relative">
+        <div className="w-full h-[50vh] lg:h-[70vh] min-h-[400px] lg:min-h-[500px] relative overflow-hidden bg-gray-50">
           <Image 
-            src="/images/Coverpic1.jpeg" 
+            src="/images/story-clothesline.jpg" 
             alt="Shirts on a clothesline outdoors" 
             fill 
             className="object-cover object-center" 
+            sizes="100vw"
+            priority
           />
         </div>
 

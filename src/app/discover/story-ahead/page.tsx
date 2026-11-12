@@ -13,7 +13,7 @@ export default function StoryAheadPage() {
           {/* --- Section 1: Canvas & Palette --- */}
           <div className="md:col-span-7 flex flex-col gap-12 lg:gap-16">
             
-            <h1 className="font-garamond text-[18px] tracking-[0.15em] text-gray-500 uppercase font-medium">
+            <h1 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium">
               THE STORY AHEAD
             </h1>
 
@@ -117,7 +117,7 @@ export default function StoryAheadPage() {
                 <p>
                   From recyclable mailers and wrapping to thank-you notes printed on seed paper that can be planted and grown, each detail is chosen with greater consideration for what comes after.
                 </p>
-                <p className="font-garamond italic text-[12px] text-gray-600">
+                <p className="italic text-[15px] text-gray-600">
                   A thoughtful ending to every order — and a small gesture towards a better tomorrow.
                 </p>
               </div>
@@ -131,7 +131,7 @@ export default function StoryAheadPage() {
                 <p>
                   As Pause Palette grows, we hope to keep creating with greater thought — exploring new materials, colours and possibilities while staying true to the values that shape how we make.
                 </p>
-                <p className="font-garamond italic text-[12px] text-gray-600">
+                <p className="italic text-[15px] text-gray-600">
                   A slower, more considered future — one story at a time.
                 </p>
               </div>
@@ -180,9 +180,10 @@ export default function StoryAheadPage() {
                <Image
                  src="/images/pencil_icon.png"
                  alt="Drawn by Hand"
-                 width={96}
-                 height={96}
+                 width={80}
+                 height={100}
                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                 style={{ width: "auto", height: "auto" }}
                />
              </div>
              <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
