@@ -158,8 +158,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
 
             {/* Price */}
             <p 
-              className="text-[16px] md:text-[18px] text-gray-800 font-medium mb-3"
-              style={{ fontFamily: "'EB Garamond', Garamond, serif" }}
+              className="font-garamond text-[16px] md:text-[18px] text-gray-800 font-medium mb-3"
             >
               ₹ {product.price.toLocaleString("en-IN")}
             </p>
@@ -176,7 +175,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             {colors.length > 0 && (
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 font-medium">Select Colour</span>
+                  <span className="text-[11px] tracking-[0.2em] uppercase text-gray-400 font-medium">Select Variant</span>
                   <span className="text-[11px] text-gray-700 font-medium">{activeColor?.name}</span>
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -220,7 +219,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
                     onClick={() => setSelectedSize(size)}
                     className={`h-8 min-w-[36px] px-2.5 text-[11px] tracking-wider uppercase rounded-sm border transition-all ${
                       selectedSize === size
-                        ? "border-[#79A7D3] bg-[#79A7D3] text-white font-medium shadow-sm"
+                        ? "border-[#79A7D3] bg-white text-[#79A7D3] font-medium shadow-sm"
                         : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                     }`}
                   >
@@ -238,8 +237,8 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
               onClick={handleAddToCart}
               className={`w-full py-3 px-6 rounded text-[11px] tracking-[0.25em] uppercase font-semibold transition-all duration-300 flex items-center justify-center gap-2 border cursor-pointer ${
                 added 
-                  ? "bg-[#6895C2] border-[#6895C2] text-white shadow-sm" 
-                  : "bg-[#79A7D3] border-[#79A7D3] text-white hover:bg-[#6895C2] active:scale-[0.99] shadow-sm"
+                  ? "bg-[#F4F8FB] border-[#79A7D3] text-[#79A7D3] shadow-sm" 
+                  : "bg-white border-[#79A7D3] text-[#79A7D3] hover:bg-[#F4F8FB] active:scale-[0.99] shadow-sm"
               }`}
             >
               {added ? (

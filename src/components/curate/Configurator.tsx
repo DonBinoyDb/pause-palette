@@ -581,7 +581,7 @@ export default function Configurator() {
                     onClick={() => setSize(s)}
                     className={`min-w-10 h-10 px-3 rounded-sm border flex items-center justify-center text-[14.5px] font-garamond uppercase tracking-wider transition-all cursor-pointer ${
                       size === s
-                        ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 font-semibold bg-white shadow-2xs"
+                        ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-semibold bg-white shadow-2xs"
                         : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                     }`}
                     title={`${s} (₹${sPrice})`}
@@ -739,7 +739,7 @@ export default function Configurator() {
 
                 <div className="grid grid-cols-[105px_1fr] gap-x-2 pt-2.5 border-t border-gray-100 mt-2.5 font-semibold text-gray-900 text-[16px] md:text-[17px]">
                   <span className="text-gray-500 font-normal text-[14.5px]">Price</span>
-                  <span>₹ {calculatedPrice.toLocaleString()}</span>
+                  <span className="font-garamond">₹ {calculatedPrice.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -749,7 +749,7 @@ export default function Configurator() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="px-8 py-3 bg-[#79A7D3] hover:bg-[#6895C2] text-white border border-[#79A7D3] text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer font-medium shadow-xs"
+                className="px-8 py-3 bg-white hover:bg-[#F4F8FB] text-[#79A7D3] border border-[#79A7D3] text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer font-medium shadow-xs"
               >
                 Add to Cart
               </button>

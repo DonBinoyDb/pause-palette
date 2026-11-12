@@ -131,7 +131,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                </p>
             </div>
             
-            <p className="font-sans font-medium text-2xl md:text-3xl text-gray-900 tracking-tight tabular-nums mb-6">
+            <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 tracking-tight tabular-nums mb-6">
               ₹{product.price.toLocaleString("en-IN")}
             </p>
 
@@ -139,7 +139,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
             {colors.length > 0 && (
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm text-gray-500">Colour:</span>
+                  <span className="text-sm text-gray-500">Variants:</span>
                   <span className="text-sm text-gray-900 font-medium">
                     {colors[selectedColorIndex]?.name || "Original"}
                   </span>
@@ -186,7 +186,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                     onClick={() => setSelectedSize(size)}
                     className={`w-11 h-11 flex items-center justify-center text-sm border transition-all ${
                       selectedSize === size 
-                        ? 'border-[#79A7D3] bg-[#79A7D3] text-white font-medium shadow-sm' 
+                        ? 'border-[#79A7D3] bg-white text-[#79A7D3] font-medium shadow-sm' 
                         : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'
                     }`}
                   >
@@ -228,7 +228,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 className={`flex-1 border font-serif text-lg tracking-wide py-4 px-4 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] ${
                   isAdded 
                     ? 'border-green-500 bg-green-50 text-green-700' 
-                    : 'border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6895C2] text-white font-medium'
+                    : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] font-medium'
                 }`}
               >
                 {isAdded ? 'Added to Cart' : 'Add To Cart'}

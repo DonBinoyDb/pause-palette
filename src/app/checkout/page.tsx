@@ -635,7 +635,7 @@ export default function CheckoutPage() {
                             <span>Qty: {item.quantity}</span>
                           </div>
                         </div>
-                        <div className="text-right font-serif text-sm font-medium text-[#2C2B29] shrink-0">
+                        <div className="text-right font-garamond text-sm font-medium text-[#2C2B29] shrink-0">
                           ₹ {(item.price * item.quantity).toLocaleString("en-IN")}
                         </div>
                       </div>
@@ -647,7 +647,7 @@ export default function CheckoutPage() {
                 <div className="border-t border-[#E0DED9] pt-4 space-y-2.5 text-xs text-[#5C5A58]">
                   <div className="flex justify-between items-center">
                     <span>Subtotal</span>
-                    <span className="font-serif text-sm text-[#2C2B29] font-medium">
+                    <span className="font-garamond text-sm text-[#2C2B29] font-medium">
                       ₹ {cartTotal.toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -659,7 +659,7 @@ export default function CheckoutPage() {
                     <span className="text-xs tracking-wider uppercase font-semibold text-[#2C2B29]">
                       Total
                     </span>
-                    <span className="font-serif text-2xl text-[#2C2B29] font-medium">
+                    <span className="font-garamond text-2xl text-[#2C2B29] font-medium">
                       ₹ {cartTotal.toLocaleString("en-IN")}
                     </span>
                   </div>

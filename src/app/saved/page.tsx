@@ -117,7 +117,7 @@ export default function SavedPage() {
                         {item.name}
                       </h3>
                     </Link>
-                    <p className="font-sans font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums whitespace-nowrap shrink-0">
+                    <p className="font-garamond font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums whitespace-nowrap shrink-0">
                       ₹{item.price.toLocaleString("en-IN")}
                     </p>
                   </div>
@@ -133,7 +133,7 @@ export default function SavedPage() {
                       className={`w-full border font-garamond tracking-widest text-[12px] md:text-[12.5px] uppercase py-2.5 transition-all duration-200 cursor-pointer rounded-xs shadow-2xs font-medium ${
                         addingId === item.productId 
                           ? 'border-green-600 bg-green-50 text-green-700' 
-                          : 'border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6895C2] text-white'
+                          : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3]'
                       }`}
                     >
                       {addingId === item.productId ? 'Added to Cart ✓' : 'Add to Cart'}

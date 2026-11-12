@@ -220,7 +220,7 @@ export default function CartPage() {
                               {item.color && (
                                 <>
                                   <span className="w-1 h-1 rounded-full bg-[#D1CFCA]" />
-                                  <span>Colour: <strong className="text-[#4E7185] bg-[#EAF0F6] px-1.5 py-0.5 rounded-xs font-semibold">{item.color}</strong></span>
+                                  <span>Variant: <strong className="text-[#4E7185] bg-[#EAF0F6] px-1.5 py-0.5 rounded-xs font-semibold">{item.color}</strong></span>
                                 </>
                               )}
                             </div>
@@ -268,11 +268,11 @@ export default function CartPage() {
                       
                       {/* Line Item Total */}
                       <div className="text-right">
-                        <div className="font-serif text-sm sm:text-base text-[#2C2B29] font-medium">
+                        <div className="font-garamond text-sm sm:text-base text-[#2C2B29] font-medium">
                           ₹ {(item.price * item.quantity).toLocaleString("en-IN")}
                         </div>
                         {item.quantity > 1 && (
-                          <div className="text-[10px] text-[#8B8985] font-sans">
+                          <div className="text-[10px] text-[#8B8985] font-garamond">
                             ₹ {item.price.toLocaleString("en-IN")} each
                           </div>
                         )}
@@ -294,7 +294,7 @@ export default function CartPage() {
                 <div className="flex flex-col gap-3 text-xs sm:text-sm text-[#5C5A58] mb-5 border-b border-[#E8E6E1] pb-5">
                   <div className="flex justify-between items-center">
                     <span>Subtotal ({totalQuantity} {totalQuantity === 1 ? 'item' : 'items'})</span>
-                    <span className="font-serif text-base text-[#2C2B29] font-medium">
+                    <span className="font-garamond text-base text-[#2C2B29] font-medium">
                       ₹ {cartTotal.toLocaleString("en-IN")}
                     </span>
                   </div>
@@ -308,7 +308,7 @@ export default function CartPage() {
                   <span className="text-xs tracking-wider uppercase font-semibold text-[#2C2B29]">
                     Estimated Total
                   </span>
-                  <span className="font-serif text-2xl md:text-3xl text-[#2C2B29] font-medium">
+                  <span className="font-garamond text-2xl md:text-3xl text-[#2C2B29] font-medium">
                     ₹ {cartTotal.toLocaleString("en-IN")}
                   </span>
                 </div>
