@@ -17,10 +17,10 @@ export default async function LookbookPage() {
         
         {/* Header Section */}
         <div className="text-center mb-12 px-6 max-w-[1400px] mx-auto">
-          <h1 className="font-garamond text-[16px] md:text-[18px] tracking-[0.2em] text-gray-500 font-semibold uppercase mb-4">
+          <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">
             LOOKBOOK
           </h1>
-          <p className="italic font-normal text-gray-600 text-[15px] md:text-[16px] mb-3 leading-[1.6]">
+          <p className="text-[14px] md:text-[15px] text-gray-500 leading-[1.8] max-w-[1200px] mx-auto mb-2">
             A visual study of Pause Palette, captured in its most expressive moments.
           </p>
           <p className="text-[14px] md:text-[15px] text-gray-500 leading-[1.8] max-w-[1200px] mx-auto mb-2">

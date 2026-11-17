@@ -117,7 +117,7 @@ export default function SavedPage() {
                         {item.name}
                       </h3>
                     </Link>
-                    <p className="font-garamond font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums whitespace-nowrap shrink-0">
+                    <p className="font-garamond font-medium text-[14px] md:text-[16px] text-gray-900 whitespace-nowrap shrink-0">
                       ₹{item.price.toLocaleString("en-IN")}
                     </p>
                   </div>

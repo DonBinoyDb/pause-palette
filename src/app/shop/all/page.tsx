@@ -22,7 +22,7 @@ export default async function ShopAllPage() {
       <div className="pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full">
         
         <header className="mb-10 md:mb-14 flex flex-col items-center text-center">
-          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase">
+          <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase">
             All Pieces
           </h1>
         </header>

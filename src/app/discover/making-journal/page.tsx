@@ -21,10 +21,10 @@ export default async function MakingJournalPage() {
 
           {/* Text Left */}
           <div className="md:w-[42%] pt-32 md:pt-56 flex flex-col z-10">
-            <h1 className="font-garamond text-[18px] tracking-[0.1em] text-gray-500 uppercase mb-1">
+            <h1 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium mb-3">
               THE MAKING JOURNAL
             </h1>
-            <p className="italic font-bold text-gray-600 text-[16px] md:text-[17px] mb-2 leading-[1.6]">
+            <p className="text-[15px] text-gray-500 leading-[1.8] mb-2">
               A journal of the stories, ideas and moments that shape Pause Palette.
             </p>
             <p className="text-[15px] text-gray-500 leading-[1.8] mb-2">

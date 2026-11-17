@@ -24,10 +24,10 @@ export default function Footer() {
           <div className="md:col-span-3">
             <h3 className="text-xs tracking-widest text-gray-500 uppercase mb-4 font-light">CUSTOMER CARE</h3>
             <ul className="space-y-1 text-sm text-gray-500 font-light">
-              <li><Link href="/contact" className="hover:text-gray-900 transition-colors">Contact</Link></li>
-              <li><Link href="/shipping-and-delivery" className="hover:text-gray-900 transition-colors">Shipping & Delivery</Link></li>
-              <li><Link href="/returns-and-exchanges" className="hover:text-gray-900 transition-colors">Returns & Exchanges</Link></li>
-              <li><Link href="/faqs" className="hover:text-gray-900 transition-colors">FAQs</Link></li>
+              <li><Link href="/contact" className="hover:text-[#79A7D3] transition-colors">Contact</Link></li>
+              <li><Link href="/shipping-and-delivery" className="hover:text-[#79A7D3] transition-colors">Shipping & Delivery</Link></li>
+              <li><Link href="/returns-and-exchanges" className="hover:text-[#79A7D3] transition-colors">Returns & Exchanges</Link></li>
+              <li><Link href="/faqs" className="hover:text-[#79A7D3] transition-colors">FAQs</Link></li>
             </ul>
           </div>
           

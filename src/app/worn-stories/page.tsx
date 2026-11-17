@@ -1,9 +1,9 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Image from "next/image";
-import WornStoriesCarousel from "@/components/WornStoriesCarousel";
-import ShareStoryForm from "@/components/ShareStoryForm";
+import WornStoriesLayout from "@/components/WornStoriesLayout";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export default async function WornStoriesPage() {
   const reviews = await prisma.review.findMany({
@@ -15,40 +15,25 @@ export default async function WornStoriesPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
 
-      <div className="pt-32 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1600px]">
+      {/* Main Container */}
+      <div className="pt-28 md:pt-36 pb-24 px-6 md:px-10 lg:px-16 container mx-auto w-full max-w-[1400px]">
+        
         {/* Header Section */}
-        <div className="text-center mb-16 mt-4">
-          <h1 className="font-garamond text-2xl tracking-[0.15em] text-gray-700 uppercase mb-4">
+        <header className="text-center mb-10 md:mb-14 max-w-2xl mx-auto">
+          <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">
             Worn Stories
           </h1>
-          <p className="font-garamond italic text-gray-600 text-sm mb-6">
+          <p className="font-garamond italic text-gray-600 text-sm md:text-[15px] mb-2 leading-relaxed">
             Your words, your moments, your Pause Palette.
           </p>
-          <p className="text-[13px] text-gray-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-garamond text-[13px] text-gray-500 leading-relaxed max-w-xl mx-auto">
             A collection of reflections from those who wear our pieces — the moments they carry, the memories they gather, and the ways each piece becomes part of their everyday.
-            <br />
-            <span className="italic">
-              Because a piece finds a new meaning once it becomes yours.
-            </span>
           </p>
-        </div>
+        </header>
 
-        {/* Dynamic Reviews Carousel with 3-at-a-time pagination */}
-        <WornStoriesCarousel reviews={reviews} />
+        {/* 2-Column Layout: Reviews on the Left, Share Story Form on the Right */}
+        <WornStoriesLayout reviews={reviews} />
 
-        {/* Share Your Story Section */}
-        <ShareStoryForm />
-
-        {/* Bottom Illustration Section */}
-        <div className="flex justify-center mt-12 mb-8">
-          <Image
-            src="/images/add.png"
-            alt="People sharing stories"
-            width={600}
-            height={400}
-            className="object-contain w-full max-w-2xl"
-          />
-        </div>
       </div>
 
       <Footer />

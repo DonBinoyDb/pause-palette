@@ -79,7 +79,9 @@ export default function NewInClient({ products }: { products: Product[] }) {
             type="button"
             suppressHydrationWarning
             onClick={() => setSortOpen(!sortOpen)}
-            className="text-sm tracking-widest uppercase text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1"
+            className={`text-sm tracking-widest uppercase transition-colors flex items-center gap-1 cursor-pointer ${
+              sortOpen ? "text-[#79A7D3]" : "text-gray-500 hover:text-[#79A7D3]"
+            }`}
           >
             Sort By {sortOpen ? "−" : "+"}
           </button>

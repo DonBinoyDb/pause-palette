@@ -131,7 +131,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                </p>
             </div>
             
-            <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 tracking-tight tabular-nums mb-6">
+            <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 mb-6">
               ₹{product.price.toLocaleString("en-IN")}
             </p>
 

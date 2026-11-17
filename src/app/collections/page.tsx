@@ -28,8 +28,8 @@ export default async function CollectionsPage() {
         
         {/* Header Section */}
         <header className="mb-16 md:mb-20 flex flex-col items-center text-center">
-          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-3">
-            Our Collections
+          <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">
+            Collections
           </h1>
           <p className="text-gray-400 text-[12px] md:text-[13px] tracking-widest font-sans uppercase mb-2">
             Two expressions. Many stories.
@@ -91,9 +91,6 @@ export default async function CollectionsPage() {
 
                   {/* Right: Harmoniously centered editorial text */}
                   <div className="w-full md:w-[36%] lg:w-[32%] xl:w-[30%] text-center md:text-left flex flex-col items-center md:items-start py-2 md:py-6">
-                    <span className="text-[11px] md:text-[12px] tracking-[0.22em] text-[#4A7DAF] uppercase font-semibold font-sans mb-2">
-                      Collection
-                    </span>
                     <h2 className="font-garamond text-3xl sm:text-4xl lg:text-5xl text-gray-900 group-hover:text-gray-700 transition-colors mb-3 md:mb-4 leading-tight font-normal">
                       {collection.name}
                     </h2>

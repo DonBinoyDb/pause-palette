@@ -9,7 +9,7 @@ export default function CurateYourPiecePage() {
       
       <main className="flex-1 pt-24 md:pt-32 pb-16 md:pb-24">
         <div className="max-w-5xl mx-auto px-6 flex flex-col items-center">
-          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase text-center mb-3">
+          <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase text-center mb-3">
             Curate Your Piece
           </h1>
           <p className="text-[15px] md:text-[16.5px] font-garamond text-gray-600 text-center max-w-2xl mx-auto mb-10 md:mb-14 leading-relaxed">

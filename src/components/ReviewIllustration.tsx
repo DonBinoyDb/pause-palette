@@ -56,7 +56,11 @@ export default function ReviewIllustration({ type, photoUrl, text }: Omit<Review
             className="w-full h-full object-cover" 
           />
         ) : (
-          <span className="font-garamond text-gray-400 text-xs">No Photo</span>
+          <div className="w-full h-full bg-[#F5F2EB] flex flex-col items-center justify-center p-2 text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/leaf_icon.png" alt="Pause Palette" className="w-6 h-6 object-contain opacity-50 mb-1" />
+            <span className="font-garamond italic text-gray-400 text-[10px]">A quiet moment</span>
+          </div>
         )}
       </div>
 

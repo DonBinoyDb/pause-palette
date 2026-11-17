@@ -77,7 +77,7 @@ export default function ProductGrid({
                   {shopProduct.category}
                 </p>
               </div>
-              <p className="font-garamond font-medium text-[13px] md:text-[15px] text-gray-900 tracking-tight tabular-nums whitespace-nowrap shrink-0 pt-0.5">
+              <p suppressHydrationWarning className="font-garamond font-medium text-[14px] md:text-[16px] text-gray-900 whitespace-nowrap shrink-0 pt-0.5">
                 ₹{product.price.toLocaleString("en-IN")}
               </p>
             </div>
