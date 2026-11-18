@@ -25,6 +25,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   const userRole = (session?.user as any)?.role?.toLowerCase();
   const isAdmin = status === "authenticated" && userRole === "admin";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<"shop" | "discover" | null>(null);
   const pathname = usePathname();
 
   // When on white background (variant !== "light"), icons and nav text are blue (#4A7DAF)
@@ -33,10 +34,24 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   const navOptionsColor = variant === "light" ? "text-white" : "text-[#4A7DAF]";
   const iconColor = variant === "light" && !mobileMenuOpen ? "text-white" : "text-[#4A7DAF]";
 
-  // Close mobile menu when route changes
+  // Close mobile menu and any active dropdown when route changes
   useEffect(() => {
     setMobileMenuOpen(false);
+    setActiveDropdown(null);
   }, [pathname]);
+
+  // Close dropdown when clicking / tapping outside
+  useEffect(() => {
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest("[data-nav-dropdown]")) {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
 
   // Position absolute normally, but fixed when mobile menu is open so it doesn't scroll away
   const positionClass = mobileMenuOpen ? "fixed" : "absolute";
@@ -58,40 +73,78 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <nav className={`hidden md:flex items-center gap-5 lg:gap-8 xl:gap-10 mt-2 text-xs tracking-[0.16em] uppercase ${navOptionsColor}`}>
             
             {/* Shop Dropdown */}
-            <div className="relative group py-2">
-              <span className="hover:opacity-70 transition-opacity cursor-pointer">Shop</span>
+            <div className="relative group py-2" data-nav-dropdown>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveDropdown(prev => prev === "shop" ? null : "shop");
+                }}
+                className="hover:opacity-70 transition-opacity cursor-pointer text-xs tracking-[0.16em] uppercase font-normal bg-transparent border-0 p-0 text-current select-none"
+                aria-expanded={activeDropdown === "shop"}
+              >
+                Shop
+              </button>
               
-              <div className="absolute top-[100%] left-0 pt-3 invisible group-hover:visible">
-                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[200px] shadow-2xl opacity-0 -translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]`}>
+              <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "shop" ? "visible" : "invisible group-hover:visible"}`}>
+                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[200px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  activeDropdown === "shop"
+                    ? "opacity-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 -translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto"
+                }`}>
                   
-                  <Link href="/shop/new-in" className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}>
+                  <Link 
+                    href="/shop/new-in" 
+                    onClick={() => setActiveDropdown(null)}
+                    className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
+                  >
                     <span className="whitespace-nowrap">New In</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
-                  <Link href="/shop/all" className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}>
+                  <Link 
+                    href="/shop/all" 
+                    onClick={() => setActiveDropdown(null)}
+                    className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
+                  >
                     <span className="whitespace-nowrap">All</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
-                  <Link href="/collections" className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}>
+                  <Link 
+                    href="/collections" 
+                    onClick={() => setActiveDropdown(null)}
+                    className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
+                  >
                     <span className="whitespace-nowrap">Collections</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
                   
-                  <Link href="/categories/men" className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}>
+                  <Link 
+                    href="/categories/men" 
+                    onClick={() => setActiveDropdown(null)}
+                    className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
+                  >
                     <span className="whitespace-nowrap">Men</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
-                  <Link href="/categories/women" className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}>
+                  <Link 
+                    href="/categories/women" 
+                    onClick={() => setActiveDropdown(null)}
+                    className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
+                  >
                     <span className="whitespace-nowrap">Women</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
                   <div className={`h-px w-full my-1 ${borderColor}`}></div>
 
-                  <Link href="/curate-your-piece" className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}>
+                  <Link 
+                    href="/curate-your-piece" 
+                    onClick={() => setActiveDropdown(null)}
+                    className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
+                  >
                     <span className="whitespace-nowrap">Curate Your Piece</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
@@ -101,12 +154,26 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             </div>
             
             {/* Discover Dropdown */}
-            <div className="relative group py-2">
-              <span className="hover:opacity-70 transition-opacity cursor-pointer">Discover</span>
+            <div className="relative group py-2" data-nav-dropdown>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveDropdown(prev => prev === "discover" ? null : "discover");
+                }}
+                className="hover:opacity-70 transition-opacity cursor-pointer text-xs tracking-[0.16em] uppercase font-normal bg-transparent border-0 p-0 text-current select-none"
+                aria-expanded={activeDropdown === "discover"}
+              >
+                Discover
+              </button>
               
               {/* Dropdown wrapper with padding to bridge the hover gap */}
-              <div className="absolute top-[100%] left-0 pt-3 invisible group-hover:visible">
-                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[260px] shadow-2xl opacity-0 -translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]`}>
+              <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "discover" ? "visible" : "invisible group-hover:visible"}`}>
+                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[260px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  activeDropdown === "discover"
+                    ? "opacity-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 -translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto"
+                }`}>
                   {[
                     { name: "The Story Ahead", href: "/discover/story-ahead" },
                     { name: "Our Story", href: "/discover/our-story" },
@@ -117,6 +184,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     <Link 
                       key={item.name} 
                       href={item.href} 
+                      onClick={() => setActiveDropdown(null)}
                       className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                     >
                       <span className="whitespace-nowrap">{item.name}</span>
@@ -132,6 +200,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             {/* Curate Your Piece Link */}
             <Link 
               href="/curate-your-piece" 
+              onClick={() => setActiveDropdown(null)}
               className="py-2 hover:opacity-70 transition-opacity whitespace-nowrap text-current"
             >
               Curate Your Piece

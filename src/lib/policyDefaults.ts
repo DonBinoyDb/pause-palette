@@ -82,7 +82,77 @@ export const DEFAULT_RETURNS_AND_EXCHANGES: PolicyPageData = {
   footerItalic: false,
 };
 
+export const DEFAULT_PRIVACY_POLICY: PolicyPageData = {
+  id: "privacy-policy",
+  title: "Privacy Policy",
+  introText:
+    "At Pause Palette, we believe in slow, intentional fashion, and that extends to how we handle your data. We only collect the information necessary to provide you with our thoughtfully crafted garments and services.",
+  introItalic: true,
+  sections: [
+    {
+      id: "information-collected",
+      title: "INFORMATION WE COLLECT",
+      content:
+        "At Pause Palette, we only collect the information necessary to provide you with our thoughtfully crafted garments and services. This includes your name, email address, shipping address, and payment information when you place an order.",
+    },
+    {
+      id: "how-we-use",
+      title: "HOW WE USE YOUR INFORMATION",
+      content:
+        "The information we collect is used exclusively to fulfill your orders, communicate with you regarding your purchases, and, if you opt-in, share our Making Journal and new collection stories with you. We do not sell or rent your personal information to third parties.",
+    },
+    {
+      id: "data-security",
+      title: "DATA SECURITY",
+      content:
+        "We implement industry-standard security measures to protect your personal information. All payment transactions are encrypted and processed through secure gateways.",
+    },
+    {
+      id: "your-rights",
+      title: "YOUR RIGHTS",
+      content:
+        "You have the right to access, update, or delete your personal information at any time. If you wish to exercise these rights or have any questions about our privacy practices, please reach out to our Customer Care team.",
+    },
+  ],
+  footerNote:
+    "For any privacy-related inquiries, please contact us at privacy@pausepalette.com",
+  footerItalic: true,
+};
+
+export const DEFAULT_TERMS_AND_CONDITIONS: PolicyPageData = {
+  id: "terms-and-conditions",
+  title: "Terms & Conditions",
+  introText:
+    "Welcome to Pause Palette. By accessing our website and purchasing our products, you agree to be bound by these Terms and Conditions. Our pieces are thoughtfully made to order, and these terms reflect our commitment to craftsmanship and our relationship with you.",
+  introItalic: true,
+  sections: [
+    {
+      id: "made-to-order",
+      title: "MADE TO ORDER PROCESS",
+      content:
+        "Because our garments are created slowly and intentionally, please note that all items are made to order. Dispatches typically occur within 12–15 business days. By placing an order, you acknowledge and agree to this timeline.",
+    },
+    {
+      id: "pricing-and-payments",
+      title: "PRICING & PAYMENTS",
+      content:
+        "All prices are listed in Indian Rupees (₹) unless otherwise noted. We reserve the right to modify prices at any time. Payment is required in full at the time of purchase before the crafting process begins.",
+    },
+    {
+      id: "intellectual-property",
+      title: "INTELLECTUAL PROPERTY",
+      content:
+        "All original hand-drawn illustrations, photographs, and content on this website are the exclusive property of Pause Palette. They may not be reproduced, copied, or used without our explicit written permission.",
+    },
+  ],
+  footerNote:
+    "For any legal inquiries regarding these terms, please contact us at legal@pausepalette.com",
+  footerItalic: true,
+};
+
 export const POLICY_PAGE_DEFAULTS: Record<string, PolicyPageData> = {
   "shipping-and-delivery": DEFAULT_SHIPPING_AND_DELIVERY,
   "returns-and-exchanges": DEFAULT_RETURNS_AND_EXCHANGES,
+  "privacy-policy": DEFAULT_PRIVACY_POLICY,
+  "terms-and-conditions": DEFAULT_TERMS_AND_CONDITIONS,
 };
