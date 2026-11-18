@@ -56,13 +56,13 @@ export default function Footer() {
           <div className="md:col-span-5 text-center md:text-left">
             © 2026 Pause Palette
             <div className="mt-1 text-xs">
-              Developed by <a href="https://asimovx.se" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors underline decoration-gray-300 underline-offset-2">Asimovx Technologies AB</a>
+              Developed by <a href="https://asimovx.se" target="_blank" rel="noopener noreferrer" className="hover:text-[#79A7D3] transition-colors underline decoration-gray-300 hover:decoration-[#79A7D3] underline-offset-2">Asimovx Technologies AB</a>
             </div>
           </div>
           
           <div className="md:col-span-5 flex flex-col sm:flex-row justify-center md:justify-start items-center gap-4 sm:gap-8 md:gap-10">
-            <Link href="/privacy-policy" className="hover:text-gray-900 transition-colors whitespace-nowrap">Privacy Policy</Link>
-            <Link href="/terms-and-conditions" className="hover:text-gray-900 transition-colors whitespace-nowrap">Terms & Conditions</Link>
+            <Link href="/privacy-policy" className="hover:text-[#79A7D3] transition-colors whitespace-nowrap">Privacy Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:text-[#79A7D3] transition-colors whitespace-nowrap">Terms & Conditions</Link>
           </div>
           
           <div className="md:col-span-2 flex justify-center md:justify-end gap-6">

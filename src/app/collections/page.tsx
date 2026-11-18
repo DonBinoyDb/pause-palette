@@ -34,7 +34,7 @@ export default async function CollectionsPage() {
           <p className="text-gray-400 text-[12px] md:text-[13px] tracking-widest font-sans uppercase mb-2">
             Two expressions. Many stories.
           </p>
-          <p className="text-gray-500 text-[13px] md:text-[14px] font-garamond italic max-w-2xl mx-auto leading-relaxed">
+          <p className="text-gray-600 text-[14px] md:text-[15px] font-garamond max-w-2xl mx-auto leading-[1.8]">
             Our collections take form through print and embroidery. Original hand-drawn illustrations are brought to life through digital print on natural fabric blends or intricate embroidery on 100% linen.
           </p>
         </header>

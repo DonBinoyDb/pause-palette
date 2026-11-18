@@ -27,10 +27,11 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Force text-gray-900 when mobile menu is open so the close button (and icons) are visible against the white overlay
-  const textColor = mobileMenuOpen ? "text-gray-900" : (variant === "light" ? "text-white" : "text-gray-900");
+  // When on white background (variant !== "light"), icons and nav text are blue (#4A7DAF)
+  const textColor = variant === "light" && !mobileMenuOpen ? "text-white" : "text-[#4A7DAF]";
   const isWhiteLogo = variant === "light" && !mobileMenuOpen;
   const navOptionsColor = variant === "light" ? "text-white" : "text-[#4A7DAF]";
+  const iconColor = variant === "light" && !mobileMenuOpen ? "text-white" : "text-[#4A7DAF]";
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
         <div className="flex items-center z-30">
           {/* Mobile Hamburger Menu */}
           <div className="md:hidden mt-2">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="hover:opacity-70 transition-opacity" aria-label="Toggle menu">
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className={`hover:opacity-70 transition-opacity ${iconColor}`} aria-label="Toggle menu">
               {mobileMenuOpen ? <X className="w-6 h-6 stroke-[1.5]" /> : <Menu className="w-6 h-6 stroke-[1.5]" />}
             </button>
           </div>
@@ -155,7 +156,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
         </div>
         
         {/* Right Icons */}
-        <div className="flex items-center gap-4 sm:gap-5 md:gap-6 mt-1 z-30">
+        <div className={`flex items-center gap-4 sm:gap-5 md:gap-6 mt-1 z-30 ${iconColor}`}>
           {isAdmin ? (
             <Link
               href="/admin/dashboard"

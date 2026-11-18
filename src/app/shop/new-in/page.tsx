@@ -25,7 +25,7 @@ export default async function NewInPage() {
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">
             New In
           </h1>
-          <p className="text-gray-400 text-[12px] md:text-[13px] tracking-wide font-sans">
+          <p className="text-[15px] md:text-[16.5px] font-garamond text-gray-600 text-center max-w-2xl mx-auto leading-relaxed">
             Our latest additions, crafted with intention. Discover the newest stories to join our collection.
           </p>
         </header>

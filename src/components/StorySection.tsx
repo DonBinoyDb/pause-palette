@@ -45,7 +45,7 @@ export default function StorySection() {
               />
             </div>
 
-            <div className="pt-2 md:pt-0 flex flex-col items-start text-left pl-[5px]">
+            <div className="pt-2 md:pt-0 flex flex-col items-start text-left md:pl-8 lg:pl-12">
               <h2 className="text-[13px] tracking-[0.2em] text-gray-500 uppercase mb-4 group-hover:text-gray-900 transition-colors leading-none md:mt-1 text-left">THE MAKING JOURNAL</h2>
               <p className="text-[17px] leading-relaxed text-gray-800 text-left mb-6" style={{ fontFamily: "'EB Garamond', Garamond, serif" }}>
                 A glimpse into the process behind<br />
