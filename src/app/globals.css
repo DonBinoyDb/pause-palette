@@ -71,3 +71,23 @@ body {
     transform: translateY(0);
   }
 }
+
+@keyframes ribbonMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ribbon {
+  display: flex;
+  width: max-content;
+  animation: ribbonMarquee 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-ribbon:hover {
+  animation-play-state: paused;
+}

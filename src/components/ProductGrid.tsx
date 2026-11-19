@@ -47,6 +47,9 @@ export default function ProductGrid({
               <img 
                 src={shopProduct.image || "https://images.unsplash.com/photo-1571513722275-4b41940f54b8?q=80&w=1974&auto=format&fit=crop"} 
                 alt={product.name}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=2070&auto=format&fit=crop";
+                }}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
               

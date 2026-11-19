@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Save, Plus, Info } from "lucide-react";
+import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Save, Plus, Info, Sparkles } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import StickySaveBar from "@/components/admin/StickySaveBar";
+import AddProductVariantModal from "@/components/admin/AddProductVariantModal";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -63,8 +64,19 @@ export default function NewProductPage() {
   // UI State
   const [openAccordion, setOpenAccordion] = useState<number | null>(null);
   const [isSilhouetteModalOpen, setIsSilhouetteModalOpen] = useState(false);
+  const [isAddFromProductModalOpen, setIsAddFromProductModalOpen] = useState(false);
   const [newFitName, setNewFitName] = useState("");
   const [newFitIconUrl, setNewFitIconUrl] = useState("");
+
+  const handleAddVariantFromExisting = (variant: {
+    name: string;
+    hex: string;
+    images: string[];
+    existingProductId?: string;
+    productSlug?: string;
+  }) => {
+    setColors((prev) => [...prev, variant]);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -296,9 +308,19 @@ export default function NewProductPage() {
     setOpenAccordion(accordions.length);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (publishOverride?: boolean) => {
+    if (!name.trim()) {
+      toast.error("Please enter a product name.");
+      return;
+    }
+    if (!price || isNaN(parseFloat(price))) {
+      toast.error("Please enter a valid price.");
+      return;
+    }
+
     setLoading(true);
+    const publishStatus = publishOverride !== undefined ? publishOverride : isPublished;
+    setIsPublished(publishStatus);
 
     try {
       const res = await fetch("/api/products", {
@@ -315,7 +337,7 @@ export default function NewProductPage() {
           accordions,
           categoryIds,
           sizes,
-          isPublished,
+          isPublished: publishStatus,
           isNew,
           imageFit,
           dispatchInfo,
@@ -331,7 +353,7 @@ export default function NewProductPage() {
 
       if (res.ok) {
         const data = await res.json();
-        toast.success("Product created successfully!");
+        toast.success(publishStatus ? "Product created & published!" : "Product saved as draft!");
         router.push(`/admin/products/${data.id}/edit`);
       } else {
         toast.error("Failed to create product");
@@ -342,6 +364,11 @@ export default function NewProductPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSave(true);
   };
 
   const displayImages = images.length > 0 ? images : [""]; 
@@ -735,20 +762,37 @@ export default function NewProductPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-2 items-center mt-4 pt-4 border-t border-gray-200">
-                    <input 
-                      type="text" 
-                      value={newColorName}
-                      onChange={(e) => setNewColorName(e.target.value)}
-                      placeholder="Variant Name (e.g. Forest Green or Option A)"
-                      className="flex-1 text-xs border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
-                    />
-                    <button 
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                    <div className="flex gap-2 items-center">
+                      <input 
+                        type="text" 
+                        value={newColorName}
+                        onChange={(e) => setNewColorName(e.target.value)}
+                        placeholder="Variant Name (e.g. Forest Green or Option A)"
+                        className="flex-1 text-xs border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
+                      />
+                      <button 
+                        type="button"
+                        onClick={addColor}
+                        className="bg-gray-800 text-white px-3 py-2 rounded-sm text-xs font-medium hover:bg-black transition-colors shrink-0"
+                      >
+                        Add Variant
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 border-t border-gray-200" />
+                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-medium">or</span>
+                      <div className="flex-1 border-t border-gray-200" />
+                    </div>
+
+                    <button
                       type="button"
-                      onClick={addColor}
-                      className="bg-gray-800 text-white px-3 py-2 rounded-sm text-xs font-medium hover:bg-black transition-colors"
+                      onClick={() => setIsAddFromProductModalOpen(true)}
+                      className="w-full py-2.5 px-3 border border-gray-300 hover:border-gray-900 bg-white hover:bg-gray-50 text-gray-800 text-xs tracking-wider uppercase font-medium rounded-sm flex items-center justify-center gap-2 transition-all shadow-2xs cursor-pointer"
                     >
-                      Add Variant
+                      <Plus size={14} />
+                      <span>Add from Existing Product</span>
                     </button>
                   </div>
                 </div>
@@ -798,14 +842,26 @@ export default function NewProductPage() {
                 </p>
               </div>
 
-              {/* Save Button */}
-              <button 
-                type="submit"
-                disabled={loading || uploading}
-                className="w-full border border-gray-800 bg-gray-800 text-white font-serif tracking-widest uppercase py-4 mb-8 hover:bg-black transition-colors disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
-              >
-                {loading ? "SAVING..." : "SAVE & PUBLISH PRODUCT"}
-              </button>
+              {/* Action Buttons: Save & Publish vs Save as Draft */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <button 
+                  type="button"
+                  onClick={() => handleSave(true)}
+                  disabled={loading || uploading}
+                  className="flex-1 border border-gray-900 bg-gray-900 text-white font-serif text-xs tracking-[0.14em] uppercase py-2.5 px-4 hover:bg-black transition-all disabled:opacity-50 flex items-center justify-center shadow-xs cursor-pointer whitespace-nowrap"
+                >
+                  <span>{loading ? "SAVING..." : "SAVE & PUBLISH"}</span>
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => handleSave(false)}
+                  disabled={loading || uploading}
+                  className="flex-1 border border-gray-300 bg-white text-gray-700 font-serif text-xs tracking-[0.14em] uppercase py-2.5 px-4 hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 flex items-center justify-center shadow-2xs cursor-pointer whitespace-nowrap"
+                >
+                  <span>SAVE AS DRAFT</span>
+                </button>
+              </div>
 
               {/* Description Input */}
               <div className="relative mb-10">
@@ -988,12 +1044,28 @@ export default function NewProductPage() {
         </div>
       )}
 
+      {/* Add Variant from Existing Product Modal */}
+      <AddProductVariantModal
+        isOpen={isAddFromProductModalOpen}
+        onClose={() => setIsAddFromProductModalOpen(false)}
+        currentProductName={name}
+        currentProductImages={images}
+        currentProductSlug={slug}
+        existingVariantNames={colors.map((c) => c.name)}
+        onAddVariant={handleAddVariantFromExisting}
+      />
+
       {/* Floating Sticky Save Bar */}
       <StickySaveBar
         formId="product-new-form"
+        onSave={() => handleSave(true)}
         saving={loading || uploading}
-        label="Save Product"
+        label="Save & Publish"
         subtext={isPublished ? "Active on store" : "Draft status"}
+        secondaryAction={{
+          label: "Save as Draft",
+          onClick: () => handleSave(false),
+        }}
       />
 
     </form>

@@ -50,6 +50,27 @@ model User {
   sessions      Session[]
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
+  addresses     Address[]
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String   @default("Home") // "Home", "Office", "Studio", "Other"
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+  country      String   @default("India")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -66,6 +87,7 @@ model Collection {
   slug        String    @unique
   description String?
   coverImage  String?
+  images      String[]  @default([])
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -77,6 +99,7 @@ model Category {
   slug        String    @unique
   description String?
   coverImage  String?
+  images      String[]  @default([])
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
