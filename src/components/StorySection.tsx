@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 export default function StorySection() {
   return (
     <section className="bg-white pt-12 md:pt-20 pb-6 md:pb-10">
-      <div className="w-full px-6 md:px-10 lg:px-20">
+      <div className="w-full max-w-[1700px] mx-auto px-4 md:px-8 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start">
 
           {/* Our Story */}

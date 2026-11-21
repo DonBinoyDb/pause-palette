@@ -94,7 +94,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="pt-20 md:pt-32 pb-24 px-0 md:px-8 lg:px-16 w-full">
+      <div className="pt-20 md:pt-32 pb-24 px-0 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
         
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
           

@@ -112,7 +112,7 @@ export default function NewInSection({
 
   return (
     <section className="bg-white pt-8 md:pt-14 pb-16 md:pb-24 border-t border-gray-100 overflow-hidden">
-      <div className="w-full px-6 md:px-10 lg:px-20 max-w-[1700px] mx-auto">
+      <div className="w-full max-w-[1700px] mx-auto px-4 md:px-8 lg:px-16">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">

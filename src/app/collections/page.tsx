@@ -24,7 +24,7 @@ export default async function CollectionsPage() {
       <Navbar variant="dark" />
       
       {/* Page Content */}
-      <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full">
+      <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
         
         {/* Header Section */}
         <header className="mb-16 md:mb-20 flex flex-col items-center text-center">
