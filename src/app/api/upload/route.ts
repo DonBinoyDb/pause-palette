@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     let contentType = file.type || "application/octet-stream";
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const originalNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
-    const sanitizedName = originalNameWithoutExt.replace(/[^a-zA-Z0-9]/g, "");
+    const sanitizedName = originalNameWithoutExt.replace(/[^a-zA-Z0-9]/g, "") || "media";
     let filename = "";
 
     if (isVideo) {
@@ -38,8 +38,9 @@ export async function POST(request: Request) {
       contentType = file.type || `video/${ext}`;
     } else {
       try {
-        // Convert images to WebP using sharp
+        // Auto-orient based on EXIF metadata (preserves portrait/vertical orientation for mobile photos) and convert to WebP
         uploadBuffer = await sharp(originalBuffer)
+          .rotate()
           .webp({ quality: 85 })
           .toBuffer();
         filename = `${uniqueSuffix}-${sanitizedName}.webp`;
