@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Info, Plus, Save } from "lucide-react";
+import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Info, Plus, Save, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Copy } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,6 +23,7 @@ export default function EditProductForm({
   const MAX_FILE_SIZE = 2 * 1024 * 1024;
   
   const [loading, setLoading] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [iconUploading, setIconUploading] = useState(false);
   const [fitGuideUploading, setFitGuideUploading] = useState(false);
@@ -265,6 +266,46 @@ export default function EditProductForm({
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const moveImage = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === images.length - 1) return;
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    setImages(prev => {
+      const next = [...prev];
+      const temp = next[index];
+      next[index] = next[targetIndex];
+      next[targetIndex] = temp;
+      return next;
+    });
+  };
+
+  const setAsCoverImage = (index: number) => {
+    if (index === 0) return;
+    setImages(prev => {
+      const next = [...prev];
+      const [selected] = next.splice(index, 1);
+      next.unshift(selected);
+      return next;
+    });
+  };
+
+  const moveColorImage = (colorIndex: number, imageIndex: number, direction: "left" | "right") => {
+    setColors(prev => {
+      const next = [...prev];
+      const targetList = [...next[colorIndex].images];
+      const targetIndex = direction === "left" ? imageIndex - 1 : imageIndex + 1;
+      if (targetIndex < 0 || targetIndex >= targetList.length) return prev;
+      const temp = targetList[imageIndex];
+      targetList[imageIndex] = targetList[targetIndex];
+      targetList[targetIndex] = temp;
+      next[colorIndex] = {
+        ...next[colorIndex],
+        images: targetList,
+      };
+      return next;
+    });
+  };
+
   const toggleCategory = (id: string) => {
     if (categoryIds.includes(id)) {
       setCategoryIds(categoryIds.filter(item => item !== id));
@@ -366,6 +407,30 @@ export default function EditProductForm({
     }
   };
 
+  const handleDuplicate = async () => {
+    try {
+      setDuplicating(true);
+      toast.loading("Duplicating product as draft...", { id: "duplicate" });
+
+      const res = await fetch(`/api/products/${product.id}/duplicate`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (data.success && data.product) {
+        toast.success("Product duplicated as draft! Opening editor...", { id: "duplicate" });
+        router.push(`/admin/products/${data.product.id}/edit`);
+      } else {
+        toast.error(data.message || "Failed to duplicate product", { id: "duplicate" });
+      }
+    } catch (err) {
+      console.error("Duplicate error:", err);
+      toast.error("Failed to duplicate product", { id: "duplicate" });
+    } finally {
+      setDuplicating(false);
+    }
+  };
+
   const displayImages = images.length > 0 ? images : [""]; 
 
   return (
@@ -384,6 +449,15 @@ export default function EditProductForm({
         </div>
         
         <div className="flex flex-wrap gap-3 items-center">
+          <button
+            type="button"
+            onClick={handleDuplicate}
+            disabled={duplicating || loading}
+            className="flex items-center gap-1.5 px-4 py-2.5 text-[10px] tracking-[0.15em] uppercase text-gray-700 hover:text-black bg-white hover:bg-gray-50 border border-gray-200 transition-all rounded-sm font-medium shadow-2xs disabled:opacity-50"
+            title="Duplicate product as draft"
+          >
+            <Copy size={13} /> {duplicating ? "Duplicating..." : "Duplicate"}
+          </button>
           <button
             type="button"
             onClick={handleDelete}
@@ -476,18 +550,47 @@ export default function EditProductForm({
             <div className="w-full lg:w-7/12 flex gap-4 md:gap-8">
               <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 h-fit">
                 {displayImages.map((src, idx) => (
-                  <div key={idx} className="aspect-[3/4] w-full relative bg-gray-100 cursor-pointer overflow-hidden border border-gray-200 group">
+                  <div key={idx} className="aspect-[3/4] w-full relative bg-gray-100 cursor-pointer overflow-hidden border border-gray-200 group rounded-xs">
                     {src ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={src} alt="Thumb" className="object-cover w-full h-full" />
-                        <button 
-                          type="button"
-                          onClick={() => removeImage(idx)}
-                          className="absolute inset-0 bg-white/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                        >
-                          <X size={16} className="text-red-500" />
-                        </button>
+                        <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[9px] font-mono px-1 rounded-xs">
+                          {idx + 1}
+                        </span>
+                        {/* Thumbnail overlay with reorder arrows */}
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-between p-1 transition-opacity">
+                          <div className="flex items-center gap-1">
+                            {idx > 0 && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); moveImage(idx, "up"); }}
+                                className="p-0.5 hover:bg-white/20 rounded-xs text-white"
+                                title="Move up"
+                              >
+                                <ChevronUp size={14} />
+                              </button>
+                            )}
+                            {idx < images.length - 1 && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); moveImage(idx, "down"); }}
+                                className="p-0.5 hover:bg-white/20 rounded-xs text-white"
+                                title="Move down"
+                              >
+                                <ChevronDown size={14} />
+                              </button>
+                            )}
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                            className="p-1 hover:text-red-400 text-white transition-colors"
+                            title="Remove image"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
                       </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -500,18 +603,60 @@ export default function EditProductForm({
 
               <div className="flex-1 flex flex-col gap-4">
                 {displayImages.map((src, idx) => (
-                  <div key={idx} className="aspect-[3/4] w-full relative bg-gray-50 border border-gray-200 border-dashed group">
+                  <div key={idx} className="aspect-[3/4] w-full relative bg-gray-50 border border-gray-200 border-dashed group overflow-hidden">
                     {src ? (
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="Main" className={`w-full h-full ${imageFit === "contain" ? "object-contain bg-white" : "object-cover"}`} />
-                        <button 
-                          type="button"
-                          onClick={() => removeImage(idx)}
-                          className="absolute top-4 right-4 bg-white p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity rounded-full hover:bg-red-50 hover:text-red-500"
-                        >
-                          <X size={20} />
-                        </button>
+                        <img src={src} alt={`Main ${idx + 1}`} className={`w-full h-full ${imageFit === "contain" ? "object-contain bg-white" : "object-cover"}`} />
+                        
+                        {/* Top-left: Position Badge & Set as Cover */}
+                        <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
+                          <span className="bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono uppercase px-2.5 py-1 rounded-sm shadow-xs font-semibold">
+                            {idx === 0 ? "★ Cover / 1st" : `#${idx + 1}`}
+                          </span>
+                          {idx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setAsCoverImage(idx)}
+                              className="bg-white/95 hover:bg-black hover:text-white text-gray-800 text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-sm shadow-md font-medium transition-all opacity-0 group-hover:opacity-100"
+                              title="Make this the first/cover image"
+                            >
+                              Make Cover
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Top-right: Reorder (Up/Down) & Delete Controls */}
+                        <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {idx > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => moveImage(idx, "up")}
+                              title="Move Image Up"
+                              className="bg-white/95 hover:bg-gray-100 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95"
+                            >
+                              <ChevronUp size={18} />
+                            </button>
+                          )}
+                          {idx < images.length - 1 && (
+                            <button
+                              type="button"
+                              onClick={() => moveImage(idx, "down")}
+                              title="Move Image Down"
+                              className="bg-white/95 hover:bg-gray-100 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95"
+                            >
+                              <ChevronDown size={18} />
+                            </button>
+                          )}
+                          <button 
+                            type="button"
+                            onClick={() => removeImage(idx)}
+                            title="Remove Image"
+                            className="bg-white/95 hover:bg-red-50 hover:text-red-500 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
                       </>
                     ) : (
                       <button 
@@ -725,13 +870,39 @@ export default function EditProductForm({
                               <div key={imgIdx} className="relative w-16 h-20 bg-gray-100 border border-gray-200 rounded-sm overflow-hidden group">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={img} alt={`${color.name} ${imgIdx}`} className="w-full h-full object-cover" />
-                                <button 
-                                  type="button" 
-                                  onClick={() => removeColorImage(colorIdx, imgIdx)}
-                                  className="absolute inset-0 bg-white/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                                >
-                                  <X size={16} className="text-red-600" />
-                                </button>
+                                <span className="absolute bottom-0.5 left-0.5 bg-black/70 text-white text-[8px] font-mono px-1 rounded-xs">
+                                  {imgIdx + 1}
+                                </span>
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-between px-1 transition-opacity">
+                                  {imgIdx > 0 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => moveColorImage(colorIdx, imgIdx, "left")}
+                                      className="text-white hover:text-gray-200 p-0.5"
+                                      title="Move left"
+                                    >
+                                      <ChevronLeft size={14} />
+                                    </button>
+                                  ) : <span className="w-3" />}
+                                  <button 
+                                    type="button" 
+                                    onClick={() => removeColorImage(colorIdx, imgIdx)}
+                                    className="text-white hover:text-red-400 p-0.5"
+                                    title="Remove"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                  {imgIdx < color.images.length - 1 ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => moveColorImage(colorIdx, imgIdx, "right")}
+                                      className="text-white hover:text-gray-200 p-0.5"
+                                      title="Move right"
+                                    >
+                                      <ChevronRight size={14} />
+                                    </button>
+                                  ) : <span className="w-3" />}
+                                </div>
                               </div>
                             ))}
                             
