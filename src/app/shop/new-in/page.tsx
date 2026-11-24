@@ -22,7 +22,7 @@ export default async function NewInPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
       
-      <div className="pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full">
+      <div className="pt-32 pb-24 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
         
         <header className="mb-14 flex flex-col items-center text-center">
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">

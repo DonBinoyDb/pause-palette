@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Package, Plus, Search, Edit } from "lucide-react";
+import { Package, Plus, Search, Edit, Copy } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function ProductsManager() {
+  const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -22,6 +26,30 @@ export default function ProductsManager() {
       console.error("Failed to fetch products", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDuplicate = async (id: string, name: string) => {
+    try {
+      setDuplicatingId(id);
+      toast.loading(`Duplicating "${name}"...`, { id: "duplicate" });
+
+      const res = await fetch(`/api/products/${id}/duplicate`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (data.success && data.product) {
+        toast.success(`Duplicated "${name}" as Draft!`, { id: "duplicate" });
+        router.push(`/admin/products/${data.product.id}/edit`);
+      } else {
+        toast.error(data.message || "Failed to duplicate product", { id: "duplicate" });
+      }
+    } catch (err) {
+      console.error("Duplicate error:", err);
+      toast.error("Error duplicating product", { id: "duplicate" });
+    } finally {
+      setDuplicatingId(null);
     }
   };
 
@@ -123,8 +151,23 @@ export default function ProductsManager() {
                         ₹{product.price.toLocaleString()}
                       </p>
                     </div>
-                    <div className="p-2 text-gray-400 shrink-0">
-                      <Edit size={16} />
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDuplicate(product.id, product.name);
+                        }}
+                        disabled={duplicatingId === product.id}
+                        className="p-2 text-gray-400 hover:text-gray-900 transition-colors disabled:opacity-50"
+                        title="Duplicate as Draft"
+                      >
+                        <Copy size={16} />
+                      </button>
+                      <div className="p-2 text-gray-400">
+                        <Edit size={16} />
+                      </div>
                     </div>
                   </Link>
                 ))}
@@ -145,11 +188,15 @@ export default function ProductsManager() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {filteredProducts.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <tr 
+                        key={product.id} 
+                        onClick={() => router.push(`/admin/products/${product.id}/edit`)}
+                        className="hover:bg-gray-50/75 transition-colors group cursor-pointer"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="w-12 h-16 bg-gray-100 rounded-md border border-gray-200 overflow-hidden flex items-center justify-center flex-shrink-0">
                             {product.images && product.images[0] ? (
-                              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+                              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             ) : (
                               <Package size={18} className="text-gray-400" />
                             )}
@@ -157,7 +204,7 @@ export default function ProductsManager() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900">{product.name}</span>
+                            <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{product.name}</span>
                             <span className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-0.5 rounded-full self-start font-mono">/{product.slug}</span>
                           </div>
                         </td>
@@ -179,9 +226,22 @@ export default function ProductsManager() {
                           ₹{product.price.toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDuplicate(product.id, product.name);
+                              }}
+                              disabled={duplicatingId === product.id}
+                              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                              title="Duplicate as Draft"
+                            >
+                              <Copy size={17} />
+                            </button>
                             <Link 
                               href={`/admin/products/${product.id}/edit`} 
+                              onClick={(e) => e.stopPropagation()}
                               className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Edit"
                             >

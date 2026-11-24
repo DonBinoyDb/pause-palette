@@ -16,7 +16,7 @@ export default async function WornStoriesPage() {
       <Navbar variant="dark" />
 
       {/* Main Container */}
-      <div className="pt-28 md:pt-36 pb-24 px-6 md:px-10 lg:px-16 container mx-auto w-full max-w-[1400px]">
+      <div className="pt-28 md:pt-36 pb-24 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
         
         {/* Header Section */}
         <header className="text-center mb-10 md:mb-14 max-w-2xl mx-auto">

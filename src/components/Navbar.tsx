@@ -58,7 +58,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
 
   return (
     <header suppressHydrationWarning className={`${positionClass} top-0 left-0 w-full z-50 ${headerBg} ${textColor} pt-6 pb-4 transition-all duration-300`}>
-      <div className="relative w-full px-4 md:px-8 lg:px-16 flex items-start justify-between">
+      <div className="relative w-full max-w-[1700px] mx-auto px-4 md:px-8 lg:px-16 flex items-start justify-between">
         
         {/* Left Section (Desktop Links / Mobile Hamburger) */}
         <div className="flex items-center z-30">

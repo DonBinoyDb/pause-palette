@@ -115,44 +115,86 @@ export default function HeroBannerManager() {
 
     const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|ogg)$/i.test(file.name);
 
-    if (!isVideo && file.size > 2 * 1024 * 1024) {
-      toast.error("Image exceeds the 2MB size limit. Please choose an image under 2MB.");
+    if (!isVideo && file.size > 5 * 1024 * 1024) {
+      toast.error("Image exceeds the 5MB size limit. Please choose an image under 5MB.");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    if (isVideo && file.size > 50 * 1024 * 1024) {
+      toast.error("Video exceeds the 50MB size limit. Please choose a video under 50MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     try {
       setUploading(true);
-      toast.loading("Uploading media file...", { id: "uploading" });
+      toast.loading(isVideo ? "Uploading video to cloud storage..." : "Uploading image...", { id: "uploading" });
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      let publicUrl = "";
 
-      const json = await res.json();
-      if (json.success && json.url) {
-        const newSlide: MediaItem = {
-          id: `slide-${Date.now()}`,
-          type: isVideo ? "video" : "image",
-          src: json.url,
-        };
+      // For videos or files larger than 4MB, use Direct Supabase Signed Upload to bypass Vercel's 4.5MB payload limit
+      if (isVideo || file.size > 4 * 1024 * 1024) {
+        const signRes = await fetch("/api/upload/sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type || (isVideo ? "video/mp4" : "application/octet-stream"),
+          }),
+        });
 
-        setData((prev) => ({
-          ...prev,
-          mediaItems: [...prev.mediaItems, newSlide],
-        }));
+        const signJson = await signRes.json();
+        if (!signJson.success || !signJson.signedUrl) {
+          throw new Error(signJson.message || "Failed to authorize upload");
+        }
 
-        toast.success("Media uploaded and added to slides!", { id: "uploading" });
+        const uploadRes = await fetch(signJson.signedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type || "video/mp4",
+          },
+          body: file,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(`Direct cloud upload failed (status ${uploadRes.status})`);
+        }
+
+        publicUrl = signJson.publicUrl;
       } else {
-        toast.error(json.message || "Upload failed", { id: "uploading" });
+        // Standard upload via API route for smaller images (with WebP optimization)
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const json = await res.json();
+        if (!json.success || !json.url) {
+          throw new Error(json.message || "Upload failed");
+        }
+
+        publicUrl = json.url;
       }
-    } catch (err) {
+
+      const newSlide: MediaItem = {
+        id: `slide-${Date.now()}`,
+        type: isVideo ? "video" : "image",
+        src: publicUrl,
+      };
+
+      setData((prev) => ({
+        ...prev,
+        mediaItems: [...prev.mediaItems, newSlide],
+      }));
+
+      toast.success(isVideo ? "Video uploaded and added to slides!" : "Media uploaded and added to slides!", { id: "uploading" });
+    } catch (err: any) {
       console.error("Upload error", err);
-      toast.error("Failed to upload media file", { id: "uploading" });
+      toast.error(err?.message || "Failed to upload media file", { id: "uploading" });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

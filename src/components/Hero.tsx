@@ -94,7 +94,7 @@ export default function Hero({ initialData }: HeroProps) {
         ))}
       </div>
 
-      <div className="relative z-20 text-white px-4 md:px-8 lg:px-16 mb-8 md:mb-0 w-full">
+      <div className="relative z-20 text-white w-full max-w-[1700px] mx-auto px-4 md:px-8 lg:px-16 mb-8 md:mb-0">
         <h1 className="text-4xl md:text-[3.5rem] leading-[1.1] font-sans mb-2 md:mb-1 whitespace-pre-line font-normal">
           {title}
         </h1>

@@ -14,8 +14,11 @@ export default async function CollectionsPage() {
   return (
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
-      
-      <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full">
+
+      {/* Page Content */}
+      <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
+
+        {/* Header Section */}
         <header className="mb-16 md:mb-20 flex flex-col items-center text-center">
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">
             Collections
@@ -39,15 +42,15 @@ export default async function CollectionsPage() {
               const collectionImages: string[] =
                 Array.isArray(collection.images) && collection.images.length > 0
                   ? collection.images.filter(
-                      (img: any) => typeof img === "string" && img.trim().length > 0
-                    )
+                    (img: any) => typeof img === "string" && img.trim().length > 0
+                  )
                   : collection.coverImage
-                  ? [collection.coverImage]
-                  : [];
+                    ? [collection.coverImage]
+                    : [];
 
               return (
-                <div 
-                  key={collection.id} 
+                <div
+                  key={collection.id}
                   className="flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-16 xl:gap-20 group"
                 >
                   {/* Left: Hero carousel showing exact collection images */}
@@ -60,8 +63,8 @@ export default async function CollectionsPage() {
                   </div>
 
                   {/* Right: Harmoniously centered editorial text */}
-                  <Link 
-                    href={`/collections/${collection.slug}`} 
+                  <Link
+                    href={`/collections/${collection.slug}`}
                     className="w-full md:w-[36%] lg:w-[32%] xl:w-[30%] text-center md:text-left flex flex-col items-center md:items-start py-2 md:py-6 cursor-pointer"
                   >
                     <h2 className="font-garamond text-3xl sm:text-4xl lg:text-5xl text-gray-900 group-hover:text-gray-700 transition-colors mb-3 md:mb-4 leading-tight font-normal">
@@ -81,7 +84,7 @@ export default async function CollectionsPage() {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </main>
   );
