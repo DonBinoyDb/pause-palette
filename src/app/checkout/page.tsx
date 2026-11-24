@@ -5,8 +5,8 @@ import Footer from "@/components/Footer";
 import { useShop } from "@/context/ShopContext";
 import { useSession, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, ShieldCheck, Truck, MessageCircle, AlertCircle, Check, Plus, MapPin } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { ArrowLeft, ArrowRight, ShieldCheck, Truck, MessageCircle, AlertCircle, Check, Plus, MapPin, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { INDIAN_STATES, STANDARD_ADDRESS_LABELS } from "@/lib/constants";
@@ -26,9 +26,16 @@ interface SavedAddress {
 }
 
 export default function CheckoutPage() {
-  const { cart, cartTotal } = useShop();
+  const { cart, cartTotal, clearCart } = useShop();
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  // Generated once per checkout visit; stable across retries to prevent duplicate orders
+  const idempotencyKeyRef = useRef<string>(
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+  );
 
   const [whatsappNumber, setWhatsappNumber] = useState("917907629021");
 
@@ -201,7 +208,7 @@ export default function CheckoutPage() {
           if (digits) setWhatsappNumber(digits);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -305,69 +312,55 @@ export default function CheckoutPage() {
       }).catch((e) => console.error("Auto-save address error", e));
     }
 
-    const phoneNumber = whatsappNumber || "917907629021";
-    const orderId = `PP-${Math.floor(100000 + Math.random() * 900000)}`;
+    try {
+      const orderPayload = {
+        customerName: formData.fullName.trim(),
+        customerEmail: formData.email.trim(),
+        customerPhone: formData.phone.trim(),
+        shippingAddress: {
+          addressLine1: formData.addressLine1.trim(),
+          addressLine2: formData.addressLine2?.trim() || null,
+          city: formData.city.trim(),
+          state: formData.state.trim(),
+          pincode: formData.pincode.replace(/\D/g, ""),
+          country: formData.country || "India",
+        },
+        orderNotes: formData.orderNotes?.trim() || null,
+        idempotencyKey: idempotencyKeyRef.current,
+        items: cart.map((item) => ({
+          productId: item.productId,
+          name: item.name,
+          image: item.image,
+          quantity: item.quantity,
+          size: item.size || null,
+          silhouette: item.silhouette || null,
+          color: item.color || null,
+          curatedDetails: item.curatedDetails || null,
+        })),
+      };
 
-    let message = "Hello Pause Palette!\n\n";
-    message += "A new order has been placed through the website.\n\n";
-    message += "ORDER DETAILS\n";
-    message += `Order ID: ${orderId}\n\n`;
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
 
-    cart.forEach((item, index) => {
-      const code = item.curatedDetails?.isCurated
-        ? (item.curatedDetails.mode ? `PP-CUR-${item.curatedDetails.mode.toUpperCase()}` : "PP-CURATED")
-        : (item.productId ? `PP-${item.productId.slice(-6).toUpperCase()}` : "PP-PIECE");
-
-      const technique = item.curatedDetails?.technique 
-        || (item.curatedDetails?.mode === "embroidery" ? "Theme Embroidery" : item.curatedDetails?.mode === "illustration" ? "Original Print" : item.curatedDetails?.mode === "solid" ? "Pure Solid Linen" : "Handcrafted");
-
-      const silhouette = item.curatedDetails?.silhouetteName 
-        || (item.silhouette ? item.silhouette.replace(/-/g, " ") : "Signature Fit");
-
-      const colour = item.curatedDetails?.colorName 
-        || item.color 
-        || "Standard";
-
-      if (cart.length > 1) {
-        message += `[Item ${index + 1}]\n`;
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to place order. Please try again.");
+        setIsSubmitting(false);
+        return;
       }
-      message += `Product Code : ${code}\n`;
-      message += `Product: ${item.name}\n`;
-      message += `Technique: ${technique}\n`;
-      message += `Silhouette: ${silhouette}\n`;
-      message += `Size: ${item.size}\n`;
-      message += `Linen Colour: ${colour}\n`;
-      message += `Quantity: ${item.quantity}\n\n`;
-    });
 
-    message += `ORDER TOTAL: ₹${cartTotal.toLocaleString("en-IN")}\n\n`;
-
-    message += "CUSTOMER DETAILS\n";
-    message += `Name: ${formData.fullName.trim()}\n`;
-    message += `Phone: ${formData.phone.trim()}\n`;
-    message += `Email: ${formData.email.trim()}\n\n`;
-
-    const addressLines = [
-      formData.addressLine1.trim(),
-      formData.addressLine2?.trim() || "",
-      `${formData.city.trim()}, ${formData.state.trim()} - ${formData.pincode.trim()}`,
-      formData.country || "India"
-    ].filter(Boolean).join("\n");
-
-    message += "SHIPPING ADDRESS\n";
-    message += `${addressLines}\n\n`;
-
-    if (formData.orderNotes?.trim()) {
-      message += `Order Notes: ${formData.orderNotes.trim()}\n\n`;
+      // Order created successfully: clear cart and redirect to success receipt
+      await clearCart();
+      toast.success("Order placed successfully!");
+      router.push(`/order-success/${data.order.orderNumber}`);
+    } catch (err) {
+      console.error("Order submit network error:", err);
+      toast.error("Network error while submitting order. Please retry.");
+      setIsSubmitting(false);
     }
-
-    message += "Payment pending.\n\n";
-    message += "Please share the payment instructions with the customer.";
-
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, "_blank");
-
-    setIsSubmitting(false);
   };
 
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -419,7 +412,7 @@ export default function CheckoutPage() {
             {/* Left Column: Checkout Form */}
             <div className="flex-1 w-full space-y-6">
               <form onSubmit={(e) => { e.preventDefault(); handlePlaceOrder(); }} className="space-y-6">
-                
+
                 {/* 1. Contact Information */}
                 <div className="bg-white p-6 sm:p-8 rounded-sm border border-[#E8E6E1]/90 shadow-2xs">
                   <div className="flex items-center justify-between pb-3 mb-5 border-b border-[#F0EEEB]">
@@ -445,11 +438,10 @@ export default function CheckoutPage() {
                         value={formData.email || ""}
                         onChange={handleChange}
                         placeholder="yourname@example.com"
-                        className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${
-                          errors.email
-                            ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                            : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                        }`}
+                        className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${errors.email
+                          ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                          : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                          }`}
                       />
                       {errors.email ? (
                         <p className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
@@ -473,11 +465,10 @@ export default function CheckoutPage() {
                         value={formData.fullName || ""}
                         onChange={handleChange}
                         placeholder="Enter your full name"
-                        className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${
-                          errors.fullName
-                            ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                            : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                        }`}
+                        className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${errors.fullName
+                          ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                          : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                          }`}
                       />
                       {errors.fullName && (
                         <p className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
@@ -498,11 +489,10 @@ export default function CheckoutPage() {
                         onChange={handleChange}
                         placeholder="e.g. 9876543210"
                         maxLength={10}
-                        className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${
-                          errors.phone
-                            ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                            : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                        }`}
+                        className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${errors.phone
+                          ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                          : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                          }`}
                       />
                       {errors.phone ? (
                         <p className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
@@ -537,11 +527,10 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           onClick={handleSelectNewAddress}
-                          className={`shrink-0 px-3 py-1.5 text-xs tracking-[0.14em] uppercase transition-all rounded-xs border flex items-center gap-1.5 ${
-                            selectedAddressId === "new"
-                              ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-2xs"
-                              : "border-[#E8E6E1] text-[#5C5A58] hover:border-[#2C2B29] bg-white"
-                          }`}
+                          className={`shrink-0 px-3 py-1.5 text-xs tracking-[0.14em] uppercase transition-all rounded-xs border flex items-center gap-1.5 ${selectedAddressId === "new"
+                            ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-2xs"
+                            : "border-[#E8E6E1] text-[#5C5A58] hover:border-[#2C2B29] bg-white"
+                            }`}
                         >
                           <Plus size={11} strokeWidth={2} />
                           <span>New Address</span>
@@ -560,11 +549,10 @@ export default function CheckoutPage() {
                                   handleSelectSavedAddress(addr);
                                 }
                               }}
-                              className={`shrink-0 px-3.5 py-1.5 text-xs tracking-[0.14em] uppercase transition-all rounded-xs border flex items-center gap-1.5 ${
-                                isSelected
-                                  ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-2xs"
-                                  : "border-[#E8E6E1] text-[#5C5A58] hover:border-[#2C2B29] bg-white"
-                              }`}
+                              className={`shrink-0 px-3.5 py-1.5 text-xs tracking-[0.14em] uppercase transition-all rounded-xs border flex items-center gap-1.5 ${isSelected
+                                ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium shadow-2xs"
+                                : "border-[#E8E6E1] text-[#5C5A58] hover:border-[#2C2B29] bg-white"
+                                }`}
                             >
                               <span>{addr.label}</span>
                             </button>
@@ -627,11 +615,10 @@ export default function CheckoutPage() {
                           value={formData.addressLine1 || ""}
                           onChange={handleChange}
                           placeholder="e.g. Flat 4B, Harmony Apartments, 5th Cross Road"
-                          className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${
-                            errors.addressLine1
-                              ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                              : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                          }`}
+                          className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${errors.addressLine1
+                            ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                            : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                            }`}
                         />
                         {errors.addressLine1 && (
                           <p className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
@@ -668,11 +655,10 @@ export default function CheckoutPage() {
                             value={formData.city || ""}
                             onChange={handleChange}
                             placeholder="e.g. Kochi"
-                            className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${
-                              errors.city
-                                ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                                : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                            }`}
+                            className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${errors.city
+                              ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                              : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                              }`}
                           />
                           {errors.city && (
                             <p className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
@@ -690,11 +676,10 @@ export default function CheckoutPage() {
                             name="state"
                             value={formData.state || "Kerala"}
                             onChange={handleChange}
-                            className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium focus:outline-none ${
-                              errors.state
-                                ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                                : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                            }`}
+                            className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium focus:outline-none ${errors.state
+                              ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                              : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                              }`}
                           >
                             {INDIAN_STATES.map((st) => (
                               <option key={st} value={st}>
@@ -721,11 +706,10 @@ export default function CheckoutPage() {
                             value={formData.pincode || ""}
                             onChange={handleChange}
                             placeholder="e.g. 682001"
-                            className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${
-                              errors.pincode
-                                ? "border-red-400 focus:border-red-500 bg-red-50/20"
-                                : "border-[#D6D3CD] focus:border-[#2C2B29]"
-                            }`}
+                            className={`w-full px-3.5 py-2.5 text-sm rounded-xs border transition-colors bg-white text-[#2C2B29] font-medium placeholder:text-[#9C9994] focus:outline-none ${errors.pincode
+                              ? "border-red-400 focus:border-red-500 bg-red-50/20"
+                              : "border-[#D6D3CD] focus:border-[#2C2B29]"
+                              }`}
                           />
                           {errors.pincode && (
                             <p className="flex items-center gap-1 text-[11px] text-red-500 mt-1">
@@ -775,11 +759,10 @@ export default function CheckoutPage() {
                                     key={lbl}
                                     type="button"
                                     onClick={() => setSaveLabel(lbl)}
-                                    className={`px-3 py-1.5 text-xs tracking-wider uppercase border rounded-xs transition-colors ${
-                                      saveLabel === lbl
-                                        ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium"
-                                        : "border-[#D6D3CD] text-[#5C5A58] hover:border-[#2C2B29] bg-white"
-                                    }`}
+                                    className={`px-3 py-1.5 text-xs tracking-wider uppercase border rounded-xs transition-colors ${saveLabel === lbl
+                                      ? "border-[#2C2B29] bg-[#2C2B29] text-white font-medium"
+                                      : "border-[#D6D3CD] text-[#5C5A58] hover:border-[#2C2B29] bg-white"
+                                      }`}
                                   >
                                     {lbl}
                                   </button>
@@ -892,15 +875,21 @@ export default function CheckoutPage() {
                   type="button"
                   onClick={handlePlaceOrder}
                   disabled={isSubmitting}
-                  className="w-full group bg-[#79A7D3] hover:bg-[#6895C2] text-white py-3.5 px-5 flex items-center justify-between transition-all duration-300 rounded-xs shadow-xs disabled:opacity-60 cursor-pointer"
+                  className="w-full group bg-[#79A7D3] hover:bg-[#6895C2] text-white py-3.5 px-5 flex items-center justify-between transition-all duration-300 rounded-xs shadow-xs disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <div className="flex items-center gap-2">
-                    <MessageCircle size={16} className="text-white" />
+                    {isSubmitting ? (
+                      <RefreshCw size={16} className="animate-spin text-white" />
+                    ) : (
+                      <MessageCircle size={16} className="text-white" />
+                    )}
                     <span className="text-xs tracking-[0.16em] uppercase font-semibold">
-                      Complete Order via WhatsApp
+                      {isSubmitting ? "Securing & Placing Order..." : "Complete Order on WhatsApp"}
                     </span>
                   </div>
-                  <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
+                  {!isSubmitting && (
+                    <ArrowRight size={14} className="group-hover:translate-x-1.5 transition-transform" />
+                  )}
                 </button>
 
                 {/* Assurance details */}

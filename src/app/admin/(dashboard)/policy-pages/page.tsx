@@ -2,18 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Save, 
-  RotateCcw, 
-  Plus, 
-  Trash2, 
-  ArrowUp, 
-  ArrowDown, 
-  ExternalLink, 
-  RefreshCw, 
-  FileText, 
-  Truck, 
+import {
+  Save,
+  RotateCcw,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  ExternalLink,
+  RefreshCw,
+  FileText,
+  Truck,
   Repeat,
+  ShieldCheck,
+  Scale,
   Eye,
   CheckCircle2,
   AlertCircle,
@@ -30,15 +32,18 @@ import {
   CopyPlus
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { 
-  PolicyPageData, 
-  PolicySection, 
-  DEFAULT_SHIPPING_AND_DELIVERY, 
-  DEFAULT_RETURNS_AND_EXCHANGES 
+import {
+  PolicyPageData,
+  PolicySection,
+  DEFAULT_SHIPPING_AND_DELIVERY,
+  DEFAULT_RETURNS_AND_EXCHANGES,
+  DEFAULT_PRIVACY_POLICY,
+  DEFAULT_TERMS_AND_CONDITIONS,
+  POLICY_PAGE_DEFAULTS
 } from "@/lib/policyDefaults";
 import StickySaveBar from "@/components/admin/StickySaveBar";
 
-type TabKey = "shipping-and-delivery" | "returns-and-exchanges";
+type TabKey = "shipping-and-delivery" | "returns-and-exchanges" | "privacy-policy" | "terms-and-conditions";
 type DevicePreview = "desktop" | "mobile";
 
 export default function PolicyPagesManager() {
@@ -54,10 +59,14 @@ export default function PolicyPagesManager() {
   // States for each page
   const [shippingData, setShippingData] = useState<PolicyPageData>(DEFAULT_SHIPPING_AND_DELIVERY);
   const [returnsData, setReturnsData] = useState<PolicyPageData>(DEFAULT_RETURNS_AND_EXCHANGES);
-  
+  const [privacyData, setPrivacyData] = useState<PolicyPageData>(DEFAULT_PRIVACY_POLICY);
+  const [termsData, setTermsData] = useState<PolicyPageData>(DEFAULT_TERMS_AND_CONDITIONS);
+
   // Track saved snapshots to detect unsaved changes
   const [savedShippingSnapshot, setSavedShippingSnapshot] = useState<string>("");
   const [savedReturnsSnapshot, setSavedReturnsSnapshot] = useState<string>("");
+  const [savedPrivacySnapshot, setSavedPrivacySnapshot] = useState<string>("");
+  const [savedTermsSnapshot, setSavedTermsSnapshot] = useState<string>("");
 
   // Open/collapsed state for sections
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -68,17 +77,42 @@ export default function PolicyPagesManager() {
     exchanges: true,
     "delivery-transit": true,
     note: true,
+    "information-collected": true,
+    "how-we-use": true,
+    "data-security": true,
+    "your-rights": true,
+    "made-to-order": true,
+    "pricing-and-payments": true,
+    "intellectual-property": true,
   });
 
-  const currentData = activeTab === "shipping-and-delivery" ? shippingData : returnsData;
-  const currentSavedSnapshot = activeTab === "shipping-and-delivery" ? savedShippingSnapshot : savedReturnsSnapshot;
+  const dataMap: Record<TabKey, PolicyPageData> = {
+    "shipping-and-delivery": shippingData,
+    "returns-and-exchanges": returnsData,
+    "privacy-policy": privacyData,
+    "terms-and-conditions": termsData,
+  };
+
+  const snapshotMap: Record<TabKey, string> = {
+    "shipping-and-delivery": savedShippingSnapshot,
+    "returns-and-exchanges": savedReturnsSnapshot,
+    "privacy-policy": savedPrivacySnapshot,
+    "terms-and-conditions": savedTermsSnapshot,
+  };
+
+  const currentData = dataMap[activeTab];
+  const currentSavedSnapshot = snapshotMap[activeTab];
   const isDirty = currentSavedSnapshot !== "" && JSON.stringify(currentData) !== currentSavedSnapshot;
 
   const setCurrentData = (updater: (prev: PolicyPageData) => PolicyPageData) => {
     if (activeTab === "shipping-and-delivery") {
       setShippingData(updater);
-    } else {
+    } else if (activeTab === "returns-and-exchanges") {
       setReturnsData(updater);
+    } else if (activeTab === "privacy-policy") {
+      setPrivacyData(updater);
+    } else if (activeTab === "terms-and-conditions") {
+      setTermsData(updater);
     }
   };
 
@@ -89,9 +123,11 @@ export default function PolicyPagesManager() {
   const fetchPagesData = async () => {
     try {
       setLoading(true);
-      const [resShipping, resReturns] = await Promise.all([
+      const [resShipping, resReturns, resPrivacy, resTerms] = await Promise.all([
         fetch("/api/policy-pages/shipping-and-delivery"),
         fetch("/api/policy-pages/returns-and-exchanges"),
+        fetch("/api/policy-pages/privacy-policy"),
+        fetch("/api/policy-pages/terms-and-conditions"),
       ]);
 
       if (resShipping.ok) {
@@ -101,8 +137,8 @@ export default function PolicyPagesManager() {
           title: json.title || DEFAULT_SHIPPING_AND_DELIVERY.title,
           introText: json.introText ?? DEFAULT_SHIPPING_AND_DELIVERY.introText,
           introItalic: json.introItalic ?? DEFAULT_SHIPPING_AND_DELIVERY.introItalic,
-          sections: Array.isArray(json.sections) && json.sections.length > 0 
-            ? json.sections 
+          sections: Array.isArray(json.sections) && json.sections.length > 0
+            ? json.sections
             : DEFAULT_SHIPPING_AND_DELIVERY.sections,
           footerNote: json.footerNote ?? DEFAULT_SHIPPING_AND_DELIVERY.footerNote,
           footerItalic: json.footerItalic ?? DEFAULT_SHIPPING_AND_DELIVERY.footerItalic,
@@ -118,14 +154,48 @@ export default function PolicyPagesManager() {
           title: json.title || DEFAULT_RETURNS_AND_EXCHANGES.title,
           introText: json.introText ?? DEFAULT_RETURNS_AND_EXCHANGES.introText,
           introItalic: json.introItalic ?? DEFAULT_RETURNS_AND_EXCHANGES.introItalic,
-          sections: Array.isArray(json.sections) && json.sections.length > 0 
-            ? json.sections 
+          sections: Array.isArray(json.sections) && json.sections.length > 0
+            ? json.sections
             : DEFAULT_RETURNS_AND_EXCHANGES.sections,
           footerNote: json.footerNote ?? DEFAULT_RETURNS_AND_EXCHANGES.footerNote,
           footerItalic: json.footerItalic ?? DEFAULT_RETURNS_AND_EXCHANGES.footerItalic,
         };
         setReturnsData(loaded);
         setSavedReturnsSnapshot(JSON.stringify(loaded));
+      }
+
+      if (resPrivacy.ok) {
+        const json = await resPrivacy.json();
+        const loaded: PolicyPageData = {
+          id: "privacy-policy",
+          title: json.title || DEFAULT_PRIVACY_POLICY.title,
+          introText: json.introText ?? DEFAULT_PRIVACY_POLICY.introText,
+          introItalic: json.introItalic ?? DEFAULT_PRIVACY_POLICY.introItalic,
+          sections: Array.isArray(json.sections) && json.sections.length > 0
+            ? json.sections
+            : DEFAULT_PRIVACY_POLICY.sections,
+          footerNote: json.footerNote ?? DEFAULT_PRIVACY_POLICY.footerNote,
+          footerItalic: json.footerItalic ?? DEFAULT_PRIVACY_POLICY.footerItalic,
+        };
+        setPrivacyData(loaded);
+        setSavedPrivacySnapshot(JSON.stringify(loaded));
+      }
+
+      if (resTerms.ok) {
+        const json = await resTerms.json();
+        const loaded: PolicyPageData = {
+          id: "terms-and-conditions",
+          title: json.title || DEFAULT_TERMS_AND_CONDITIONS.title,
+          introText: json.introText ?? DEFAULT_TERMS_AND_CONDITIONS.introText,
+          introItalic: json.introItalic ?? DEFAULT_TERMS_AND_CONDITIONS.introItalic,
+          sections: Array.isArray(json.sections) && json.sections.length > 0
+            ? json.sections
+            : DEFAULT_TERMS_AND_CONDITIONS.sections,
+          footerNote: json.footerNote ?? DEFAULT_TERMS_AND_CONDITIONS.footerNote,
+          footerItalic: json.footerItalic ?? DEFAULT_TERMS_AND_CONDITIONS.footerItalic,
+        };
+        setTermsData(loaded);
+        setSavedTermsSnapshot(JSON.stringify(loaded));
       }
     } catch (err) {
       console.error("Failed to load policy pages", err);
@@ -146,10 +216,15 @@ export default function PolicyPagesManager() {
 
       const resData = await res.json();
       if (resData.success) {
+        const snap = JSON.stringify(currentData);
         if (activeTab === "shipping-and-delivery") {
-          setSavedShippingSnapshot(JSON.stringify(currentData));
-        } else {
-          setSavedReturnsSnapshot(JSON.stringify(currentData));
+          setSavedShippingSnapshot(snap);
+        } else if (activeTab === "returns-and-exchanges") {
+          setSavedReturnsSnapshot(snap);
+        } else if (activeTab === "privacy-policy") {
+          setSavedPrivacySnapshot(snap);
+        } else if (activeTab === "terms-and-conditions") {
+          setSavedTermsSnapshot(snap);
         }
         toast.success(`${currentData.title} updated and published live!`);
       } else {
@@ -174,14 +249,17 @@ export default function PolicyPagesManager() {
 
       const resData = await res.json();
       if (resData.success) {
-        const defaultData = activeTab === "shipping-and-delivery" 
-          ? DEFAULT_SHIPPING_AND_DELIVERY 
-          : DEFAULT_RETURNS_AND_EXCHANGES;
+        const defaultData = POLICY_PAGE_DEFAULTS[activeTab] || DEFAULT_SHIPPING_AND_DELIVERY;
         setCurrentData(() => ({ ...defaultData }));
+        const snap = JSON.stringify(defaultData);
         if (activeTab === "shipping-and-delivery") {
-          setSavedShippingSnapshot(JSON.stringify(defaultData));
-        } else {
-          setSavedReturnsSnapshot(JSON.stringify(defaultData));
+          setSavedShippingSnapshot(snap);
+        } else if (activeTab === "returns-and-exchanges") {
+          setSavedReturnsSnapshot(snap);
+        } else if (activeTab === "privacy-policy") {
+          setSavedPrivacySnapshot(snap);
+        } else if (activeTab === "terms-and-conditions") {
+          setSavedTermsSnapshot(snap);
         }
         toast.success(`Reset ${defaultData.title} to original defaults!`);
       } else {
@@ -317,7 +395,7 @@ export default function PolicyPagesManager() {
 
   return (
     <div className="w-full pb-28">
-      
+
       {/* Header Banner (Normal flow, not sticky) */}
       <div className="pb-6 mb-6 border-b border-[#E8E6E1] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -379,11 +457,10 @@ export default function PolicyPagesManager() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium text-xs uppercase tracking-wider transition-all shadow-sm ${
-              isDirty
+            className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium text-xs uppercase tracking-wider transition-all shadow-sm ${isDirty
                 ? "bg-[#2C2B29] hover:bg-black text-white ring-2 ring-[#2C2B29]/20"
                 : "bg-[#2C2B29] text-white hover:bg-black opacity-90"
-            } disabled:opacity-50`}
+              } disabled:opacity-50`}
           >
             {saving ? (
               <>
@@ -401,79 +478,133 @@ export default function PolicyPagesManager() {
       </div>
 
       {/* Main Tab Cards - Clean, Large & User Friendly */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-        
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+
         {/* Shipping Tab Button */}
         <button
           type="button"
           onClick={() => setActiveTab("shipping-and-delivery")}
-          className={`relative p-4 rounded-xl border text-left transition-all flex items-center justify-between ${
-            activeTab === "shipping-and-delivery"
+          className={`relative p-4 rounded-xl border text-left transition-all flex items-center justify-between ${activeTab === "shipping-and-delivery"
               ? "bg-white border-[#2C2B29] shadow-sm ring-1 ring-[#2C2B29]"
               : "bg-[#F9F8F6] border-[#E8E6E1] hover:bg-white/80 hover:border-gray-300"
-          }`}
+            }`}
         >
-          <div className="flex items-center gap-3.5">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-              activeTab === "shipping-and-delivery"
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0 ${activeTab === "shipping-and-delivery"
                 ? "bg-[#2C2B29] text-white"
                 : "bg-white border border-[#E8E6E1] text-[#8B8985]"
-            }`}>
-              <Truck size={18} />
+              }`}>
+              <Truck size={17} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-[#2C2B29]">Shipping & Delivery</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-bold text-[#2C2B29] truncate">Shipping</span>
                 {activeTab === "shipping-and-delivery" && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                 )}
               </div>
-              <p className="text-xs text-[#8B8985] mt-0.5">
-                {shippingData.sections.length} policy sections configured
+              <p className="text-[11px] text-[#8B8985] mt-0.5 truncate">
+                {shippingData.sections.length} sections
               </p>
             </div>
           </div>
-          <span className="text-xs font-mono text-[#8B8985] hidden sm:block">/shipping-and-delivery</span>
         </button>
 
         {/* Returns Tab Button */}
         <button
           type="button"
           onClick={() => setActiveTab("returns-and-exchanges")}
-          className={`relative p-4 rounded-xl border text-left transition-all flex items-center justify-between ${
-            activeTab === "returns-and-exchanges"
+          className={`relative p-4 rounded-xl border text-left transition-all flex items-center justify-between ${activeTab === "returns-and-exchanges"
               ? "bg-white border-[#2C2B29] shadow-sm ring-1 ring-[#2C2B29]"
               : "bg-[#F9F8F6] border-[#E8E6E1] hover:bg-white/80 hover:border-gray-300"
-          }`}
+            }`}
         >
-          <div className="flex items-center gap-3.5">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-              activeTab === "returns-and-exchanges"
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0 ${activeTab === "returns-and-exchanges"
                 ? "bg-[#2C2B29] text-white"
                 : "bg-white border border-[#E8E6E1] text-[#8B8985]"
-            }`}>
-              <Repeat size={18} />
+              }`}>
+              <Repeat size={17} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-[#2C2B29]">Returns & Exchanges</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-bold text-[#2C2B29] truncate">Returns</span>
                 {activeTab === "returns-and-exchanges" && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                 )}
               </div>
-              <p className="text-xs text-[#8B8985] mt-0.5">
-                {returnsData.sections.length} policy sections configured
+              <p className="text-[11px] text-[#8B8985] mt-0.5 truncate">
+                {returnsData.sections.length} sections
               </p>
             </div>
           </div>
-          <span className="text-xs font-mono text-[#8B8985] hidden sm:block">/returns-and-exchanges</span>
+        </button>
+
+        {/* Privacy Policy Tab Button */}
+        <button
+          type="button"
+          onClick={() => setActiveTab("privacy-policy")}
+          className={`relative p-4 rounded-xl border text-left transition-all flex items-center justify-between ${activeTab === "privacy-policy"
+              ? "bg-white border-[#2C2B29] shadow-sm ring-1 ring-[#2C2B29]"
+              : "bg-[#F9F8F6] border-[#E8E6E1] hover:bg-white/80 hover:border-gray-300"
+            }`}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0 ${activeTab === "privacy-policy"
+                ? "bg-[#2C2B29] text-white"
+                : "bg-white border border-[#E8E6E1] text-[#8B8985]"
+              }`}>
+              <ShieldCheck size={17} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-bold text-[#2C2B29] truncate">Privacy</span>
+                {activeTab === "privacy-policy" && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                )}
+              </div>
+              <p className="text-[11px] text-[#8B8985] mt-0.5 truncate">
+                {privacyData.sections.length} sections
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* Terms & Conditions Tab Button */}
+        <button
+          type="button"
+          onClick={() => setActiveTab("terms-and-conditions")}
+          className={`relative p-4 rounded-xl border text-left transition-all flex items-center justify-between ${activeTab === "terms-and-conditions"
+              ? "bg-white border-[#2C2B29] shadow-sm ring-1 ring-[#2C2B29]"
+              : "bg-[#F9F8F6] border-[#E8E6E1] hover:bg-white/80 hover:border-gray-300"
+            }`}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors shrink-0 ${activeTab === "terms-and-conditions"
+                ? "bg-[#2C2B29] text-white"
+                : "bg-white border border-[#E8E6E1] text-[#8B8985]"
+              }`}>
+              <Scale size={17} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-bold text-[#2C2B29] truncate">Terms</span>
+                {activeTab === "terms-and-conditions" && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                )}
+              </div>
+              <p className="text-[11px] text-[#8B8985] mt-0.5 truncate">
+                {termsData.sections.length} sections
+              </p>
+            </div>
+          </div>
         </button>
 
       </div>
 
       {/* Editor & Preview Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         {/* Left Form Controls (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-6">
 
@@ -608,11 +739,10 @@ export default function PolicyPagesManager() {
                     <div
                       key={section.id || index}
                       onFocus={() => setActiveEditingSectionId(section.id)}
-                      className={`border rounded-xl transition-all overflow-hidden ${
-                        isHighlighted
+                      className={`border rounded-xl transition-all overflow-hidden ${isHighlighted
                           ? "border-[#2C2B29] shadow-xs bg-white"
                           : "border-gray-200 bg-white hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       {/* Accordion Header */}
                       <div className="flex items-center justify-between p-3.5 bg-[#FAF9F7]/70 cursor-pointer select-none" onClick={() => toggleSectionExpand(section.id)}>
@@ -620,7 +750,7 @@ export default function PolicyPagesManager() {
                           <span className="w-6 h-6 rounded-md bg-white border border-gray-200 text-[#2C2B29] text-xs font-mono font-bold flex items-center justify-center shrink-0">
                             #{index + 1}
                           </span>
-                          
+
                           <div className="min-w-0">
                             <span className="text-xs font-bold uppercase tracking-wider text-[#2C2B29] block truncate">
                               {section.title || "Untitled Section"}
@@ -682,7 +812,7 @@ export default function PolicyPagesManager() {
                       {/* Accordion Body */}
                       {isExpanded && (
                         <div className="p-4 pt-3 border-t border-gray-100 space-y-3.5 bg-white">
-                          
+
                           {/* Section Title */}
                           <div>
                             <div className="flex items-center justify-between mb-1">
@@ -818,7 +948,7 @@ export default function PolicyPagesManager() {
         <div className="lg:col-span-5 flex flex-col gap-4">
           <div className="sticky top-20">
             <div className="bg-white rounded-2xl border border-[#E8E6E1] p-5 shadow-xs">
-              
+
               {/* Preview Header with Desktop / Mobile switch */}
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
@@ -833,11 +963,10 @@ export default function PolicyPagesManager() {
                   <button
                     type="button"
                     onClick={() => setDevicePreview("desktop")}
-                    className={`p-1.5 rounded-md transition-all ${
-                      devicePreview === "desktop"
+                    className={`p-1.5 rounded-md transition-all ${devicePreview === "desktop"
                         ? "bg-white text-gray-900 shadow-2xs"
                         : "text-gray-400 hover:text-gray-700"
-                    }`}
+                      }`}
                     title="Desktop View"
                   >
                     <Monitor size={14} />
@@ -845,11 +974,10 @@ export default function PolicyPagesManager() {
                   <button
                     type="button"
                     onClick={() => setDevicePreview("mobile")}
-                    className={`p-1.5 rounded-md transition-all ${
-                      devicePreview === "mobile"
+                    className={`p-1.5 rounded-md transition-all ${devicePreview === "mobile"
                         ? "bg-white text-gray-900 shadow-2xs"
                         : "text-gray-400 hover:text-gray-700"
-                    }`}
+                      }`}
                     title="Mobile View"
                   >
                     <Smartphone size={14} />
@@ -860,29 +988,28 @@ export default function PolicyPagesManager() {
               {/* Simulated Device Frame */}
               <div className="flex justify-center bg-gray-100/60 p-2 sm:p-3 rounded-xl border border-gray-200">
                 <div
-                  className={`bg-white transition-all duration-300 shadow-sm overflow-hidden flex flex-col text-center font-serif ${
-                    devicePreview === "mobile"
+                  className={`bg-white transition-all duration-300 shadow-sm overflow-hidden flex flex-col text-center font-serif ${devicePreview === "mobile"
                       ? "w-[320px] rounded-2xl border-4 border-gray-800 my-1"
                       : "w-full rounded-lg border border-gray-200"
-                  }`}
+                    }`}
                   style={{ maxHeight: "680px" }}
                 >
                   {/* Mock Navbar */}
                   <div className="border-b border-gray-100 px-4 py-3 flex items-center justify-between bg-white shrink-0">
                     <span className="text-[9px] tracking-widest uppercase text-gray-400">PAUSE PALETTE</span>
-                    <span className="text-[9px] font-sans text-gray-400 uppercase tracking-wider">{activeTab === "shipping-and-delivery" ? "Shipping" : "Returns"}</span>
+                    <span className="text-[9px] font-sans text-gray-400 uppercase tracking-wider truncate max-w-[140px]">{currentData.title}</span>
                   </div>
 
                   {/* Scrollable Content inside Preview */}
                   <div className="overflow-y-auto p-5 sm:p-7 flex-1">
-                    
+
                     {/* Main Title */}
                     <h1 className="font-garamond text-[15px] sm:text-[16px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-8">
                       {currentData.title || "Policy Heading"}
                     </h1>
 
-                    <div 
-                      className="text-gray-600 leading-relaxed text-xs sm:text-[13px] max-w-md mx-auto" 
+                    <div
+                      className="text-gray-600 leading-relaxed text-xs sm:text-[13px] max-w-md mx-auto"
                       style={{ fontFamily: "'EB Garamond', Garamond, serif" }}
                     >
                       {/* Intro Text */}
@@ -898,13 +1025,12 @@ export default function PolicyPagesManager() {
 
                       {/* Sections */}
                       {currentData.sections.map((section, idx) => (
-                        <section 
-                          key={section.id || idx} 
-                          className={`mb-8 p-2 rounded-lg transition-colors ${
-                            activeEditingSectionId === section.id
+                        <section
+                          key={section.id || idx}
+                          className={`mb-8 p-2 rounded-lg transition-colors ${activeEditingSectionId === section.id
                               ? "bg-amber-50/50 ring-1 ring-amber-300/40"
                               : ""
-                          }`}
+                            }`}
                         >
                           <h2 className="font-sans text-[10px] sm:text-[11px] tracking-[0.2em] text-gray-500 uppercase mb-2 font-semibold">
                             {section.title || "SECTION HEADING"}
@@ -963,7 +1089,7 @@ export default function PolicyPagesManager() {
                 <span className="text-[11px] text-gray-400">Restore default policy statements</span>
               </div>
             </div>
-            
+
             <p className="text-xs text-gray-500 leading-relaxed mb-6 bg-gray-50 p-3 rounded-lg border border-gray-100">
               This will restore all headings, dispatch timelines, and conditions for <strong>{currentData.title}</strong> back to the original brand defaults. Any unsaved custom modifications will be discarded.
             </p>

@@ -198,10 +198,18 @@ export async function DELETE(request: Request) {
     if (!user) return new NextResponse("User not found", { status: 404 });
 
     const { searchParams } = new URL(request.url);
+    const clearAll = searchParams.get("clearAll");
     const productId = searchParams.get("productId");
     const size = searchParams.get("size");
     const silhouette = searchParams.get("silhouette");
     const color = searchParams.get("color");
+
+    if (clearAll === "true" || (!productId && !size && !silhouette)) {
+      await prisma.cartItem.deleteMany({
+        where: { userId: user.id }
+      });
+      return NextResponse.json({ success: true, cleared: true });
+    }
 
     if (!productId || !size || !silhouette) {
       return new NextResponse("Missing required fields", { status: 400 });
