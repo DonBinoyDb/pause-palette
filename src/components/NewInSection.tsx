@@ -210,6 +210,8 @@ export default function NewInSection({
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=2070&auto=format&fit=crop";
                       }}
+                      className={`w-full h-full transition-all duration-700 ease-out group-hover:scale-105 ${
+                        secondaryImage ? "group-hover:opacity-0" : ""
                       } ${isLandscapeOrContain ? "object-contain bg-[#FBFBFA]" : "object-cover"}`}
                     />
 

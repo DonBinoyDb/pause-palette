@@ -1371,15 +1371,18 @@ export default function CuratorSettingsPage() {
                       {/* Swatch circle with image or hex */}
                       <div className="relative">
                         <div
-                          className="w-11 h-11 rounded-full border border-gray-300 shadow-inner overflow-hidden relative flex items-center justify-center bg-gray-100"
-                          style={{ backgroundColor: color.hex }}
+                          className="w-11 h-11 rounded-full border border-gray-300 shadow-inner overflow-hidden relative flex items-center justify-center"
+                          style={{ backgroundColor: color.hex || "#D8C7A5" }}
                         >
-                          {color.image ? (
+                          {color.image && color.image.trim() ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={color.image}
                               alt={color.name}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
                             />
                           ) : null}
                           {uploadingColorId === color.id && (
@@ -1580,19 +1583,64 @@ export default function CuratorSettingsPage() {
                       </button>
                     </div>
 
-                    <div
-                      className="w-10 h-10 rounded-full border border-gray-300 shadow-inner overflow-hidden flex items-center justify-center bg-gray-100"
-                      style={{ backgroundColor: color.hex }}
-                    >
-                      {color.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={color.image} alt={color.name} className="w-full h-full object-cover" />
-                      ) : null}
+                    {/* Swatch circle with image or hex */}
+                    <div className="relative">
+                      <div
+                        className="w-11 h-11 rounded-full border border-gray-300 shadow-inner overflow-hidden relative flex items-center justify-center"
+                        style={{ backgroundColor: color.hex || "#D8C7A5" }}
+                      >
+                        {color.image && color.image.trim() ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={color.image}
+                            alt={color.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : null}
+                        {uploadingColorId === color.id && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+                            <Loader2 className="w-4 h-4 text-white animate-spin" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-xs font-garamond uppercase tracking-wider font-medium text-gray-800">
+
+                    <span className="text-xs font-garamond uppercase tracking-wider font-semibold text-gray-800 text-center">
                       {color.name}
                     </span>
-                    <div className="flex items-center gap-1 text-xs">
+
+                    {/* Image actions: Upload / Change Image or Remove */}
+                    <div className="flex flex-col items-center gap-0.5 w-full">
+                      <label className="text-[11px] text-[#79A7D3] hover:text-[#5a8bb8] cursor-pointer font-medium flex items-center gap-1 py-0.5">
+                        <Upload className="w-3 h-3" />
+                        <span>{color.image ? "Change image" : "Upload image"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={uploadingColorId === color.id}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleUploadColorImage(color.id, f);
+                            e.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      {color.image && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveColorImage(color.id)}
+                          className="text-[10px] text-gray-400 hover:text-red-500 cursor-pointer underline"
+                        >
+                          Remove image
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs pt-1 border-t border-gray-100 w-full justify-center">
                       <span className="text-gray-400">+₹</span>
                       <input
                         type="number"
@@ -1791,19 +1839,64 @@ export default function CuratorSettingsPage() {
                       </button>
                     </div>
 
-                    <div
-                      className="w-10 h-10 rounded-full border border-gray-300 shadow-inner overflow-hidden flex items-center justify-center bg-gray-100"
-                      style={{ backgroundColor: color.hex }}
-                    >
-                      {color.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={color.image} alt={color.name} className="w-full h-full object-cover" />
-                      ) : null}
+                    {/* Swatch circle with image or hex */}
+                    <div className="relative">
+                      <div
+                        className="w-11 h-11 rounded-full border border-gray-300 shadow-inner overflow-hidden relative flex items-center justify-center"
+                        style={{ backgroundColor: color.hex || "#D8C7A5" }}
+                      >
+                        {color.image && color.image.trim() ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={color.image}
+                            alt={color.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : null}
+                        {uploadingColorId === color.id && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+                            <Loader2 className="w-4 h-4 text-white animate-spin" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-xs font-garamond uppercase tracking-wider font-medium text-gray-800">
+
+                    <span className="text-xs font-garamond uppercase tracking-wider font-semibold text-gray-800 text-center">
                       {color.name}
                     </span>
-                    <div className="flex items-center gap-1 text-xs">
+
+                    {/* Image actions: Upload / Change Image or Remove */}
+                    <div className="flex flex-col items-center gap-0.5 w-full">
+                      <label className="text-[11px] text-[#79A7D3] hover:text-[#5a8bb8] cursor-pointer font-medium flex items-center gap-1 py-0.5">
+                        <Upload className="w-3 h-3" />
+                        <span>{color.image ? "Change image" : "Upload image"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={uploadingColorId === color.id}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleUploadColorImage(color.id, f);
+                            e.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                      {color.image && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveColorImage(color.id)}
+                          className="text-[10px] text-gray-400 hover:text-red-500 cursor-pointer underline"
+                        >
+                          Remove image
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs pt-1 border-t border-gray-100 w-full justify-center">
                       <span className="text-gray-400">+₹</span>
                       <input
                         type="number"
@@ -2366,12 +2459,19 @@ export default function CuratorSettingsPage() {
                 </label>
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-12 h-12 rounded-full border border-gray-300 shadow-inner overflow-hidden flex-shrink-0 flex items-center justify-center relative bg-gray-100"
-                    style={{ backgroundColor: newColorHex }}
+                    className="w-12 h-12 rounded-full border border-gray-300 shadow-inner overflow-hidden flex-shrink-0 flex items-center justify-center relative"
+                    style={{ backgroundColor: newColorHex || "#8A9A86" }}
                   >
-                    {newColorImage ? (
+                    {newColorImage && newColorImage.trim() ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={newColorImage} alt="Swatch preview" className="w-full h-full object-cover" />
+                      <img
+                        src={newColorImage}
+                        alt="Swatch preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
                     ) : null}
                     {isNewColorUploading && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
