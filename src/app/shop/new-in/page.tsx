@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import NewInClient from "./NewInClient";
 
 export default async function NewInPage() {
-  // Fetch the latest published products from Prisma (e.g., newest 12)
-  const products = await prisma.product.findMany({
+  // Fetch the latest published products marked as isNew
+  let products = await prisma.product.findMany({
     where: { isPublished: true, isNew: true },
     orderBy: { createdAt: "desc" },
     include: {
@@ -14,6 +14,19 @@ export default async function NewInPage() {
       }
     }
   });
+
+  // Fallback to latest published products if none marked isNew
+  if (!products || products.length === 0) {
+    products = await prisma.product.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+      include: {
+        collection: {
+          select: { name: true }
+        }
+      }
+    });
+  }
 
   return (
     <main className="flex min-h-screen flex-col bg-white">

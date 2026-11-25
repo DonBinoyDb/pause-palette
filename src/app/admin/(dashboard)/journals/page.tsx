@@ -76,8 +76,12 @@ export default function JournalsManager() {
                 </div>
                 
                 {item.imageUrl ? (
-                  <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-gray-200 relative shrink-0">
-                    <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
+                  <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-gray-200 relative shrink-0 bg-black/5">
+                    {/\.(mp4|webm|mov|ogg)$/i.test(item.imageUrl) ? (
+                      <video src={item.imageUrl} className="w-full h-full object-cover" muted playsInline />
+                    ) : (
+                      <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
+                    )}
                   </div>
                 ) : (
                   <div className="w-full h-48 rounded-xl overflow-hidden mb-4 border border-gray-200 bg-gray-100 flex items-center justify-center text-gray-300 shrink-0">

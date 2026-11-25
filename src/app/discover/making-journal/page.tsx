@@ -54,13 +54,6 @@ export default async function MakingJournalPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-12 mb-12 text-[13px] tracking-[0.05em] font-serif uppercase">
-          <button suppressHydrationWarning className="text-gray-500 border-b border-gray-400 pb-0.5 hover:text-gray-800 transition-colors">Videos</button>
-          <button suppressHydrationWarning className="text-[#8FB1D0] border-b border-[#8FB1D0] pb-0.5">Photos</button>
-          <button suppressHydrationWarning className="text-gray-500 border-b border-gray-400 pb-0.5 hover:text-gray-800 transition-colors">All</button>
-        </div>
-
         {/* Masonry Grid with Pagination */}
         <JournalGridClient journals={journals} />
 

@@ -72,11 +72,16 @@ export default async function Home() {
           .filter(Boolean) as any[];
       }
 
-      // If no curated products or not enough, grab products marked as isNew
-      if (newInProducts.length === 0) {
-        let products = await prisma.product.findMany({
-          where: { isPublished: true, isNew: true },
-          take: limit,
+      // If no curated products or fewer than limit, automatically grab the newest "isNew" products
+      if (newInProducts.length < limit) {
+        const existingIds = newInProducts.map((p) => p.id);
+        const autoProducts = await prisma.product.findMany({
+          where: {
+            isPublished: true,
+            isNew: true,
+            ...(existingIds.length > 0 ? { id: { notIn: existingIds } } : {}),
+          },
+          take: limit - newInProducts.length,
           orderBy: { createdAt: "desc" },
           include: {
             collection: {
@@ -84,21 +89,26 @@ export default async function Home() {
             },
           },
         });
+        newInProducts = [...newInProducts, ...autoProducts];
+      }
 
-        // Fallback to published products if none marked isNew
-        if (!products || products.length === 0) {
-          products = await prisma.product.findMany({
-            where: { isPublished: true },
-            take: limit,
-            orderBy: { createdAt: "desc" },
-            include: {
-              collection: {
-                select: { name: true },
-              },
+      // If still fewer than limit (e.g. not enough products marked isNew), fallback to any published products by recency
+      if (newInProducts.length < limit) {
+        const existingIds = newInProducts.map((p) => p.id);
+        const fallbackProducts = await prisma.product.findMany({
+          where: {
+            isPublished: true,
+            ...(existingIds.length > 0 ? { id: { notIn: existingIds } } : {}),
+          },
+          take: limit - newInProducts.length,
+          orderBy: { createdAt: "desc" },
+          include: {
+            collection: {
+              select: { name: true },
             },
-          });
-        }
-        newInProducts = products;
+          },
+        });
+        newInProducts = [...newInProducts, ...fallbackProducts];
       }
     }
   } catch (err) {

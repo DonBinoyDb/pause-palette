@@ -22,37 +22,82 @@ export default function NewJournalItem() {
   const [imageUrl, setImageUrl] = useState("");
   const [isPublished, setIsPublished] = useState(true);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    if (file.size > 2 * 1024 * 1024) {
-      setFileError("The selected image exceeds the 2MB size limit. Please choose a smaller image under 2MB.");
+    const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|ogg)$/i.test(file.name);
+
+    if (!isVideo && file.size > 5 * 1024 * 1024) {
+      setFileError("The selected image exceeds the 5MB size limit. Please choose a smaller image under 5MB.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (isVideo && file.size > 50 * 1024 * 1024) {
+      setFileError("The selected video exceeds the 50MB size limit. Please choose a video under 50MB.");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     setUploading(true);
+    toast.loading(isVideo ? "Uploading video..." : "Uploading image...", { id: "media-upload" });
+
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      
-      const data = await res.json();
-      if (data.success) {
-        setImageUrl(data.url);
+      let finalUrl = "";
+
+      // For videos or files larger than 4MB, use Direct Supabase Signed Upload to bypass Vercel's 4.5MB payload limit
+      if (isVideo || file.size > 4 * 1024 * 1024) {
+        const signRes = await fetch("/api/upload/sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type || (isVideo ? "video/mp4" : "application/octet-stream"),
+          }),
+        });
+
+        const signData = await signRes.json();
+        if (!signData.success || !signData.signedUrl) {
+          throw new Error(signData.message || "Failed to authorize upload");
+        }
+
+        const uploadRes = await fetch(signData.signedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type || "video/mp4",
+          },
+          body: file,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(`Direct upload failed (status ${uploadRes.status})`);
+        }
+
+        finalUrl = signData.publicUrl;
       } else {
-        console.error("Upload error:", data);
-        toast.error(data.message || "Upload failed");
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (data.success && data.url) {
+          finalUrl = data.url;
+        } else {
+          throw new Error(data.message || "Upload failed");
+        }
       }
-    } catch (error) {
+
+      setImageUrl(finalUrl);
+      toast.success(isVideo ? "Video uploaded!" : "Image uploaded!", { id: "media-upload" });
+    } catch (error: any) {
       console.error("Upload failed", error);
-      toast.error("Upload failed");
+      toast.error(error?.message || "Upload failed", { id: "media-upload" });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -157,16 +202,20 @@ export default function NewJournalItem() {
           </div>
         </div>
 
-        {/* Right: Photo */}
+        {/* Right: Photo or Video */}
         <div className="w-full md:w-1/3">
-          <h2 className="text-[12px] text-gray-500 font-semibold tracking-wide mb-1.5">Cover Image (Optional)</h2>
+          <h2 className="text-[12px] text-gray-500 font-semibold tracking-wide mb-1.5">Cover Media (Photo or Video)</h2>
           {imageUrl ? (
             <div className="aspect-[3/4] relative rounded-2xl overflow-hidden border border-gray-200 bg-[#F8F9FD]">
-              <Image src={imageUrl} alt="Uploaded" fill className="object-cover" />
+              {/\.(mp4|webm|mov|ogg)$/i.test(imageUrl) ? (
+                <video src={imageUrl} controls className="w-full h-full object-cover" />
+              ) : (
+                <Image src={imageUrl} alt="Uploaded" fill className="object-cover" />
+              )}
               <button 
                 type="button"
                 onClick={() => setImageUrl("")}
-                className="absolute top-4 right-4 bg-white/90 text-red-500 text-xs px-3 py-1.5 rounded-full shadow-sm font-medium"
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-red-500 text-xs px-3 py-1.5 rounded-full shadow-sm font-medium z-10"
               >
                 Remove
               </button>
@@ -185,12 +234,13 @@ export default function NewJournalItem() {
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mb-4 text-blue-500">
                     <Upload size={20} strokeWidth={2.5} />
                   </div>
-                  <span className="text-sm font-semibold text-center px-4">Upload cover photo</span>
+                  <span className="text-sm font-semibold text-center px-4">Upload cover photo or video</span>
+                  <span className="text-[11px] text-gray-400 mt-1">MP4, WebM, PNG, JPG</span>
                 </>
               )}
             </button>
           )}
-          <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+          <input type="file" ref={fileInputRef} onChange={handleMediaUpload} accept="image/*,video/*" className="hidden" />
           
           <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
             <h3 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-2">
