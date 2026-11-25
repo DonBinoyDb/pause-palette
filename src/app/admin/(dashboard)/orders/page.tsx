@@ -692,6 +692,25 @@ export default function AdminOrdersPage() {
                               Color: <span className="font-medium text-gray-800">{item.color}</span>
                             </p>
                           )}
+                          {item.curatedDetails?.colorName && (
+                            <p className="flex items-center gap-1.5">
+                              Linen Swatch:
+                              {item.curatedDetails.colorImage ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={item.curatedDetails.colorImage}
+                                  alt=""
+                                  className="w-3.5 h-3.5 rounded-full object-cover border border-gray-300 inline-block"
+                                />
+                              ) : item.curatedDetails.colorHex ? (
+                                <span
+                                  className="w-3.5 h-3.5 rounded-full border border-gray-300 inline-block"
+                                  style={{ backgroundColor: item.curatedDetails.colorHex }}
+                                />
+                              ) : null}
+                              <span className="font-medium text-gray-800">{item.curatedDetails.colorName}</span>
+                            </p>
+                          )}
                         </div>
                       </div>
 

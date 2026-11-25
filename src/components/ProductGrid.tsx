@@ -15,11 +15,11 @@ type Product = {
   collection?: { name: string } | null;
 };
 
-export default function ProductGrid({ 
-  products, 
-  showWishlist = false 
-}: { 
-  products: Product[]; 
+export default function ProductGrid({
+  products,
+  showWishlist = false
+}: {
+  products: Product[];
   showWishlist?: boolean;
 }) {
   const { toggleSaved, isSaved } = useShop();
@@ -35,8 +35,10 @@ export default function ProductGrid({
           category: product.collection?.name || "Uncategorized"
         };
 
+        const isLandscapeOrContain = (product as any).imageFit === "contain" || (product as any).imageFit === "landscape";
+
         return (
-          <Link 
+          <Link
             key={product.id}
             href={`/product/${product.slug}`}
             className="group flex flex-col cursor-pointer"
@@ -44,18 +46,19 @@ export default function ProductGrid({
             {/* Image Container */}
             <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden mb-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={shopProduct.image || "https://images.unsplash.com/photo-1571513722275-4b41940f54b8?q=80&w=1974&auto=format&fit=crop"} 
+              <img
+                src={shopProduct.image || "https://images.unsplash.com/photo-1571513722275-4b41940f54b8?q=80&w=1974&auto=format&fit=crop"}
                 alt={product.name}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=2070&auto=format&fit=crop";
                 }}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className={`w-full h-full transition-transform duration-700 group-hover:scale-105 ${isLandscapeOrContain ? "object-contain bg-[#FBFBFA]" : "object-cover"
+                  }`}
               />
-              
+
               {/* Wishlist Button (if enabled) */}
               {showWishlist && (
-                <button 
+                <button
                   type="button"
                   suppressHydrationWarning
                   onClick={(e) => {

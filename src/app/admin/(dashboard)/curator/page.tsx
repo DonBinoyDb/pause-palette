@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Save, Palette, Shirt, Sparkles, Scissors, Check, Trash2, ShoppingBag, Upload } from "lucide-react";
+import { Plus, X, Save, Palette, Shirt, Sparkles, Scissors, Check, Trash2, ShoppingBag, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { DEFAULT_PRICING, DEFAULT_SILHOUETTES, DEFAULT_VISIBILITY, DEFAULT_MODES } from "@/lib/curatorDefaults";
@@ -66,6 +66,9 @@ export default function CuratorSettingsPage() {
   const [newColorName, setNewColorName] = useState("");
   const [newColorHex, setNewColorHex] = useState("#8A9A86");
   const [newColorAdjustment, setNewColorAdjustment] = useState("0");
+  const [newColorImage, setNewColorImage] = useState("");
+  const [uploadingColorId, setUploadingColorId] = useState<string | null>(null);
+  const [isNewColorUploading, setIsNewColorUploading] = useState(false);
 
   // Modal State for Customizing Silhouette Sizes & Pricing
   const [isSilSizesModalOpen, setIsSilSizesModalOpen] = useState(false);
@@ -87,7 +90,7 @@ export default function CuratorSettingsPage() {
     pricing: {
       techniqueValues: { printed: number; embroidered: number };
       sizeValues: Record<string, number>;
-      linenColors: Array<{ id: string; name: string; hex: string; adjustment: number }>;
+      linenColors: Array<{ id: string; name: string; hex: string; adjustment: number; image?: string }>;
       pieces: { printed: any[]; embroidered: any[] };
     };
   }>({
@@ -211,6 +214,86 @@ export default function CuratorSettingsPage() {
         ),
       },
     }));
+  };
+
+  const handleUploadColorImage = async (colorId: string, file: File) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File exceeds 10MB size limit.");
+      return;
+    }
+    try {
+      setUploadingColorId(colorId);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "swatch");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.success || !data.url) {
+        throw new Error(data.message || "Upload failed");
+      }
+
+      setSettings((prev) => ({
+        ...prev,
+        pricing: {
+          ...prev.pricing,
+          linenColors: prev.pricing.linenColors.map((c) =>
+            c.id === colorId ? { ...c, image: data.url } : c
+          ),
+        },
+      }));
+      toast.success("Swatch image updated! Remember to click 'Save Changes'.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload swatch image");
+    } finally {
+      setUploadingColorId(null);
+    }
+  };
+
+  const handleRemoveColorImage = (colorId: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      pricing: {
+        ...prev.pricing,
+        linenColors: prev.pricing.linenColors.map((c) =>
+          c.id === colorId ? { ...c, image: "" } : c
+        ),
+      },
+    }));
+    toast.success("Swatch image removed. Reverted to hex color.");
+  };
+
+  const handleNewColorImageUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File exceeds 10MB size limit.");
+      return;
+    }
+    try {
+      setIsNewColorUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "swatch");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.success || !data.url) {
+        throw new Error(data.message || "Upload failed");
+      }
+      setNewColorImage(data.url);
+      toast.success("Swatch image uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload swatch image");
+    } finally {
+      setIsNewColorUploading(false);
+    }
   };
 
   const handleSilhouetteBasePriceChange = (silId: string, basePrice: number) => {
@@ -709,12 +792,19 @@ export default function CuratorSettingsPage() {
       toast.error("Please enter a color name.");
       return;
     }
-    const id = newColorName.toLowerCase().replace(/\s+/g, "-");
+    const slug = newColorName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const id = slug || `color-${Date.now()}`;
+
+    // Prevent duplicate ID collision
+    const existingIds = new Set(settings.pricing.linenColors.map((c) => c.id));
+    const finalId = existingIds.has(id) ? `${id}-${Date.now().toString().slice(-4)}` : id;
+
     const newColor = {
-      id,
-      name: newColorName,
+      id: finalId,
+      name: newColorName.trim(),
       hex: newColorHex || "#000000",
       adjustment: Number(newColorAdjustment) || 0,
+      image: newColorImage.trim(),
     };
 
     setSettings((prev) => ({
@@ -727,17 +817,21 @@ export default function CuratorSettingsPage() {
         ...prev.modes,
         embroidery: {
           ...prev.modes.embroidery,
-          linenColors: [...(prev.modes.embroidery?.linenColors || []), id],
+          linenColors: [...(prev.modes.embroidery?.linenColors || []), finalId],
         },
         solid: {
           ...prev.modes.solid,
-          linenColors: [...(prev.modes.solid?.linenColors || []), id],
+          linenColors: [...(prev.modes.solid?.linenColors || []), finalId],
         },
       },
     }));
 
     setIsColorModalOpen(false);
-    toast.success("Linen color added!");
+    setNewColorName("");
+    setNewColorHex("#8A9A86");
+    setNewColorAdjustment("0");
+    setNewColorImage("");
+    toast.success("Linen color added! Remember to click 'Save Changes'.");
   };
 
   const removeColor = (colorId: string) => {
@@ -1272,16 +1366,63 @@ export default function CuratorSettingsPage() {
                   {settings.pricing.linenColors.map((color) => (
                     <div
                       key={color.id}
-                      className="p-3 rounded-xl border border-gray-200 bg-white flex flex-col items-center gap-2 relative shadow-sm"
+                      className="p-3 rounded-xl border border-gray-200 bg-white flex flex-col items-center gap-2 relative shadow-sm hover:border-gray-300 transition-all"
                     >
-                      <div
-                        className="w-8 h-8 rounded-full border border-gray-300 shadow-inner"
-                        style={{ backgroundColor: color.hex }}
-                      />
-                      <span className="text-xs font-garamond uppercase tracking-wider font-medium text-gray-800">
+                      {/* Swatch circle with image or hex */}
+                      <div className="relative">
+                        <div
+                          className="w-11 h-11 rounded-full border border-gray-300 shadow-inner overflow-hidden relative flex items-center justify-center bg-gray-100"
+                          style={{ backgroundColor: color.hex }}
+                        >
+                          {color.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={color.image}
+                              alt={color.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : null}
+                          {uploadingColorId === color.id && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full">
+                              <Loader2 className="w-4 h-4 text-white animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <span className="text-xs font-garamond uppercase tracking-wider font-semibold text-gray-800 text-center">
                         {color.name}
                       </span>
-                      <div className="flex items-center gap-1 text-xs">
+
+                      {/* Image actions: Upload / Change Image or Remove */}
+                      <div className="flex flex-col items-center gap-0.5 w-full">
+                        <label className="text-[11px] text-[#79A7D3] hover:text-[#5a8bb8] cursor-pointer font-medium flex items-center gap-1 py-0.5">
+                          <Upload className="w-3 h-3" />
+                          <span>{color.image ? "Change image" : "Upload image"}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={uploadingColorId === color.id}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleUploadColorImage(color.id, f);
+                              e.target.value = "";
+                            }}
+                            className="hidden"
+                          />
+                        </label>
+                        {color.image && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveColorImage(color.id)}
+                            className="text-[10px] text-gray-400 hover:text-red-500 cursor-pointer underline"
+                          >
+                            Remove image
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1 text-xs pt-1 border-t border-gray-100 w-full justify-center">
                         <span className="text-gray-400">+₹</span>
                         <input
                           type="number"
@@ -1293,7 +1434,7 @@ export default function CuratorSettingsPage() {
                       <button
                         type="button"
                         onClick={() => removeColor(color.id)}
-                        className="absolute top-1 right-1 text-gray-400 hover:text-red-500 p-1 cursor-pointer"
+                        className="absolute top-1 right-1 text-gray-400 hover:text-red-500 p-1 cursor-pointer transition-colors"
                         title="Remove colour"
                       >
                         <X className="w-3 h-3" />
@@ -1440,9 +1581,14 @@ export default function CuratorSettingsPage() {
                     </div>
 
                     <div
-                      className="w-8 h-8 rounded-full border border-gray-300 shadow-inner"
+                      className="w-10 h-10 rounded-full border border-gray-300 shadow-inner overflow-hidden flex items-center justify-center bg-gray-100"
                       style={{ backgroundColor: color.hex }}
-                    />
+                    >
+                      {color.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={color.image} alt={color.name} className="w-full h-full object-cover" />
+                      ) : null}
+                    </div>
                     <span className="text-xs font-garamond uppercase tracking-wider font-medium text-gray-800">
                       {color.name}
                     </span>
@@ -1646,9 +1792,14 @@ export default function CuratorSettingsPage() {
                     </div>
 
                     <div
-                      className="w-8 h-8 rounded-full border border-gray-300 shadow-inner"
+                      className="w-10 h-10 rounded-full border border-gray-300 shadow-inner overflow-hidden flex items-center justify-center bg-gray-100"
                       style={{ backgroundColor: color.hex }}
-                    />
+                    >
+                      {color.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={color.image} alt={color.name} className="w-full h-full object-cover" />
+                      ) : null}
+                    </div>
                     <span className="text-xs font-garamond uppercase tracking-wider font-medium text-gray-800">
                       {color.name}
                     </span>
@@ -2207,6 +2358,57 @@ export default function CuratorSettingsPage() {
                   onChange={(e) => setNewColorAdjustment(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs outline-none focus:ring-1 focus:ring-[#79A7D3]"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-gray-700 block mb-1">
+                  Swatch Fabric Image (Optional)
+                </label>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-12 h-12 rounded-full border border-gray-300 shadow-inner overflow-hidden flex-shrink-0 flex items-center justify-center relative bg-gray-100"
+                    style={{ backgroundColor: newColorHex }}
+                  >
+                    {newColorImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={newColorImage} alt="Swatch preview" className="w-full h-full object-cover" />
+                    ) : null}
+                    {isNewColorUploading && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+                      <Upload className="w-3.5 h-3.5 text-gray-500" />
+                      <span>{newColorImage ? "Replace image" : "Upload fabric image"}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={isNewColorUploading}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleNewColorImageUpload(f);
+                          e.target.value = "";
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                    {newColorImage && (
+                      <button
+                        type="button"
+                        onClick={() => setNewColorImage("")}
+                        className="block text-[11px] text-red-500 hover:underline cursor-pointer"
+                      >
+                        Remove image (use hex only)
+                      </button>
+                    )}
+                    <p className="text-[10px] text-gray-400">
+                      Leave empty to use solid hex colour
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

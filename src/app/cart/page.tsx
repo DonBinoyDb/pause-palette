@@ -203,7 +203,23 @@ export default function CartPage() {
                               {item.curatedDetails.colorName && (
                                 <>
                                   <span className="w-1 h-1 rounded-full bg-[#D1CFCA]" />
-                                  <span>Linen: <strong className="text-[#2C2B29] font-medium">{item.curatedDetails.colorName}</strong></span>
+                                  <span className="inline-flex items-center gap-1">
+                                    Linen:{" "}
+                                    {item.curatedDetails.colorImage ? (
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      <img
+                                        src={item.curatedDetails.colorImage}
+                                        alt={item.curatedDetails.colorName}
+                                        className="w-3.5 h-3.5 rounded-full object-cover border border-gray-300 inline-block"
+                                      />
+                                    ) : item.curatedDetails.colorHex ? (
+                                      <span
+                                        className="w-3.5 h-3.5 rounded-full border border-gray-300 inline-block"
+                                        style={{ backgroundColor: item.curatedDetails.colorHex }}
+                                      />
+                                    ) : null}
+                                    <strong className="text-[#2C2B29] font-medium">{item.curatedDetails.colorName}</strong>
+                                  </span>
                                 </>
                               )}
                               {item.curatedDetails.theme && (

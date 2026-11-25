@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES, getSilhouetteSizes } from "@/lib/curatorDefaults";
+import {
+  DEFAULT_SILHOUETTES,
+  DEFAULT_PRICING,
+  DEFAULT_VISIBILITY,
+  DEFAULT_MODES,
+  getSilhouetteSizes,
+  normalizeLinenColors,
+} from "@/lib/curatorDefaults";
 
-export { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES, getSilhouetteSizes };
+export { DEFAULT_SILHOUETTES, DEFAULT_PRICING, DEFAULT_VISIBILITY, DEFAULT_MODES, getSilhouetteSizes, normalizeLinenColors };
 
 export async function GET() {
   try {
@@ -27,7 +34,11 @@ export async function GET() {
     }
 
     const visibilityData = (settings.visibility as any) || {};
-    const pricing = visibilityData.pricing || DEFAULT_PRICING;
+    const rawPricing = visibilityData.pricing || DEFAULT_PRICING;
+    const pricing = {
+      ...rawPricing,
+      linenColors: normalizeLinenColors(rawPricing.linenColors),
+    };
     let silhouettes = settings.silhouettes as any[];
     if (!silhouettes || silhouettes.length === 0 || !silhouettes.some((s) => s.id === "cuban-collar" || s.id === "classic-point-collar")) {
       silhouettes = DEFAULT_SILHOUETTES;
@@ -102,10 +113,42 @@ export async function GET() {
   }
 }
 
+function isValidImageUrl(url?: string): boolean {
+  if (!url || typeof url !== "string" || url.trim() === "") return true;
+  const trimmed = url.trim();
+  if (trimmed.startsWith("/")) return true;
+  try {
+    const parsed = new URL(trimmed);
+    const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
+      ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname
+      : "";
+    if (supabaseHost && parsed.hostname === supabaseHost) return true;
+    if (parsed.hostname.endsWith(".supabase.co")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { visibility, canvasProductIds, silhouettes, pricing, modes } = body;
+    let { visibility, canvasProductIds, silhouettes, pricing, modes } = body;
+
+    // Validate and normalize linen colors if pricing is updated
+    if (pricing && Array.isArray(pricing.linenColors)) {
+      const sanitizedColors = pricing.linenColors.map((c: any) => {
+        const image = isValidImageUrl(c?.image) ? (typeof c?.image === "string" ? c.image.trim() : c?.image) : "";
+        return {
+          ...c,
+          image,
+        };
+      });
+      pricing = {
+        ...pricing,
+        linenColors: normalizeLinenColors(sanitizedColors),
+      };
+    }
 
     // Merge pricing and modes into visibility payload to store seamlessly without schema alteration
     const mergedVisibility = {

@@ -68,6 +68,14 @@ export const DEFAULT_SILHOUETTES = [
   }
 ];
 
+export type LinenColorSwatch = {
+  id: string;
+  name: string;
+  hex: string;
+  adjustment: number;
+  image?: string;
+};
+
 export const DEFAULT_PRICING = {
   techniqueValues: {
     printed: 200,
@@ -82,12 +90,12 @@ export const DEFAULT_PRICING = {
     XXL: 300,
   },
   linenColors: [
-    { id: "black", name: "Black", hex: "#1C1C1C", adjustment: 0 },
-    { id: "olive", name: "Olive", hex: "#5E6738", adjustment: 100 },
-    { id: "brown", name: "Brown", hex: "#6E473B", adjustment: 100 },
-    { id: "beige", name: "Beige", hex: "#D8C7A5", adjustment: 0 },
-    { id: "sage", name: "Sage", hex: "#8A9A86", adjustment: 200 },
-  ],
+    { id: "black", name: "Black", hex: "#1C1C1C", adjustment: 0, image: "" },
+    { id: "olive", name: "Olive", hex: "#5E6738", adjustment: 100, image: "" },
+    { id: "brown", name: "Brown", hex: "#6E473B", adjustment: 100, image: "" },
+    { id: "beige", name: "Beige", hex: "#D8C7A5", adjustment: 0, image: "" },
+    { id: "sage", name: "Sage", hex: "#8A9A86", adjustment: 200, image: "" },
+  ] as LinenColorSwatch[],
   pieces: {
     printed: [
       { id: "tropical-dawn", name: "Tropical Dawn", basePrice: 1800, image: "/images/Coverpic1.jpeg" },
@@ -196,4 +204,39 @@ export function getSilhouettePriceForSize(
   const adj = globalSizeValues?.[size] ?? 0;
   return base + Number(adj);
 }
+
+export function normalizeLinenColors(colors: any[]): LinenColorSwatch[] {
+  if (!Array.isArray(colors) || colors.length === 0) {
+    return DEFAULT_PRICING.linenColors;
+  }
+
+  const defaultMap = new Map<string, LinenColorSwatch>(
+    DEFAULT_PRICING.linenColors.map((c) => [c.id, c])
+  );
+
+  return colors.map((c: any, index: number) => {
+    const rawId = typeof c?.id === "string" && c.id.trim()
+      ? c.id.trim().toLowerCase()
+      : `color-${index}-${Date.now()}`;
+    const defaultColor = defaultMap.get(rawId);
+
+    // Fallback logic: ONLY fall back to default image when c.image is strictly undefined.
+    // If c.image is an empty string (""), the user/admin intentionally removed the image.
+    let image: string = "";
+    if (typeof c?.image === "string") {
+      image = c.image.trim();
+    } else if (c?.image === undefined && defaultColor?.image) {
+      image = defaultColor.image;
+    }
+
+    return {
+      id: rawId,
+      name: typeof c?.name === "string" && c.name.trim() ? c.name.trim() : (defaultColor?.name || "Custom"),
+      hex: typeof c?.hex === "string" && c.hex.trim() ? c.hex.trim() : (defaultColor?.hex || "#CCCCCC"),
+      adjustment: typeof c?.adjustment === "number" && !isNaN(c.adjustment) ? Number(c.adjustment) : (defaultColor?.adjustment ?? 0),
+      image,
+    };
+  });
+}
+
 

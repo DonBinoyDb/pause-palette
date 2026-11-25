@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useShop } from "@/context/ShopContext";
-import { DEFAULT_MODES, DEFAULT_PRICING, DEFAULT_SILHOUETTES } from "@/lib/curatorDefaults";
+import { DEFAULT_MODES, DEFAULT_PRICING, DEFAULT_SILHOUETTES, normalizeLinenColors, LinenColorSwatch } from "@/lib/curatorDefaults";
 
 type Mode = "illustration" | "embroidery" | "solid";
 type Audience = "men" | "women";
@@ -106,12 +106,7 @@ export default function Configurator() {
     image?: string;
     sizes?: Array<{ size: string; price: number; enabled?: boolean }>;
   }>;
-  const linenColors = (pricing.linenColors?.length ? pricing.linenColors : DEFAULT_PRICING.linenColors) as Array<{
-    id: string;
-    name: string;
-    hex: string;
-    adjustment: number;
-  }>;
+  const linenColors: LinenColorSwatch[] = normalizeLinenColors(pricing.linenColors || []);
 
   // Filter silhouettes and colors based on active mode configuration
   const allowedSilIds = modes[mode]?.silhouettes as string[] | undefined;
@@ -251,8 +246,13 @@ export default function Configurator() {
       technique: mode === "illustration" ? (technique === "printed" ? "Printed" : "Embroidered") : undefined,
       pieceName: mode === "illustration" ? activePiece.name : undefined,
       silhouetteName: activeSilhouette.name,
+      silhouetteId: activeSilhouette.id,
       size,
+      colorId: isLinenApplicable ? activeColor.id : undefined,
       colorName: isLinenApplicable ? activeColor.name : undefined,
+      colorHex: isLinenApplicable ? activeColor.hex : undefined,
+      colorImage: isLinenApplicable && activeColor.image ? activeColor.image : undefined,
+      colorAdjustment: isLinenApplicable ? activeColor.adjustment : undefined,
       theme: mode === "embroidery" && themeText.trim() ? themeText.trim() : undefined,
     };
 
@@ -282,8 +282,13 @@ export default function Configurator() {
       modeTitle: "Theme-Based Embroidery",
       audience: audience === "men" ? "Men" : "Women",
       silhouetteName: activeSilhouette.name,
+      silhouetteId: activeSilhouette.id,
       size,
+      colorId: activeColor.id,
       colorName: activeColor.name,
+      colorHex: activeColor.hex,
+      colorImage: activeColor.image || undefined,
+      colorAdjustment: activeColor.adjustment,
       theme: themeText.trim(),
     };
 
@@ -621,15 +626,28 @@ export default function Configurator() {
                     key={color.id}
                     type="button"
                     onClick={() => setSelectedColorId(color.id)}
-                    className="flex flex-col items-center gap-2 group cursor-pointer"
+                    className="flex flex-col items-center gap-2 group cursor-pointer focus:outline-none"
+                    title={color.adjustment > 0 ? `${color.name} (+₹${color.adjustment})` : color.name}
                   >
                     <div
-                      className={`w-6 h-6 rounded-full border transition-all ${
-                        isSelected ? "ring-2 ring-offset-2 ring-[#79A7D3] scale-110" : "border-gray-300 hover:scale-105"
+                      className={`w-10 h-10 md:w-11 md:h-11 rounded-full border overflow-hidden relative transition-all duration-200 ${
+                        isSelected
+                          ? "ring-2 ring-offset-2 ring-[#79A7D3] scale-110 shadow-sm"
+                          : "border-gray-300 hover:scale-105 hover:border-gray-400"
                       }`}
                       style={{ backgroundColor: color.hex }}
-                    />
-                    <span className={`text-[13px] font-garamond uppercase tracking-wider transition-colors ${
+                    >
+                      {color.image && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={color.image}
+                          alt={color.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
+                    <span className={`text-[12.5px] md:text-[13px] font-garamond uppercase tracking-wider transition-colors ${
                       isSelected ? "text-[#79A7D3] font-semibold" : "text-gray-700 font-medium"
                     }`}>
                       {color.name}
