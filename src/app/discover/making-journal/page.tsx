@@ -54,85 +54,84 @@ export default async function MakingJournalPage() {
           </div>
         </div>
 
-        {/* Masonry Grid with Pagination */}
+        {/* Masonry / Ribbon Grid with Interactive Tabs */}
         <JournalGridClient journals={journals} />
 
         {/* Features / Icons Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6 lg:gap-8 pt-16 max-w-[1200px] mx-auto w-full">
 
           {/* Icon 1: Drawn by Hand */}
-          <div className="flex flex-col items-center text-center px-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+          <div className="flex flex-col items-center text-center px-1 sm:px-2 md:px-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-2 sm:mb-3 md:mb-4 flex items-center justify-center">
               <Image
                 src="/images/pencil_icon.png"
                 alt="Drawn by Hand"
-                width={80}
-                height={100}
-                className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                style={{ width: "auto", height: "auto" }}
+                width={112}
+                height={112}
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain"
               />
             </div>
-            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.06em] sm:tracking-[0.1em] md:tracking-[0.12em] text-gray-500 uppercase mb-1 sm:mb-2 font-medium">
               DRAWN BY HAND
             </h3>
-            <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
+            <p className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] text-gray-400 leading-tight sm:leading-relaxed max-w-[200px]">
               Original illustrations, thoughtfully imagined.
             </p>
           </div>
 
           {/* Icon 2: Crafted with Intention */}
-          <div className="flex flex-col items-center text-center px-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+          <div className="flex flex-col items-center text-center px-1 sm:px-2 md:px-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-2 sm:mb-3 md:mb-4 flex items-center justify-center">
               <Image
                 src="/images/needle.png"
                 alt="Crafted with Intention"
-                width={80}
-                height={80}
-                className="w-14 h-14 md:w-16 md:h-16 object-contain"
+                width={112}
+                height={112}
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain"
               />
             </div>
-            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.06em] sm:tracking-[0.1em] md:tracking-[0.12em] text-gray-500 uppercase mb-1 sm:mb-2 font-medium">
               CRAFTED WITH INTENTION
             </h3>
-            <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
+            <p className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] text-gray-400 leading-tight sm:leading-relaxed max-w-[200px]">
               Every detail, considered with purpose.
             </p>
           </div>
 
           {/* Icon 3: Naturally Chosen */}
-          <div className="flex flex-col items-center text-center px-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+          <div className="flex flex-col items-center text-center px-1 sm:px-2 md:px-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-2 sm:mb-3 md:mb-4 flex items-center justify-center">
               <Image
                 src="/images/leaf_icon.png"
                 alt="Naturally Chosen"
-                width={120}
-                height={120}
-                className="w-20 h-20 md:w-26 md:h-26 object-contain scale-125"
+                width={112}
+                height={112}
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain"
               />
             </div>
-            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.06em] sm:tracking-[0.1em] md:tracking-[0.12em] text-gray-500 uppercase mb-1 sm:mb-2 font-medium">
               NATURALLY CHOSEN
             </h3>
-            <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
+            <p className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] text-gray-400 leading-tight sm:leading-relaxed max-w-[200px]">
               Natural fabrics, selected for feel and longevity.
             </p>
           </div>
 
           {/* Icon 4: Designed & Made in India */}
-          <div className="flex flex-col items-center text-center px-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 mb-4 flex items-center justify-center">
+          <div className="flex flex-col items-center text-center px-1 sm:px-2 md:px-4">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-2 sm:mb-3 md:mb-4 flex items-center justify-center">
               <Image
-                src="/images/home_icon.png"
+                src="/images/home_icon_v2.png"
                 alt="Designed & Made in India"
-                width={96}
-                height={96}
-                className="w-16 h-16 md:w-20 md:h-20 object-contain"
+                width={116}
+                height={116}
+                className="w-[52px] h-[52px] sm:w-[68px] sm:h-[68px] md:w-[100px] md:h-[100px] lg:w-[116px] lg:h-[116px] object-contain"
               />
             </div>
-            <h3 className="font-garamond text-[10px] md:text-[11px] tracking-[0.12em] text-gray-500 uppercase mb-2 font-medium">
+            <h3 className="font-garamond text-[9px] sm:text-[10px] md:text-[11px] tracking-[0.06em] sm:tracking-[0.1em] md:tracking-[0.12em] text-gray-500 uppercase mb-1 sm:mb-2 font-medium">
               DESIGNED & MADE IN INDIA
             </h3>
-            <p className="text-[12px] md:text-[13px] text-gray-400 leading-relaxed max-w-[200px]">
+            <p className="text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px] text-gray-400 leading-tight sm:leading-relaxed max-w-[200px]">
               Rooted in design, brought to life close to home.
             </p>
           </div>

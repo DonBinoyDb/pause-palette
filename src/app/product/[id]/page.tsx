@@ -11,6 +11,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     include: {
       collection: {
         select: { name: true }
+      },
+      categories: {
+        select: { id: true, name: true, slug: true }
       }
     }
   });
@@ -18,6 +21,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   if (!product) {
     notFound();
   }
+
+  const categoryNames = product.categories?.map((c) => c.name) || [];
+  const categoryDisplay = categoryNames.length > 0
+    ? categoryNames.join(", ")
+    : (product.gender?.length > 0 ? product.gender.join(", ") : "");
 
   // Map to the expected format for the client
   const serializedProduct = {
@@ -27,7 +35,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     description: product.description || "",
     images: product.images,
     imageFit: product.imageFit || "cover",
-    category: product.collection?.name || "Uncategorized",
+    collectionName: product.collection?.name || null,
+    categories: product.categories || [],
+    category: categoryDisplay,
     hasSilhouette: product.hasSilhouette,
     fits: (product.fits as {name: string, iconUrl: string}[]) || [],
     accordions: (product.accordions as {title: string, content: string}[]) || [],

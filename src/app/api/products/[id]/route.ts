@@ -49,6 +49,23 @@ export async function PUT(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    let genderList: string[] | undefined = Array.isArray(data.gender) ? data.gender : undefined;
+    if ((!genderList || genderList.length === 0) && Array.isArray(data.categoryIds) && data.categoryIds.length > 0) {
+      const selectedCats = await prisma.category.findMany({
+        where: { id: { in: data.categoryIds } },
+        select: { slug: true, name: true }
+      });
+      const inferred: string[] = [];
+      selectedCats.forEach((c) => {
+        const s = (c.slug || c.name || "").toLowerCase();
+        if (s.includes("men") && !s.includes("women") && !inferred.includes("MEN")) inferred.push("MEN");
+        if (s.includes("women") && !inferred.includes("WOMEN")) inferred.push("WOMEN");
+      });
+      if (inferred.length > 0) {
+        genderList = inferred;
+      }
+    }
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -69,6 +86,7 @@ export async function PUT(
         categories: {
           set: data.categoryIds?.map((id: string) => ({ id })) || []
         },
+        ...(genderList !== undefined ? { gender: genderList } : {}),
         sizes: data.sizes || [],
         fitGuideDescription: data.fitGuideDescription || null,
         fitGuideImage: data.fitGuideImage || null,
@@ -79,6 +97,23 @@ export async function PUT(
         imageFit: data.imageFit !== undefined ? data.imageFit : undefined,
       },
     });
+
+    if (data.isNew === true) {
+      try {
+        const settings = await prisma.newArrivalsSettings.findUnique({ where: { id: "singleton" } });
+        if (settings) {
+          const currentIds = (settings.productIds || []).filter((id: string) => id !== product.id);
+          await prisma.newArrivalsSettings.update({
+            where: { id: "singleton" },
+            data: {
+              productIds: [product.id, ...currentIds]
+            }
+          });
+        }
+      } catch (err) {
+        console.warn("[PRODUCTS_PUT] Could not prepend to new arrivals:", err);
+      }
+    }
 
     return NextResponse.json(product);
   } catch (error: any) {

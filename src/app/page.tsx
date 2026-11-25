@@ -55,6 +55,18 @@ export default async function Home() {
       const limit = Math.max(newArrivalsSettings.limit || 0, 8);
       const customIds = newArrivalsSettings.productIds || [];
 
+      // Query any published products marked as isNew, sorted newest first
+      const newestAddedProducts = await prisma.product.findMany({
+        where: { isPublished: true, isNew: true },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        include: {
+          collection: {
+            select: { name: true },
+          },
+        },
+      });
+
       if (customIds.length > 0) {
         const curated = await prisma.product.findMany({
           where: {
@@ -67,40 +79,29 @@ export default async function Home() {
             },
           },
         });
-        newInProducts = customIds
+        const curatedOrdered = customIds
           .map((id) => curated.find((p) => p.id === id))
           .filter(Boolean) as any[];
-      }
 
-      // If no curated products or fewer than limit, automatically grab the newest "isNew" products
-      if (newInProducts.length < limit) {
-        const existingIds = newInProducts.map((p) => p.id);
-        const autoProducts = await prisma.product.findMany({
-          where: {
-            isPublished: true,
-            isNew: true,
-            ...(existingIds.length > 0 ? { id: { notIn: existingIds } } : {}),
-          },
-          take: limit - newInProducts.length,
-          orderBy: { createdAt: "desc" },
-          include: {
-            collection: {
-              select: { name: true },
-            },
-          },
-        });
-        newInProducts = [...newInProducts, ...autoProducts];
+        // Products that are brand new (isNew: true) and not already in customIds come first
+        const newNotYetCurated = newestAddedProducts.filter(
+          (p) => !customIds.includes(p.id)
+        );
+
+        newInProducts = [...newNotYetCurated, ...curatedOrdered];
+      } else {
+        newInProducts = newestAddedProducts;
       }
 
       // If still fewer than limit (e.g. not enough products marked isNew), fallback to any published products by recency
-      if (newInProducts.length < limit) {
-        const existingIds = newInProducts.map((p) => p.id);
+      if (!newInProducts || newInProducts.length < limit) {
+        const existingIds = (newInProducts || []).map((p) => p.id);
         const fallbackProducts = await prisma.product.findMany({
           where: {
             isPublished: true,
             ...(existingIds.length > 0 ? { id: { notIn: existingIds } } : {}),
           },
-          take: limit - newInProducts.length,
+          take: limit - (newInProducts ? newInProducts.length : 0),
           orderBy: { createdAt: "desc" },
           include: {
             collection: {
@@ -108,7 +109,7 @@ export default async function Home() {
             },
           },
         });
-        newInProducts = [...newInProducts, ...fallbackProducts];
+        newInProducts = [...(newInProducts || []), ...fallbackProducts];
       }
     }
   } catch (err) {

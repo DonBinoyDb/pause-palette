@@ -50,6 +50,28 @@ model User {
   sessions      Session[]
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
+  addresses     Address[]
+  orders        Order[]
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label        String   @default("Home") // "Home", "Office", "Studio", "Other"
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  pincode      String
+  country      String   @default("India")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -66,6 +88,7 @@ model Collection {
   slug        String    @unique
   description String?
   coverImage  String?
+  images      String[]  @default([])
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -77,6 +100,7 @@ model Category {
   slug        String    @unique
   description String?
   coverImage  String?
+  images      String[]  @default([])
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -108,6 +132,7 @@ model Product {
   updatedAt     DateTime    @updatedAt
   cartItems     CartItem[]
   wishlistItems WishlistItem[]
+  orderItems    OrderItem[]
 }
 
 model LookbookItem {
@@ -218,6 +243,67 @@ model StoreSettings {
   instagramUrl   String?  @default("https://www.instagram.com/pause_palette?stkn=c2k1dGNxeGJ4aGtj")
   updatedAt      DateTime @updatedAt
 }
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  IN_MAKING
+  DISPATCHED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress Json
+  orderNotes      String?       @db.Text
+  adminNotes      String?       @db.Text
+  totalAmount     Int
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  courierName     String?
+  trackingNumber  String?
+  idempotencyKey  String?
+  items           OrderItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName    String
+  productImage   String?
+  price          Int
+  quantity       Int      @default(1)
+  size           String?
+  silhouette     String?
+  color          String?
+  curatedDetails Json?
+
+  @@index([orderId])
+}
+
 
 
 

@@ -1,16 +1,61 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Tag, Layers, LogOut, Image as ImageIcon, Star, BookOpen, Sparkles, ShoppingBag, FileText, MessageCircle } from "lucide-react";
-
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Package,
+  Tag,
+  Layers,
+  LogOut,
+  Image as ImageIcon,
+  Star,
+  BookOpen,
+  Sparkles,
+  ShoppingBag,
+  FileText,
+  MessageCircle,
+} from "lucide-react";
 import { signOut } from "next-auth/react";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [pendingOrders, setPendingOrders] = useState<number>(0);
+
+  useEffect(() => {
+    async function loadPendingCount() {
+      try {
+        const res = await fetch("/api/admin/orders/count");
+        if (res.ok) {
+          const data = await res.json();
+          setPendingOrders(data.pendingCount || 0);
+        }
+      } catch (err) {
+        console.warn("Could not fetch pending orders count:", err);
+      }
+    }
+
+    loadPendingCount();
+    const interval = setInterval(loadPendingCount, 60000); // Poll once every 60s
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/orders/count")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (typeof data?.pendingCount === "number") {
+          setPendingOrders(data.pendingCount);
+        }
+      })
+      .catch(() => { });
+  }, [pathname]);
 
   const navItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { name: "Orders", href: "/admin/orders", icon: ClipboardList },
     { name: "Hero Banner", href: "/admin/hero", icon: Sparkles },
     { name: "New Arrivals", href: "/admin/new-arrivals", icon: ShoppingBag },
     { name: "Products", href: "/admin/products", icon: Package },
@@ -29,7 +74,7 @@ export default function Sidebar() {
       <div className="mb-12 px-8">
         <Link href="/" className="flex flex-col items-start group">
           <span className="font-serif text-[28px] font-medium tracking-tight text-[#2C2B29] group-hover:opacity-80 transition-opacity">
-            Pause<br/>Palette
+            Pause<br />Palette
           </span>
           <div className="w-6 h-[1px] bg-[#2C2B29]/20 mt-4 mb-3 transition-all group-hover:w-10"></div>
           <p className="text-[9px] text-[#8B8985] uppercase tracking-[0.2em] font-medium">Admin Workspace</p>
@@ -40,26 +85,30 @@ export default function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           const Icon = item.icon;
-          
+
           return (
-            <Link 
+            <Link
               key={item.name}
-              href={item.href} 
-              className={`group flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 relative overflow-hidden ${
-                isActive 
-                  ? "text-[#2C2B29] bg-[#F2F0ED] shadow-[inset_0_1px_1px_rgba(0,0,0,0.02)]" 
-                  : "text-[#8B8985] hover:text-[#2C2B29] hover:bg-[#F2F0ED]/50"
-              }`}
+              href={item.href}
+              className={`group flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 relative overflow-hidden ${isActive
+                ? "text-[#2C2B29] bg-[#F2F0ED] shadow-[inset_0_1px_1px_rgba(0,0,0,0.02)]"
+                : "text-[#8B8985] hover:text-[#2C2B29] hover:bg-[#F2F0ED]/50"
+                }`}
             >
               {isActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-[#2C2B29] rounded-r-full"></div>
               )}
-              <Icon 
-                size={18} 
-                strokeWidth={isActive ? 2 : 1.5} 
-                className={`${isActive ? 'text-[#2C2B29]' : 'text-[#8B8985] group-hover:text-[#2C2B29]'} transition-colors duration-300`} 
+              <Icon
+                size={18}
+                strokeWidth={isActive ? 2 : 1.5}
+                className={`${isActive ? 'text-[#2C2B29]' : 'text-[#8B8985] group-hover:text-[#2C2B29]'} transition-colors duration-300`}
               />
-              <span className="tracking-wide">{item.name}</span>
+              <span className="tracking-wide flex-1">{item.name}</span>
+              {item.name === "Orders" && pendingOrders > 0 && (
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-500 text-white font-mono shadow-2xs">
+                  {pendingOrders}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -67,7 +116,7 @@ export default function Sidebar() {
 
       <div className="mt-auto pt-6 px-4 pb-4">
         <div className="w-full h-[1px] bg-[#E8E6E1] mb-6 mx-2 max-w-[calc(100%-16px)]"></div>
-        <button 
+        <button
           suppressHydrationWarning
           onClick={async () => {
             try {

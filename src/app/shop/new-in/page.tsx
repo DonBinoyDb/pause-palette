@@ -11,6 +11,9 @@ export default async function NewInPage() {
     include: {
       collection: {
         select: { name: true }
+      },
+      categories: {
+        select: { id: true, name: true, slug: true }
       }
     }
   });
@@ -23,6 +26,9 @@ export default async function NewInPage() {
       include: {
         collection: {
           select: { name: true }
+        },
+        categories: {
+          select: { id: true, name: true, slug: true }
         }
       }
     });

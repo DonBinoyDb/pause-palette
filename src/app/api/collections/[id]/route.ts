@@ -9,6 +9,11 @@ export async function GET(
     const { id } = await params;
     const collection = await prisma.collection.findUnique({
       where: { id },
+      include: {
+        products: {
+          select: { id: true, name: true, images: true },
+        },
+      },
     });
 
     if (!collection) {
@@ -29,11 +34,19 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, slug, description, coverImage } = body;
+    const { name, slug, description, coverImage, images } = body;
 
     if (!name || !slug) {
       return new NextResponse("Name and slug are required", { status: 400 });
     }
+
+    const imageArray = Array.isArray(images)
+      ? images.filter((img): img is string => typeof img === "string" && img.trim().length > 0)
+      : undefined;
+
+    const effectiveCover = imageArray !== undefined
+      ? (imageArray.length > 0 ? imageArray[0] : null)
+      : coverImage;
 
     const collection = await prisma.collection.update({
       where: { id },
@@ -41,7 +54,8 @@ export async function PUT(
         name,
         slug,
         description,
-        coverImage,
+        coverImage: effectiveCover,
+        ...(imageArray !== undefined ? { images: imageArray } : {}),
       },
     });
 
