@@ -45,6 +45,7 @@ interface ShopContextType {
   updateQuantity: (id: string, quantity: number) => void;
   toggleSaved: (item: SavedItem) => void;
   isSaved: (productId: string) => boolean;
+  clearCart: () => void;
   clearData: () => void;
   cartTotal: number;
 }
@@ -299,6 +300,18 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     return saved.some(item => item.productId === productId);
   };
 
+  const clearCart = async () => {
+    setCart([]);
+    localStorage.removeItem('pause_palette_cart');
+    if (status === 'authenticated') {
+      try {
+        await fetch('/api/cart?clearAll=true', { method: 'DELETE' });
+      } catch (err) {
+        console.error("Failed to clear DB cart", err);
+      }
+    }
+  };
+
   const clearData = () => {
     setCart([]);
     setSaved([]);
@@ -317,6 +330,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       updateQuantity, 
       toggleSaved, 
       isSaved,
+      clearCart,
       clearData,
       cartTotal
     }}>

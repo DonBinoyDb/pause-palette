@@ -2,30 +2,22 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import CollectionCarousel from "@/components/CollectionCarousel";
 
 export const dynamic = "force-dynamic";
 
 export default async function CollectionsPage() {
-  // Fetch collections from Prisma, including their products to get an image
   const collections = await prisma.collection.findMany({
-    include: {
-      products: {
-        where: { isPublished: true },
-        select: { images: true },
-        take: 1
-      }
-    },
-    orderBy: { createdAt: "desc" }
+    orderBy: { createdAt: "desc" },
   });
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
-      {/* Use the dark text variant of the Navbar */}
       <Navbar variant="dark" />
-      
+
       {/* Page Content */}
       <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
-        
+
         {/* Header Section */}
         <header className="mb-16 md:mb-20 flex flex-col items-center text-center">
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">
@@ -39,7 +31,6 @@ export default async function CollectionsPage() {
           </p>
         </header>
 
-        {/* Collections List */}
         {collections.length === 0 ? (
           <div className="text-center py-24 text-gray-400 italic font-garamond text-lg">
             No collections found in the archive.
@@ -47,50 +38,35 @@ export default async function CollectionsPage() {
         ) : (
           <div className="space-y-20 md:space-y-32">
             {collections.map((collection: any) => {
-              // Try to use the collection cover image first.
-              let imageSrc = collection.coverImage;
-              
-              if (!imageSrc) {
-                // Fallback 1: Hardcoded mock images
-                if (collection.slug === "in-wild-bloom") imageSrc = "/images/in_wild_bloom.png";
-                else if (collection.slug === "midnight-moss") imageSrc = "/images/midnight_moss.png";
-                else if (collection.slug === "sage-and-soil") imageSrc = "/images/sage_and_soil.png";
-                
-                // Fallback 2: First product image
-                else if (collection.products[0]?.images[0]) {
-                  imageSrc = collection.products[0].images[0];
-                }
-                
-                // Fallback 3: Generic Unsplash image
-                else {
-                  imageSrc = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920&auto=format&fit=crop";
-                }
-              }
+              // Direct 1-to-1: collection.images is the single source of truth
+              const collectionImages: string[] =
+                Array.isArray(collection.images) && collection.images.length > 0
+                  ? collection.images.filter(
+                    (img: any) => typeof img === "string" && img.trim().length > 0
+                  )
+                  : collection.coverImage
+                    ? [collection.coverImage]
+                    : [];
 
               return (
-                <Link 
-                  key={collection.id} 
-                  href={`/collections/${collection.slug}`} 
-                  className="flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-16 xl:gap-20 group cursor-pointer"
+                <div
+                  key={collection.id}
+                  className="flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-16 xl:gap-20 group"
                 >
-                  {/* Left: Wider, commanding hero image */}
+                  {/* Left: Hero carousel showing exact collection images */}
                   <div className="w-full md:w-[64%] lg:w-[68%] xl:w-[70%] relative overflow-hidden bg-gray-100 rounded-xs shadow-xs">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={imageSrc} 
-                      alt={collection.name} 
-                      className="w-full h-[380px] sm:h-[460px] md:h-[520px] lg:h-[580px] xl:h-[620px] object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                    <CollectionCarousel
+                      images={collectionImages}
+                      collectionName={collection.name}
+                      linkHref={`/collections/${collection.slug}`}
                     />
-                    <div className="absolute bottom-4 right-4 flex gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/80"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/80"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/80"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/80"></div>
-                    </div>
                   </div>
 
                   {/* Right: Harmoniously centered editorial text */}
-                  <div className="w-full md:w-[36%] lg:w-[32%] xl:w-[30%] text-center md:text-left flex flex-col items-center md:items-start py-2 md:py-6">
+                  <Link
+                    href={`/collections/${collection.slug}`}
+                    className="w-full md:w-[36%] lg:w-[32%] xl:w-[30%] text-center md:text-left flex flex-col items-center md:items-start py-2 md:py-6 cursor-pointer"
+                  >
                     <h2 className="font-garamond text-3xl sm:text-4xl lg:text-5xl text-gray-900 group-hover:text-gray-700 transition-colors mb-3 md:mb-4 leading-tight font-normal">
                       {collection.name}
                     </h2>
@@ -101,14 +77,14 @@ export default async function CollectionsPage() {
                       <span>Discover Collection</span>
                       <span className="transition-transform group-hover:translate-x-1.5 duration-300">→</span>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               );
             })}
           </div>
         )}
       </div>
-      
+
       <Footer />
     </main>
   );

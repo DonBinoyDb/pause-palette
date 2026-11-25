@@ -6,13 +6,14 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import StickySaveBar from "@/components/admin/StickySaveBar";
+import AddProductVariantModal from "@/components/admin/AddProductVariantModal";
 
-export default function EditProductForm({ 
-  product, 
+export default function EditProductForm({
+  product,
   collections,
   categories
-}: { 
-  product: any, 
+}: {
+  product: any,
   collections: any[],
   categories: any[]
 }) {
@@ -21,22 +22,22 @@ export default function EditProductForm({
   const iconInputRef = useRef<HTMLInputElement>(null);
   const productId = product.id;
   const MAX_FILE_SIZE = 2 * 1024 * 1024;
-  
+
   const [loading, setLoading] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [iconUploading, setIconUploading] = useState(false);
   const [fitGuideUploading, setFitGuideUploading] = useState(false);
-  
+
   const fitGuideInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Form Data
   const [name, setName] = useState(product.name || "");
   const [slug, setSlug] = useState(product.slug || "");
   const [description, setDescription] = useState(product.description || "");
   const [price, setPrice] = useState(product.price?.toString() || "");
   const [collectionId, setCollectionId] = useState(product.collectionId || "");
-  
+
   const [categoryIds, setCategoryIds] = useState<string[]>(
     product.categories?.map((c: any) => c.id) || []
   );
@@ -52,10 +53,10 @@ export default function EditProductForm({
 
   // Fits
   const [hasSilhouette, setHasSilhouette] = useState(product.hasSilhouette || false);
-  const [fits, setFits] = useState<{name: string, iconUrl: string}[]>(
+  const [fits, setFits] = useState<{ name: string, iconUrl: string }[]>(
     Array.isArray(product.fits) ? product.fits : []
   );
-  
+
   // Accordions
   const defaultAccordions = [
     { title: "Size & Fit", content: "" },
@@ -63,9 +64,9 @@ export default function EditProductForm({
     { title: "Care", content: "" },
     { title: "Returns & Exchanges", content: "" },
   ];
-  const [accordions, setAccordions] = useState<{title: string, content: string}[]>(
-    Array.isArray(product.accordions) && product.accordions.length > 0 
-      ? product.accordions 
+  const [accordions, setAccordions] = useState<{ title: string, content: string }[]>(
+    Array.isArray(product.accordions) && product.accordions.length > 0
+      ? product.accordions
       : defaultAccordions
   );
 
@@ -75,16 +76,27 @@ export default function EditProductForm({
   const additionalColors = savedColors.filter((c: any) => !c.isMain);
 
   const [mainColorName, setMainColorName] = useState(mainColorItem ? mainColorItem.name : "Original");
-  const [colors, setColors] = useState<{name: string, hex: string, images: string[]}[]>(additionalColors);
+  const [colors, setColors] = useState<{ name: string, hex: string, images: string[] }[]>(additionalColors);
   const [newColorName, setNewColorName] = useState("");
   const colorInputRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
   const [colorUploading, setColorUploading] = useState<{ [key: number]: boolean }>({});
-  
+
   // UI State
   const [openAccordion, setOpenAccordion] = useState<number | null>(null);
   const [isSilhouetteModalOpen, setIsSilhouetteModalOpen] = useState(false);
+  const [isAddFromProductModalOpen, setIsAddFromProductModalOpen] = useState(false);
   const [newFitName, setNewFitName] = useState("");
   const [newFitIconUrl, setNewFitIconUrl] = useState("");
+
+  const handleAddVariantFromExisting = (variant: {
+    name: string;
+    hex: string;
+    images: string[];
+    existingProductId?: string;
+    productSlug?: string;
+  }) => {
+    setColors((prev) => [...prev, variant]);
+  };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -110,12 +122,12 @@ export default function EditProductForm({
       for (let i = 0; i < files.length; i++) {
         const formData = new FormData();
         formData.append("file", files[i]);
-        
+
         const res = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
-        
+
         const data = await res.json();
         if (data.success) {
           setImages(prev => [...prev, data.url]);
@@ -143,7 +155,7 @@ export default function EditProductForm({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      
+
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
       if (data.success) {
@@ -234,7 +246,7 @@ export default function EditProductForm({
           newImageUrls.push(data.url);
         }
       }
-      
+
       setColors(prev => {
         const next = [...prev];
         next[index] = {
@@ -337,9 +349,19 @@ export default function EditProductForm({
     setOpenAccordion(accordions.length);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (publishOverride?: boolean) => {
+    if (!name.trim()) {
+      toast.error("Please enter a product name.");
+      return;
+    }
+    if (!price || isNaN(parseFloat(price))) {
+      toast.error("Please enter a valid price.");
+      return;
+    }
+
     setLoading(true);
+    const publishStatus = publishOverride !== undefined ? publishOverride : isPublished;
+    setIsPublished(publishStatus);
 
     try {
       const res = await fetch(`/api/products/${productId}`, {
@@ -356,7 +378,7 @@ export default function EditProductForm({
           hasSilhouette,
           fits,
           accordions,
-          isPublished,
+          isPublished: publishStatus,
           isNew,
           imageFit,
           dispatchInfo,
@@ -371,7 +393,7 @@ export default function EditProductForm({
       });
 
       if (res.ok) {
-        toast.success("Product updated successfully!");
+        toast.success(publishStatus ? "Product published successfully!" : "Product saved as draft!");
         router.refresh();
       } else {
         const errJson = await res.json().catch(() => null);
@@ -384,6 +406,11 @@ export default function EditProductForm({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSave(true);
   };
 
   const handleDelete = async () => {
@@ -431,11 +458,11 @@ export default function EditProductForm({
     }
   };
 
-  const displayImages = images.length > 0 ? images : [""]; 
+  const displayImages = images.length > 0 ? images : [""];
 
   return (
     <form id="edit-product-form" onSubmit={handleSubmit} className="w-full">
-      
+
       {/* Admin Action Bar (Normal flow, not sticky) */}
       <div className="pb-6 mb-8 border-b border-[#E8E6E1] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -447,7 +474,7 @@ export default function EditProductForm({
             <p className="text-gray-500 text-[10px] tracking-widest uppercase mt-1">Live Storefront Preview</p>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap gap-3 items-center">
           <button
             type="button"
@@ -465,7 +492,7 @@ export default function EditProductForm({
           >
             <Trash2 size={13} /> Delete
           </button>
-          <button 
+          <button
             type="button"
             onClick={() => router.push("/admin/products")}
             className="px-6 py-2.5 text-[10px] tracking-[0.15em] uppercase text-gray-700 hover:bg-gray-100 border border-gray-200 transition-colors rounded-sm font-medium"
@@ -473,7 +500,7 @@ export default function EditProductForm({
             Cancel
           </button>
           <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden">
-            <button 
+            <button
               type="button"
               onClick={() => setIsPublished(true)}
               className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${isPublished ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:bg-gray-50'}`}
@@ -481,7 +508,7 @@ export default function EditProductForm({
               <Eye size={13} /> Active
             </button>
             <div className="w-px h-full bg-gray-200" />
-            <button 
+            <button
               type="button"
               onClick={() => setIsPublished(false)}
               className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${!isPublished ? 'bg-gray-100 text-gray-800' : 'text-gray-500 hover:bg-gray-50'}`}
@@ -489,9 +516,9 @@ export default function EditProductForm({
               <EyeOff size={13} /> Draft
             </button>
           </div>
-          
+
           <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden">
-            <button 
+            <button
               type="button"
               onClick={() => setIsNew(!isNew)}
               className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${isNew ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:bg-gray-50'}`}
@@ -501,7 +528,7 @@ export default function EditProductForm({
           </div>
 
           <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden" title="Portrait image fitting: Fill Frame (Cover) or Full Image (Contain)">
-            <button 
+            <button
               type="button"
               onClick={() => setImageFit(imageFit === "cover" ? "contain" : "cover")}
               className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${imageFit === "contain" ? 'bg-amber-50 text-amber-800 font-semibold' : 'text-gray-500 hover:bg-gray-50'}`}
@@ -510,7 +537,7 @@ export default function EditProductForm({
             </button>
           </div>
 
-          <button 
+          <button
             type="submit"
             disabled={loading || uploading}
             className="px-6 py-2.5 text-[10px] tracking-[0.15em] uppercase bg-[#2C2B29] text-white hover:bg-black transition-colors rounded-sm flex items-center gap-2 shadow-sm disabled:opacity-50 font-semibold"
@@ -523,7 +550,7 @@ export default function EditProductForm({
 
       {/* Editor Canvas */}
       <div className="bg-white shadow-2xl rounded-md border border-gray-100 overflow-hidden mb-24 relative">
-        
+
         {/* Fake Browser Header */}
         <div className="bg-gray-50 border-b border-gray-200 py-3 px-6 flex items-center gap-4">
           <div className="flex gap-2">
@@ -532,20 +559,20 @@ export default function EditProductForm({
             <div className="w-3 h-3 rounded-full bg-green-400"></div>
           </div>
           <div className="flex-1 bg-white border border-gray-200 rounded-md py-1.5 px-4 text-[10px] text-gray-400 font-mono flex items-center gap-2 max-w-sm mx-auto">
-             <span>pause-palette.com/product/</span>
-             <input 
-               type="text" 
-               value={slug} 
-               onChange={(e) => setSlug(e.target.value)}
-               className="bg-transparent border-none outline-none text-gray-700 w-full"
-             />
+            <span>pause-palette.com/product/</span>
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className="bg-transparent border-none outline-none text-gray-700 w-full"
+            />
           </div>
         </div>
 
         <div className="pt-16 pb-24 px-6 md:px-12 lg:px-16 w-full">
-          
+
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
-            
+
             {/* Left: Images Section */}
             <div className="w-full lg:w-7/12 flex gap-4 md:gap-8">
               <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 h-fit">
@@ -582,7 +609,7 @@ export default function EditProductForm({
                               </button>
                             )}
                           </div>
-                          <button 
+                          <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
                             className="p-1 hover:text-red-400 text-white transition-colors"
@@ -608,7 +635,7 @@ export default function EditProductForm({
                       <>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={src} alt={`Main ${idx + 1}`} className={`w-full h-full ${imageFit === "contain" ? "object-contain bg-white" : "object-cover"}`} />
-                        
+
                         {/* Top-left: Position Badge & Set as Cover */}
                         <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
                           <span className="bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono uppercase px-2.5 py-1 rounded-sm shadow-xs font-semibold">
@@ -648,7 +675,7 @@ export default function EditProductForm({
                               <ChevronDown size={18} />
                             </button>
                           )}
-                          <button 
+                          <button
                             type="button"
                             onClick={() => removeImage(idx)}
                             title="Remove Image"
@@ -659,7 +686,7 @@ export default function EditProductForm({
                         </div>
                       </>
                     ) : (
-                      <button 
+                      <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
@@ -678,7 +705,7 @@ export default function EditProductForm({
                 ))}
 
                 {displayImages.length < 5 && (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="aspect-[3/4] w-full relative bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
@@ -693,20 +720,20 @@ export default function EditProductForm({
                     )}
                   </button>
                 )}
-                
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleImageUpload} 
-                  accept="image/*" 
-                  multiple 
-                  className="hidden" 
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
                 />
 
                 <div className="mt-4 flex flex-col gap-2 bg-gray-50 p-4 border border-gray-200 rounded-sm">
                   <label className="text-[11px] uppercase tracking-widest text-gray-500 font-medium">Main Images Variant Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={mainColorName}
                     onChange={(e) => setMainColorName(e.target.value)}
                     placeholder="e.g. Original, Ivory, Default"
@@ -719,9 +746,9 @@ export default function EditProductForm({
 
             {/* Right: Product Details */}
             <div className="w-full lg:w-5/12 py-4">
-              
-              <input 
-                type="text" 
+
+              <input
+                type="text"
                 value={name}
                 onChange={handleNameChange}
                 placeholder="Product Name..."
@@ -730,37 +757,37 @@ export default function EditProductForm({
               />
 
               <div className="flex items-center gap-3 mb-6 bg-gray-50 p-2 rounded-md border border-gray-100">
-                 <select 
-                   value={collectionId}
-                   onChange={(e) => setCollectionId(e.target.value)}
-                   className="text-[10px] tracking-widest uppercase text-gray-600 bg-transparent border-none outline-none cursor-pointer"
-                 >
-                   <option value="">+ SELECT COLLECTION</option>
-                   {collections.map(col => (
-                     <option key={col.id} value={col.id}>{col.name.toUpperCase()}</option>
-                   ))}
-                 </select>
-                 
-                 <span className="text-gray-300">|</span>
-                 
-                 <div className="flex flex-wrap items-center gap-2">
-                   {categories.map(cat => (
-                     <button 
-                       key={cat.id}
-                       type="button"
-                       onClick={() => toggleCategory(cat.id)}
-                       className={`px-3 py-1 text-[10px] tracking-widest uppercase transition-colors rounded-sm ${categoryIds.includes(cat.id) ? 'bg-[#2C2B29] text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'}`}
-                     >
-                       {cat.name}
-                     </button>
-                   ))}
-                 </div>
+                <select
+                  value={collectionId}
+                  onChange={(e) => setCollectionId(e.target.value)}
+                  className="text-[10px] tracking-widest uppercase text-gray-600 bg-transparent border-none outline-none cursor-pointer"
+                >
+                  <option value="">+ SELECT COLLECTION</option>
+                  {collections.map(col => (
+                    <option key={col.id} value={col.id}>{col.name.toUpperCase()}</option>
+                  ))}
+                </select>
+
+                <span className="text-gray-300">|</span>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => toggleCategory(cat.id)}
+                      className={`px-3 py-1 text-[10px] tracking-widest uppercase transition-colors rounded-sm ${categoryIds.includes(cat.id) ? 'bg-[#2C2B29] text-white' : 'bg-transparent text-gray-500 hover:bg-gray-200'}`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-              
+
               <div className="relative mb-8 w-max">
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 font-garamond text-lg text-gray-700" style={{ fontFamily: "var(--font-body), 'EB Garamond', Garamond, serif" }}>₹</span>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   step="0.01"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
@@ -776,7 +803,7 @@ export default function EditProductForm({
                 <div className="flex justify-between items-end mb-4">
                   <div className="flex gap-2">
                     {["XS", "S", "M", "L", "XL", "XXL"].map(size => (
-                      <button 
+                      <button
                         type="button"
                         key={size}
                         onClick={() => toggleSize(size)}
@@ -791,22 +818,22 @@ export default function EditProductForm({
                 {/* Fit Guide Slider Content */}
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
                   <p className="text-[11px] uppercase tracking-widest text-gray-500 mb-3 font-medium">Fit Guide Slider Content</p>
-                  
+
                   <div className="flex flex-col gap-4">
-                    <textarea 
+                    <textarea
                       value={fitGuideDescription}
                       onChange={(e) => setFitGuideDescription(e.target.value)}
                       placeholder="Enter the fit guide description for the side slider..."
                       className="w-full text-[12px] text-gray-600 border border-gray-300 focus:border-gray-800 outline-none p-3 rounded-sm min-h-[80px] bg-white resize-y"
                     />
-                    
+
                     <div className="flex items-center gap-4">
                       {fitGuideImage && (
                         <div className="relative w-16 h-20 bg-gray-100 border border-gray-200 rounded-sm overflow-hidden shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={fitGuideImage} alt="Fit Guide" className="w-full h-full object-cover" />
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => setFitGuideImage("")}
                             className="absolute inset-0 bg-white/50 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity"
                           >
@@ -814,8 +841,8 @@ export default function EditProductForm({
                           </button>
                         </div>
                       )}
-                      
-                      <button 
+
+                      <button
                         type="button"
                         onClick={() => fitGuideInputRef.current?.click()}
                         className="flex-1 py-3 border border-gray-300 border-dashed text-[11px] uppercase tracking-widest text-gray-500 hover:bg-gray-100 transition-colors bg-white rounded-sm flex items-center justify-center gap-2"
@@ -826,12 +853,12 @@ export default function EditProductForm({
                           </>
                         )}
                       </button>
-                      <input 
-                        type="file" 
-                        ref={fitGuideInputRef} 
-                        onChange={handleFitGuideUpload} 
-                        accept="image/*" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        ref={fitGuideInputRef}
+                        onChange={handleFitGuideUpload}
+                        accept="image/*"
+                        className="hidden"
                       />
                     </div>
                   </div>
@@ -843,7 +870,7 @@ export default function EditProductForm({
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-[11px] uppercase tracking-widest text-gray-500 font-medium">Additional Color Variants</p>
                 </div>
-                
+
                 <div className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-4">
                   {colors.length === 0 ? (
                     <p className="text-xs text-gray-400 italic">No additional variants added yet.</p>
@@ -855,8 +882,8 @@ export default function EditProductForm({
                             <div className="flex items-center gap-3">
                               <span className="text-sm font-medium text-gray-900">{color.name}</span>
                             </div>
-                            <button 
-                              type="button" 
+                            <button
+                              type="button"
                               onClick={() => removeColor(colorIdx)}
                               className="text-red-500 hover:text-red-600 p-1"
                               title="Remove Color"
@@ -864,7 +891,7 @@ export default function EditProductForm({
                               <Trash2 size={16} />
                             </button>
                           </div>
-                          
+
                           <div className="flex flex-wrap gap-2 mb-3">
                             {color.images.map((img, imgIdx) => (
                               <div key={imgIdx} className="relative w-16 h-20 bg-gray-100 border border-gray-200 rounded-sm overflow-hidden group">
@@ -884,8 +911,8 @@ export default function EditProductForm({
                                       <ChevronLeft size={14} />
                                     </button>
                                   ) : <span className="w-3" />}
-                                  <button 
-                                    type="button" 
+                                  <button
+                                    type="button"
                                     onClick={() => removeColorImage(colorIdx, imgIdx)}
                                     className="text-white hover:text-red-400 p-0.5"
                                     title="Remove"
@@ -905,8 +932,8 @@ export default function EditProductForm({
                                 </div>
                               </div>
                             ))}
-                            
-                            <button 
+
+                            <button
                               type="button"
                               onClick={() => colorInputRefs.current[colorIdx]?.click()}
                               disabled={colorUploading[colorIdx]}
@@ -921,13 +948,13 @@ export default function EditProductForm({
                                 </>
                               )}
                             </button>
-                            <input 
-                              type="file" 
+                            <input
+                              type="file"
                               multiple
                               accept="image/*"
                               ref={(el) => { colorInputRefs.current[colorIdx] = el }}
-                              onChange={(e) => handleColorImageUpload(colorIdx, e)} 
-                              className="hidden" 
+                              onChange={(e) => handleColorImageUpload(colorIdx, e)}
+                              className="hidden"
                             />
                           </div>
                         </div>
@@ -935,20 +962,37 @@ export default function EditProductForm({
                     </div>
                   )}
 
-                  <div className="flex gap-2 items-center mt-4 pt-4 border-t border-gray-200">
-                    <input 
-                      type="text" 
-                      value={newColorName}
-                      onChange={(e) => setNewColorName(e.target.value)}
-                      placeholder="Variant Name (e.g. Forest Green or Option A)"
-                      className="flex-1 text-xs border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
-                    />
-                    <button 
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={newColorName}
+                        onChange={(e) => setNewColorName(e.target.value)}
+                        placeholder="Variant Name (e.g. Forest Green or Option A)"
+                        className="flex-1 text-xs border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={addColor}
+                        className="bg-gray-800 text-white px-3 py-2 rounded-sm text-xs font-medium hover:bg-black transition-colors shrink-0"
+                      >
+                        Add Variant
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 border-t border-gray-200" />
+                      <span className="text-[10px] uppercase tracking-widest text-gray-400 font-medium">or</span>
+                      <div className="flex-1 border-t border-gray-200" />
+                    </div>
+
+                    <button
                       type="button"
-                      onClick={addColor}
-                      className="bg-gray-800 text-white px-3 py-2 rounded-sm text-xs font-medium hover:bg-black transition-colors"
+                      onClick={() => setIsAddFromProductModalOpen(true)}
+                      className="w-full py-2.5 px-3 border border-gray-300 hover:border-gray-900 bg-white hover:bg-gray-50 text-gray-800 text-xs tracking-wider uppercase font-medium rounded-sm flex items-center justify-center gap-2 transition-all shadow-2xs cursor-pointer"
                     >
-                      Add Variant
+                      <Plus size={14} />
+                      <span>Add from Existing Product</span>
                     </button>
                   </div>
                 </div>
@@ -963,9 +1007,9 @@ export default function EditProductForm({
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-800"></div>
                   </label>
                 </div>
-                
+
                 {hasSilhouette && (
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setIsSilhouetteModalOpen(true)}
                     className="w-full border border-gray-800 bg-white py-3 px-4 flex justify-between items-center text-sm text-gray-800 hover:bg-gray-50 transition-colors shadow-sm"
@@ -985,7 +1029,7 @@ export default function EditProductForm({
                   </label>
                   <span className="text-[10px] text-gray-400 font-mono">Product Page Text</span>
                 </div>
-                <input 
+                <input
                   type="text"
                   value={dispatchInfo}
                   onChange={(e) => setDispatchInfo(e.target.value)}
@@ -998,18 +1042,30 @@ export default function EditProductForm({
                 </p>
               </div>
 
-              {/* Save Button */}
-              <button 
-                type="submit"
-                disabled={loading || uploading}
-                className="w-full border border-gray-800 bg-gray-800 text-white font-serif tracking-widest uppercase py-4 mb-8 hover:bg-black transition-colors disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
-              >
-                {loading ? "SAVING..." : "SAVE & PUBLISH PRODUCT"}
-              </button>
+              {/* Action Buttons: Save & Publish vs Save as Draft */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <button
+                  type="button"
+                  onClick={() => handleSave(true)}
+                  disabled={loading || uploading}
+                  className="flex-1 border border-gray-900 bg-gray-900 text-white font-serif text-xs tracking-[0.14em] uppercase py-2.5 px-4 hover:bg-black transition-all disabled:opacity-50 flex items-center justify-center shadow-xs cursor-pointer whitespace-nowrap"
+                >
+                  <span>{loading ? "SAVING..." : "SAVE & PUBLISH"}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSave(false)}
+                  disabled={loading || uploading}
+                  className="flex-1 border border-gray-300 bg-white text-gray-700 font-serif text-xs tracking-[0.14em] uppercase py-2.5 px-4 hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 flex items-center justify-center shadow-2xs cursor-pointer whitespace-nowrap"
+                >
+                  <span>SAVE AS DRAFT</span>
+                </button>
+              </div>
 
               {/* Description Input */}
               <div className="relative mb-10">
-                <textarea 
+                <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the piece, the fabric, the feel..."
@@ -1022,12 +1078,12 @@ export default function EditProductForm({
               <div className="border-t border-gray-200">
                 {accordions.map((item, idx) => (
                   <div key={idx} className="border-b border-gray-200 group relative">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setOpenAccordion(openAccordion === idx ? null : idx)}
                       className="w-full py-4 flex justify-between items-center text-left hover:bg-gray-50"
                     >
-                      <input 
+                      <input
                         type="text"
                         value={item.title}
                         onChange={(e) => updateAccordion(idx, 'title', e.target.value)}
@@ -1054,9 +1110,9 @@ export default function EditProductForm({
                     )}
                   </div>
                 ))}
-                
-                <button 
-                  type="button" 
+
+                <button
+                  type="button"
                   onClick={addAccordion}
                   className="w-full py-4 flex items-center justify-center gap-2 text-[11px] text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors border-b border-gray-200 border-dashed"
                 >
@@ -1073,12 +1129,12 @@ export default function EditProductForm({
       {isSilhouetteModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsSilhouetteModalOpen(false)}></div>
-          
+
           <div className="relative w-full max-w-2xl bg-[#FBF9F6] rounded-sm shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col">
             <button type="button" onClick={() => setIsSilhouetteModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10 bg-white/50 rounded-full p-1">
               <X size={20} strokeWidth={1.5} />
             </button>
-            
+
             <div className="px-8 py-10 flex-1">
               <h2 className="text-center font-serif text-xl tracking-widest text-gray-800 mb-2">CONFIGURE SILHOUETTES</h2>
               <p className="text-center text-sm text-gray-600 mb-10">Add or remove available fits and illustrations for this piece.</p>
@@ -1087,10 +1143,10 @@ export default function EditProductForm({
               <div className="mb-10 bg-white p-6 border border-gray-200 rounded-md shadow-sm">
                 <h3 className="text-[10px] font-medium tracking-widest text-gray-500 mb-4 uppercase">Add New Fit</h3>
                 <div className="flex items-start gap-6">
-                  
+
                   {/* Icon Uploader */}
                   <div className="shrink-0">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => iconInputRef.current?.click()}
                       className="w-24 h-24 bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors relative overflow-hidden"
@@ -1118,18 +1174,18 @@ export default function EditProductForm({
                     </button>
                     <input type="file" ref={iconInputRef} onChange={handleIconUpload} accept="image/*" className="hidden" />
                   </div>
-                  
+
                   {/* Name Input & Submit */}
                   <div className="flex-1 flex flex-col gap-4">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={newFitName}
                       onChange={(e) => setNewFitName(e.target.value)}
                       placeholder="e.g. Drop-Shoulder Shirt"
                       className="w-full border-b border-gray-300 bg-transparent py-2 text-sm text-gray-800 focus:outline-none focus:border-gray-800 transition-colors placeholder:text-gray-400 font-serif"
                     />
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={addFit}
                       className="bg-[#2C2B29] text-white py-2 px-6 text-[10px] uppercase tracking-widest hover:bg-black self-start rounded-sm"
                     >
@@ -1150,8 +1206,8 @@ export default function EditProductForm({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {fits.map((fitItem, idx) => (
                       <div key={idx} className="bg-white border border-gray-200 rounded-md p-4 flex flex-col items-center relative group shadow-sm">
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => removeFit(idx)}
                           className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-100"
                         >
@@ -1175,7 +1231,7 @@ export default function EditProductForm({
                 <Info size={14} className="text-gray-500 mt-0.5 shrink-0" strokeWidth={1.5} />
                 <p className="text-xs text-gray-600 text-center max-w-sm">This is exactly how fits will appear to your customers.</p>
               </div>
-              <button 
+              <button
                 type="button"
                 onClick={() => setIsSilhouetteModalOpen(false)}
                 className="w-full bg-[#2C2B29] hover:bg-black text-white py-4 font-serif tracking-widest text-sm transition-colors rounded-sm shadow-md"
@@ -1183,17 +1239,34 @@ export default function EditProductForm({
                 DONE
               </button>
             </div>
-            
+
           </div>
         </div>
       )}
 
+      {/* Add Variant from Existing Product Modal */}
+      <AddProductVariantModal
+        isOpen={isAddFromProductModalOpen}
+        onClose={() => setIsAddFromProductModalOpen(false)}
+        currentProductId={product.id}
+        currentProductName={name}
+        currentProductImages={images}
+        currentProductSlug={slug}
+        existingVariantNames={colors.map((c) => c.name)}
+        onAddVariant={handleAddVariantFromExisting}
+      />
+
       {/* Floating Sticky Save Bar */}
       <StickySaveBar
         formId="edit-product-form"
+        onSave={() => handleSave(true)}
         saving={loading || uploading}
-        label="Save Changes"
+        label="Save & Publish"
         subtext={isPublished ? "Active on store" : "Draft status"}
+        secondaryAction={{
+          label: "Save as Draft",
+          onClick: () => handleSave(false),
+        }}
       />
 
     </form>

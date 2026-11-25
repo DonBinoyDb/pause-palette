@@ -10,6 +10,8 @@ interface Product {
   slug: string;
   images: string[];
   gender?: string[];
+  categories?: { id?: string; name?: string; slug?: string }[];
+  fits?: any;
   collection?: { name: string } | null;
 }
 
@@ -20,8 +22,20 @@ export default function ShopAllClient({ products }: { products: Product[] }) {
 
   const filteredProducts = products.filter((p) => {
     if (filter === "all") return true;
+
+    // Check categories (primary classification from admin)
+    const categorySlugs = (p.categories || []).map((c) => (c.slug || c.name || "").toLowerCase());
+    if (categorySlugs.length > 0) {
+      if (filter === "men") return categorySlugs.some((s) => s === "men");
+      if (filter === "women") return categorySlugs.some((s) => s === "women");
+    }
+
+    // Check gender array
     const genders = (p.gender || []).map((g) => g.toLowerCase());
-    return genders.includes(filter);
+    if (filter === "men") return genders.includes("men") && !genders.includes("women");
+    if (filter === "women") return genders.includes("women");
+
+    return false;
   });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {

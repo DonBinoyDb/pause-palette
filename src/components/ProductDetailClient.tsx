@@ -2,8 +2,8 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";
-import { X, Check, Info } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Check, Info, ShoppingBag } from "lucide-react";
 import { useShop } from "@/context/ShopContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,8 @@ type ProductDetails = {
   description: string;
   images: string[];
   category: string;
+  collectionName?: string | null;
+  categories?: { id?: string; name: string; slug?: string }[];
   hasSilhouette: boolean;
   fits: {name: string, iconUrl: string}[];
   accordions?: {title: string, content: string}[];
@@ -38,10 +40,32 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     product.fits && product.fits.length > 0 ? product.fits[0].name : "original"
   );
   const [isAdded, setIsAdded] = useState(false);
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
   const { addToCart, toggleSaved, isSaved } = useShop();
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Close on ESC and lock body scroll when cart modal is open
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsCartModalOpen(false);
+      }
+    };
+
+    if (isCartModalOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isCartModalOpen]);
 
   const colors = product.colors || [];
   const currentColorImages = (colors.length > 0 && selectedColorIndex !== null && selectedColorIndex < colors.length && colors[selectedColorIndex].images.length > 0)
@@ -74,6 +98,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     });
     
     setIsAdded(true);
+    setIsCartModalOpen(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
 
@@ -125,15 +150,27 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           {/* Right: Product Details (sticky) */}
           <div className="w-full lg:w-5/12 sticky top-32 py-4 px-4 md:px-0">
             <h1 className="font-garamond text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
-            <div className="flex items-center gap-2 mb-4">
-               <p className="text-sm tracking-wide text-gray-500 font-garamond italic">
-                 {product.category} {product.gender?.length > 0 ? `| ${product.gender.join(', ')}` : ''}
-               </p>
-            </div>
+            {product.collectionName && (
+              <div className="flex items-center gap-2 mb-4">
+                 <p className="text-sm tracking-wide text-gray-500 font-garamond italic">
+                   {product.collectionName}
+                 </p>
+              </div>
+            )}
             
-            <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 mb-6">
+            <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 mb-2">
               ₹{product.price.toLocaleString("en-IN")}
             </p>
+
+            {/* Category Display between Price and Variants */}
+            {product.category && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm text-gray-500">Category:</span>
+                <span className="text-sm text-gray-900 font-medium">
+                  {product.category}
+                </span>
+              </div>
+            )}
 
             {/* Colour Options */}
             {colors.length > 0 && (
@@ -395,6 +432,91 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           </div>
         </div>
       </div>
+
+      {/* Added to Cart Popup Modal */}
+      {isCartModalOpen && (
+        <div 
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setIsCartModalOpen(false)}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-md bg-white rounded-none sm:rounded-xs shadow-2xl p-6 sm:p-8 text-center border border-[#DCE8F3] animate-in zoom-in-95 duration-200"
+          >
+            {/* Close Button */}
+            <button 
+              type="button"
+              onClick={() => setIsCartModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-[#79A7D3] transition-colors p-1.5 cursor-pointer"
+              aria-label="Close"
+            >
+              <X size={18} strokeWidth={1.5} />
+            </button>
+
+            {/* Checkmark Icon in brand soft blue badge */}
+            <div className="w-12 h-12 rounded-full bg-[#F4F8FB] border border-[#D5E5F2] text-[#79A7D3] flex items-center justify-center mx-auto mb-3 shadow-2xs">
+              <Check size={22} strokeWidth={2.5} />
+            </div>
+
+            {/* Brand Title & Subtitle */}
+            <h3 className="font-garamond text-2xl text-gray-900 tracking-wide mb-1 font-normal uppercase">
+              Added to Cart
+            </h3>
+            <p className="text-xs text-gray-500 font-serif italic mb-5">
+              Your piece has been thoughtfully added to your shopping bag.
+            </p>
+
+            {/* Product Card Snapshot */}
+            <div className="bg-[#FAF8F5] border border-[#EAE6DF] rounded-none sm:rounded-xs p-3.5 flex items-center gap-4 text-left mb-6">
+              <div className="w-16 h-20 bg-white border border-gray-100 shrink-0 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={displayImages[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-garamond text-sm text-gray-900 font-medium truncate uppercase tracking-wide">
+                  {product.name}
+                </p>
+                <div className="text-[12px] text-gray-500 mt-0.5 space-y-0.5 font-light">
+                  <p>Size: <span className="text-gray-800 font-normal">{selectedSize}</span></p>
+                  {product.hasSilhouette && selectedSilhouette && (
+                    <p className="truncate">Fit: <span className="text-gray-800 font-normal">{selectedSilhouette}</span></p>
+                  )}
+                </div>
+                <p className="text-sm font-serif text-[#4A7DAF] font-semibold mt-1.5">
+                  ₹{product.price.toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+
+            {/* Two Signature Blue Action Buttons */}
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCartModalOpen(false);
+                  router.push("/cart");
+                }}
+                className="w-full border border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6894BE] text-white py-3.5 px-6 font-serif text-xs sm:text-[13px] tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] font-medium flex items-center justify-center gap-2"
+              >
+                <ShoppingBag size={15} /> Go To Cart
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCartModalOpen(false)}
+                className="w-full border border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] py-3.5 px-6 font-serif text-xs sm:text-[13px] tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer active:scale-[0.99] font-medium"
+              >
+                Continue Browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

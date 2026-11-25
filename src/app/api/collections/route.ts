@@ -16,18 +16,25 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, slug, description, coverImage } = body;
+    const { name, slug, description, coverImage, images } = body;
 
     if (!name || !slug) {
       return new NextResponse("Name and slug are required", { status: 400 });
     }
+
+    const imageArray = Array.isArray(images)
+      ? images.filter((img): img is string => typeof img === "string" && img.trim().length > 0)
+      : [];
+
+    const effectiveCover = coverImage || (imageArray.length > 0 ? imageArray[0] : null);
 
     const collection = await prisma.collection.create({
       data: {
         name,
         slug,
         description,
-        coverImage,
+        coverImage: effectiveCover,
+        images: imageArray,
       },
     });
 

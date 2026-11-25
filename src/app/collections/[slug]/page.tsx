@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import ProductGrid from "@/components/ProductGrid";
+import CollectionCarousel from "@/components/CollectionCarousel";
 import { notFound } from "next/navigation";
 
 export default async function CollectionInnerPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -25,19 +26,15 @@ export default async function CollectionInnerPage({ params }: { params: Promise<
     notFound();
   }
 
-  // Determine a hero image (fallback to cover image first, then products, then static placeholder)
-  let heroImage = collectionData.coverImage;
-  
-  if (!heroImage) {
-    if (collectionData.slug === "in-wild-bloom") heroImage = "https://images.unsplash.com/photo-1588661609156-f56191c0628e?q=80&w=1980&auto=format&fit=crop";
-    else if (collectionData.slug === "men") heroImage = "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=1980&auto=format&fit=crop";
-    else if (collectionData.slug === "women") heroImage = "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1980&auto=format&fit=crop";
-    else if (collectionData.products.length > 0 && collectionData.products[0].images.length > 0) {
-      heroImage = collectionData.products[0].images[0];
-    } else {
-      heroImage = "https://images.unsplash.com/photo-1588661609156-f56191c0628e?q=80&w=1980&auto=format&fit=crop";
-    }
-  }
+  // Direct 1-to-1: collectionData.images is the single source of truth
+  const collectionImages: string[] =
+    Array.isArray(collectionData.images) && collectionData.images.length > 0
+      ? collectionData.images.filter(
+          (img: any) => typeof img === "string" && img.trim().length > 0
+        )
+      : collectionData.coverImage
+      ? [collectionData.coverImage]
+      : [];
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
@@ -50,13 +47,12 @@ export default async function CollectionInnerPage({ params }: { params: Promise<
           
           {/* Left: Image Carousel */}
           <div className="w-full md:w-1/2 relative">
-            <div className="aspect-[4/5] relative w-full overflow-hidden bg-gray-100">
-               {/* eslint-disable-next-line @next/next/no-img-element */}
-               <img 
-                 src={heroImage} 
-                 alt={collectionData.name}
-                 className="object-cover w-full h-full"
-               />
+            <div className="aspect-[4/5] relative w-full overflow-hidden bg-gray-100 rounded-xs">
+              <CollectionCarousel
+                images={collectionImages}
+                collectionName={collectionData.name}
+                heightClass="w-full h-full"
+              />
             </div>
           </div>
 

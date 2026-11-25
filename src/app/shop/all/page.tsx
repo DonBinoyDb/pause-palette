@@ -11,6 +11,9 @@ export default async function ShopAllPage() {
     include: {
       collection: {
         select: { name: true }
+      },
+      categories: {
+        select: { id: true, name: true, slug: true }
       }
     }
   });

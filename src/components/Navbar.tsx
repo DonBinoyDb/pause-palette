@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Search, ShoppingCart, Bookmark, Menu, X, LayoutDashboard } from "lucide-react";
+import { User, Search, ShoppingCart, Bookmark, Menu, X, LayoutDashboard, Package } from "lucide-react";
 import { useShop } from "@/context/ShopContext";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -250,6 +250,23 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               <User className="w-5 h-5 stroke-[1.5]" />
             </Link>
           )}
+          {/* Order History Icon */}
+          <Link
+            href={
+              isAdmin
+                ? "/admin/orders"
+                : status === "authenticated"
+                ? "/profile?tab=orders"
+                : "/login?callbackUrl=/profile?tab=orders"
+            }
+            suppressHydrationWarning
+            className="hover:opacity-70 transition-opacity"
+            aria-label="Order History"
+            title="Order History"
+          >
+            <Package className="w-5 h-5 stroke-[1.5]" />
+          </Link>
+
           <Link href="/search" suppressHydrationWarning className="hover:opacity-70 transition-opacity" aria-label="Search">
             <Search className="w-5 h-5 stroke-[1.5]" />
           </Link>
@@ -313,9 +330,23 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               </div>
             </div>
             
-            {status === "authenticated" && (
-              <div className="mt-4 pt-6 border-t border-gray-100 text-[15px] text-gray-700">
-                {isAdmin ? (
+            <div className="mt-4 pt-6 border-t border-gray-100 text-[15px] text-gray-700 flex flex-col gap-3.5">
+              <Link
+                href={
+                  isAdmin
+                    ? "/admin/orders"
+                    : status === "authenticated"
+                    ? "/profile?tab=orders"
+                    : "/login?callbackUrl=/profile?tab=orders"
+                }
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 hover:text-black transition-colors font-medium text-gray-900"
+              >
+                <Package className="w-4 h-4 text-[#4A7DAF]" />
+                <span>Order History</span>
+              </Link>
+              {status === "authenticated" ? (
+                isAdmin ? (
                   <Link
                     href="/admin/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
@@ -331,9 +362,17 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                   >
                     <User className="w-4 h-4" /> My Account
                   </Link>
-                )}
-              </div>
-            )}
+                )
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 hover:text-black transition-colors"
+                >
+                  <User className="w-4 h-4" /> Sign In
+                </Link>
+              )}
+            </div>
           </nav>
         </div>
       )}

@@ -56,3 +56,6 @@ if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = getPrismaClient();
 }
 
+export default prisma;
+
+

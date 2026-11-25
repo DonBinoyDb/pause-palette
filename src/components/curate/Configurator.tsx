@@ -327,7 +327,9 @@ export default function Configurator() {
               className="h-20 w-auto max-w-full object-contain"
             />
           </div>
-          <h2 className="text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-2">
+          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${
+            mode === "illustration" ? "text-[#79A7D3]" : "text-gray-900"
+          }`}>
             {modes.illustration?.title || "ORIGINAL ILLUSTRATION"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
@@ -353,7 +355,9 @@ export default function Configurator() {
               className="h-20 w-auto max-w-full object-contain"
             />
           </div>
-          <h2 className="text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-2">
+          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${
+            mode === "embroidery" ? "text-[#79A7D3]" : "text-gray-900"
+          }`}>
             {modes.embroidery?.title || "THEME-BASED EMBROIDERY"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
@@ -377,7 +381,9 @@ export default function Configurator() {
               <div className="w-6 h-6 rounded-full bg-[#B57864] absolute bottom-1.5 left-1.5" />
             </div>
           </div>
-          <h2 className="text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase text-gray-900 mb-2">
+          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${
+            mode === "solid" ? "text-[#79A7D3]" : "text-gray-900"
+          }`}>
             {modes.solid?.title || "SOLID LINEN"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
@@ -402,10 +408,10 @@ export default function Configurator() {
 
         {/* STEP: Who is it for? */}
         <div className="mb-7 w-full">
-          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
+          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
             Who is it for?
           </label>
-          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
+          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-3">
             Select the fit you're designing for
           </p>
           <div className="flex gap-2.5">
@@ -414,7 +420,7 @@ export default function Configurator() {
               onClick={() => setAudience("men")}
               className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                 audience === "men"
-                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
+                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
               }`}
             >
@@ -425,7 +431,7 @@ export default function Configurator() {
               onClick={() => setAudience("women")}
               className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                 audience === "women"
-                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
+                  ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
               }`}
             >
@@ -437,10 +443,10 @@ export default function Configurator() {
         {/* STEP (Illustration only): Technique */}
         {mode === "illustration" && (
           <div className="mb-7 w-full">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
               Technique
             </label>
-            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-3">
               Choose how the illustration is rendered
             </p>
             <div className="flex gap-2.5">
@@ -449,7 +455,7 @@ export default function Configurator() {
                 onClick={() => setTechnique("printed")}
                 className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                   technique === "printed"
-                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
+                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                     : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                 }`}
               >
@@ -460,7 +466,7 @@ export default function Configurator() {
                 onClick={() => setTechnique("embroidered")}
                 className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
                   technique === "embroidered"
-                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-gray-900 bg-white shadow-xs"
+                    ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                     : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
                 }`}
               >
@@ -473,10 +479,10 @@ export default function Configurator() {
         {/* STEP (Illustration only): Choose from our pieces */}
         {mode === "illustration" && (
           <div className="mb-7 w-full">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
               Choose from our pieces
             </label>
-            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-3">
               Select an existing Pause Palette design
             </p>
             <div className="flex flex-wrap gap-5">
@@ -505,7 +511,9 @@ export default function Configurator() {
                         />
                       )}
                     </div>
-                    <span className="text-[15px] font-garamond text-gray-800 mt-2.5 max-w-[160px] sm:max-w-[192px] truncate leading-tight font-medium">
+                    <span className={`text-[15px] font-garamond mt-2.5 max-w-[160px] sm:max-w-[192px] truncate leading-tight font-medium transition-colors ${
+                      isSelected ? "text-[#79A7D3]" : "text-gray-800"
+                    }`}>
                       {piece.name}
                     </span>
                   </button>
@@ -517,10 +525,10 @@ export default function Configurator() {
 
         {/* STEP: Choose your Silhouette */}
         <div className="mb-7 w-full">
-          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
+          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
             Choose your Silhouette
           </label>
-          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
+          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-3">
             Every piece is cut and sewn to your chosen silhouette
           </p>
           <div className="flex flex-wrap gap-5">
@@ -543,7 +551,9 @@ export default function Configurator() {
                     {renderSilhouetteIcon(sil, "w-32 h-32 sm:w-38 sm:h-38")}
                   </div>
                   <div className="w-full flex flex-col items-center">
-                    <span className="text-[15px] sm:text-[16px] font-garamond text-gray-900 leading-tight font-medium">
+                    <span className={`text-[15px] sm:text-[16px] font-garamond leading-tight font-medium transition-colors ${
+                      isSelected ? "text-[#79A7D3]" : "text-gray-900"
+                    }`}>
                       {sil.name}
                     </span>
                     {sizeSummary && (
@@ -560,16 +570,9 @@ export default function Configurator() {
 
         {/* STEP: Choose your Size */}
         <div className="mb-7 w-full">
-          <div className="flex items-center justify-between mb-1">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900">
-              Choose your Size
-            </label>
-            {activeSilhouette && (
-              <span className="text-[14px] font-garamond text-gray-500 italic">
-                Available for {activeSilhouette.name}
-              </span>
-            )}
-          </div>
+          <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-1">
+            Choose your Size
+          </label>
           <div className="flex items-center gap-4 mt-2">
             <div className="flex flex-wrap gap-2">
               {availableSizes.map((s: string) => {
@@ -604,10 +607,10 @@ export default function Configurator() {
         {/* STEP (Embroidery, Solid, or Embroidered Illustration): Choose your Linen colour */}
         {(mode === "embroidery" || mode === "solid" || (mode === "illustration" && technique === "embroidered")) && (
           <div className="mb-7 w-full">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
               Choose your Linen colour
             </label>
-            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-3">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-3">
               Available in 100% pure Belgian linen
             </p>
             <div className="flex flex-wrap gap-6 items-center pt-1">
@@ -626,7 +629,9 @@ export default function Configurator() {
                       }`}
                       style={{ backgroundColor: color.hex }}
                     />
-                    <span className="text-[13px] font-garamond uppercase tracking-wider text-gray-700 font-medium">
+                    <span className={`text-[13px] font-garamond uppercase tracking-wider transition-colors ${
+                      isSelected ? "text-[#79A7D3] font-semibold" : "text-gray-700 font-medium"
+                    }`}>
                       {color.name}
                     </span>
                   </button>
@@ -639,10 +644,10 @@ export default function Configurator() {
         {/* STEP (Embroidery only): Share your theme */}
         {mode === "embroidery" && (
           <div className="mb-7 w-full max-w-xl">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-1">
+            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
               Share your theme
             </label>
-            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mb-2.5">
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-2.5">
               Tell us about your theme, idea or inspiration...
             </p>
             <div className="border border-gray-200 rounded-md p-3.5 focus-within:border-[#79A7D3] transition-colors bg-white">
