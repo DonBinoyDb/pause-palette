@@ -14,13 +14,13 @@ export default async function MakingJournalPage() {
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
 
-      <div className="pt-24 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
+      <div className="pt-28 md:pt-32 pb-20 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
 
         {/* Hero Section */}
-        <div className="flex flex-col md:flex-row justify-between mb-8 relative">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6 md:gap-8 relative">
 
           {/* Text Left */}
-          <div className="md:w-[42%] pt-32 md:pt-56 flex flex-col z-10">
+          <div className="md:w-[42%] flex flex-col z-10 pb-2 md:pb-6">
             <h1 className="font-garamond text-[14px] tracking-[0.1em] text-gray-500 uppercase font-medium mb-3">
               THE MAKING JOURNAL
             </h1>
