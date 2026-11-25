@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useShop } from "@/context/ShopContext";
-import { DEFAULT_MODES, DEFAULT_PRICING, DEFAULT_SILHOUETTES } from "@/lib/curatorDefaults";
+import { DEFAULT_MODES, DEFAULT_PRICING, DEFAULT_SILHOUETTES, normalizeLinenColors, LinenColorSwatch } from "@/lib/curatorDefaults";
 
 type Mode = "illustration" | "embroidery" | "solid";
 type Audience = "men" | "women";
@@ -72,6 +72,19 @@ export default function Configurator() {
   const [themeText, setThemeText] = useState("");
   const [themeSubmitted, setThemeSubmitted] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
+  const [inspectColorId, setInspectColorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowSizeGuide(false);
+        setShowMaterialModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     fetch("/api/curator-settings")
@@ -106,12 +119,7 @@ export default function Configurator() {
     image?: string;
     sizes?: Array<{ size: string; price: number; enabled?: boolean }>;
   }>;
-  const linenColors = (pricing.linenColors?.length ? pricing.linenColors : DEFAULT_PRICING.linenColors) as Array<{
-    id: string;
-    name: string;
-    hex: string;
-    adjustment: number;
-  }>;
+  const linenColors: LinenColorSwatch[] = normalizeLinenColors(pricing.linenColors || []);
 
   // Filter silhouettes and colors based on active mode configuration
   const allowedSilIds = modes[mode]?.silhouettes as string[] | undefined;
@@ -251,8 +259,13 @@ export default function Configurator() {
       technique: mode === "illustration" ? (technique === "printed" ? "Printed" : "Embroidered") : undefined,
       pieceName: mode === "illustration" ? activePiece.name : undefined,
       silhouetteName: activeSilhouette.name,
+      silhouetteId: activeSilhouette.id,
       size,
+      colorId: isLinenApplicable ? activeColor.id : undefined,
       colorName: isLinenApplicable ? activeColor.name : undefined,
+      colorHex: isLinenApplicable ? activeColor.hex : undefined,
+      colorImage: isLinenApplicable && activeColor.image ? activeColor.image : undefined,
+      colorAdjustment: isLinenApplicable ? activeColor.adjustment : undefined,
       theme: mode === "embroidery" && themeText.trim() ? themeText.trim() : undefined,
     };
 
@@ -282,8 +295,13 @@ export default function Configurator() {
       modeTitle: "Theme-Based Embroidery",
       audience: audience === "men" ? "Men" : "Women",
       silhouetteName: activeSilhouette.name,
+      silhouetteId: activeSilhouette.id,
       size,
+      colorId: activeColor.id,
       colorName: activeColor.name,
+      colorHex: activeColor.hex,
+      colorImage: activeColor.image || undefined,
+      colorAdjustment: activeColor.adjustment,
       theme: themeText.trim(),
     };
 
@@ -305,19 +323,18 @@ export default function Configurator() {
 
   return (
     <div className="w-full flex flex-col font-garamond text-gray-900">
-      
+
       {/* 3 Mode Choice Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 w-full">
-        
+
         {/* 1. ORIGINAL ILLUSTRATION */}
         <button
           type="button"
           onClick={() => { setMode("illustration"); setThemeSubmitted(false); }}
-          className={`relative flex flex-col items-center text-center p-6 rounded-md border transition-all cursor-pointer bg-white ${
-            mode === "illustration"
+          className={`relative flex flex-col items-center text-center p-6 rounded-md border transition-all cursor-pointer bg-white ${mode === "illustration"
               ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
               : "border-gray-200/90 hover:border-gray-300"
-          }`}
+            }`}
         >
           <div className="h-24 flex items-center justify-center mb-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -327,9 +344,8 @@ export default function Configurator() {
               className="h-20 w-auto max-w-full object-contain"
             />
           </div>
-          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${
-            mode === "illustration" ? "text-[#79A7D3]" : "text-gray-900"
-          }`}>
+          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${mode === "illustration" ? "text-[#79A7D3]" : "text-gray-900"
+            }`}>
             {modes.illustration?.title || "ORIGINAL ILLUSTRATION"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
@@ -341,11 +357,10 @@ export default function Configurator() {
         <button
           type="button"
           onClick={() => { setMode("embroidery"); setThemeSubmitted(false); }}
-          className={`relative flex flex-col items-center text-center p-6 rounded-md border transition-all cursor-pointer bg-white ${
-            mode === "embroidery"
+          className={`relative flex flex-col items-center text-center p-6 rounded-md border transition-all cursor-pointer bg-white ${mode === "embroidery"
               ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
               : "border-gray-200/90 hover:border-gray-300"
-          }`}
+            }`}
         >
           <div className="h-24 flex items-center justify-center mb-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -355,9 +370,8 @@ export default function Configurator() {
               className="h-20 w-auto max-w-full object-contain"
             />
           </div>
-          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${
-            mode === "embroidery" ? "text-[#79A7D3]" : "text-gray-900"
-          }`}>
+          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${mode === "embroidery" ? "text-[#79A7D3]" : "text-gray-900"
+            }`}>
             {modes.embroidery?.title || "THEME-BASED EMBROIDERY"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
@@ -369,11 +383,10 @@ export default function Configurator() {
         <button
           type="button"
           onClick={() => { setMode("solid"); setThemeSubmitted(false); }}
-          className={`relative flex flex-col items-center text-center p-6 rounded-md border transition-all cursor-pointer bg-white ${
-            mode === "solid"
+          className={`relative flex flex-col items-center text-center p-6 rounded-md border transition-all cursor-pointer bg-white ${mode === "solid"
               ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
               : "border-gray-200/90 hover:border-gray-300"
-          }`}
+            }`}
         >
           <div className="h-24 flex items-center justify-center mb-3">
             <div className="relative w-14 h-14 flex items-center justify-center">
@@ -381,9 +394,8 @@ export default function Configurator() {
               <div className="w-6 h-6 rounded-full bg-[#B57864] absolute bottom-1.5 left-1.5" />
             </div>
           </div>
-          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${
-            mode === "solid" ? "text-[#79A7D3]" : "text-gray-900"
-          }`}>
+          <h2 className={`text-[15px] md:text-[16px] font-garamond font-semibold tracking-[0.14em] uppercase mb-2 transition-colors ${mode === "solid" ? "text-[#79A7D3]" : "text-gray-900"
+            }`}>
             {modes.solid?.title || "SOLID LINEN"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
@@ -398,7 +410,7 @@ export default function Configurator() {
 
       {/* Left-aligned Editor Layout Area */}
       <div className="w-full flex flex-col items-start text-left">
-        
+
         {/* Mode Heading */}
         <h3 className="text-[16px] md:text-[17px] font-garamond font-semibold tracking-[0.18em] uppercase text-gray-900 mb-6">
           {mode === "illustration" && "ORIGINAL ILLUSTRATION"}
@@ -418,22 +430,20 @@ export default function Configurator() {
             <button
               type="button"
               onClick={() => setAudience("men")}
-              className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
-                audience === "men"
+              className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${audience === "men"
                   ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-              }`}
+                }`}
             >
               Men
             </button>
             <button
               type="button"
               onClick={() => setAudience("women")}
-              className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
-                audience === "women"
+              className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${audience === "women"
                   ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                   : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-              }`}
+                }`}
             >
               Women
             </button>
@@ -453,22 +463,20 @@ export default function Configurator() {
               <button
                 type="button"
                 onClick={() => setTechnique("printed")}
-                className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
-                  technique === "printed"
+                className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${technique === "printed"
                     ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                     : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-                }`}
+                  }`}
               >
                 Printed
               </button>
               <button
                 type="button"
                 onClick={() => setTechnique("embroidered")}
-                className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${
-                  technique === "embroidered"
+                className={`px-7 py-2.5 rounded-sm border text-[14.5px] md:text-[15px] font-garamond tracking-wide transition-all cursor-pointer ${technique === "embroidered"
                     ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-medium bg-white shadow-xs"
                     : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-                }`}
+                  }`}
               >
                 Embroidered
               </button>
@@ -496,11 +504,10 @@ export default function Configurator() {
                     className="flex flex-col items-start text-left cursor-pointer group"
                   >
                     <div
-                      className={`relative w-40 sm:w-48 aspect-[3/4] rounded-sm overflow-hidden bg-gray-50 border transition-all ${
-                        isSelected
+                      className={`relative w-40 sm:w-48 aspect-[3/4] rounded-sm overflow-hidden bg-gray-50 border transition-all ${isSelected
                           ? "border-[#79A7D3] ring-1 ring-[#79A7D3]"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       {piece.image && (
                         <Image
@@ -511,9 +518,8 @@ export default function Configurator() {
                         />
                       )}
                     </div>
-                    <span className={`text-[15px] font-garamond mt-2.5 max-w-[160px] sm:max-w-[192px] truncate leading-tight font-medium transition-colors ${
-                      isSelected ? "text-[#79A7D3]" : "text-gray-800"
-                    }`}>
+                    <span className={`text-[15px] font-garamond mt-2.5 max-w-[160px] sm:max-w-[192px] truncate leading-tight font-medium transition-colors ${isSelected ? "text-[#79A7D3]" : "text-gray-800"
+                      }`}>
                       {piece.name}
                     </span>
                   </button>
@@ -541,19 +547,17 @@ export default function Configurator() {
                   key={sil.id}
                   type="button"
                   onClick={() => setSelectedSilhouetteId(sil.id)}
-                  className={`w-44 sm:w-52 h-56 sm:h-64 p-4 rounded-md border flex flex-col items-center justify-between text-center transition-all cursor-pointer bg-white ${
-                    isSelected
+                  className={`w-44 sm:w-52 h-56 sm:h-64 p-4 rounded-md border flex flex-col items-center justify-between text-center transition-all cursor-pointer bg-white ${isSelected
                       ? "border-[#79A7D3] ring-1 ring-[#79A7D3] shadow-xs"
                       : "border-gray-200 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <div className="flex-1 w-full flex items-center justify-center p-2 text-gray-700">
                     {renderSilhouetteIcon(sil, "w-32 h-32 sm:w-38 sm:h-38")}
                   </div>
                   <div className="w-full flex flex-col items-center">
-                    <span className={`text-[15px] sm:text-[16px] font-garamond leading-tight font-medium transition-colors ${
-                      isSelected ? "text-[#79A7D3]" : "text-gray-900"
-                    }`}>
+                    <span className={`text-[15px] sm:text-[16px] font-garamond leading-tight font-medium transition-colors ${isSelected ? "text-[#79A7D3]" : "text-gray-900"
+                      }`}>
                       {sil.name}
                     </span>
                     {sizeSummary && (
@@ -582,11 +586,10 @@ export default function Configurator() {
                     key={s}
                     type="button"
                     onClick={() => setSize(s)}
-                    className={`min-w-10 h-10 px-3 rounded-sm border flex items-center justify-center text-[14.5px] font-garamond uppercase tracking-wider transition-all cursor-pointer ${
-                      size === s
+                    className={`min-w-10 h-10 px-3 rounded-sm border flex items-center justify-center text-[14.5px] font-garamond uppercase tracking-wider transition-all cursor-pointer ${size === s
                         ? "border-[#79A7D3] ring-1 ring-[#79A7D3] text-[#79A7D3] font-semibold bg-white shadow-2xs"
                         : "border-gray-200 text-gray-600 hover:border-gray-400 bg-white"
-                    }`}
+                      }`}
                     title={`${s} (₹${sPrice})`}
                   >
                     {s}
@@ -607,217 +610,440 @@ export default function Configurator() {
         {/* STEP (Embroidery, Solid, or Embroidered Illustration): Choose your Linen colour */}
         {(mode === "embroidery" || mode === "solid" || (mode === "illustration" && technique === "embroidered")) && (
           <div className="mb-7 w-full">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
-              Choose your Linen colour
-            </label>
-            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-3">
-              Available in 100% pure Belgian linen
-            </p>
+            <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+              <div>
+                <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
+                  Choose your Linen colour
+                </label>
+                <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug">
+                  Available in 100% pure Belgian linen
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setInspectColorId(activeColor.id);
+                  setShowMaterialModal(true);
+                }}
+                className="text-[13.5px] md:text-[14px] text-gray-500 underline font-garamond hover:text-gray-900 transition-colors cursor-pointer"
+              >
+                Material &amp; fabric details
+              </button>
+            </div>
             <div className="flex flex-wrap gap-6 items-center pt-1">
               {(filteredLinenColors.length ? filteredLinenColors : linenColors).map((color) => {
                 const isSelected = selectedColorId ? selectedColorId === color.id : activeColor.id === color.id;
                 return (
-                  <button
-                    key={color.id}
-                    type="button"
-                    onClick={() => setSelectedColorId(color.id)}
-                    className="flex flex-col items-center gap-2 group cursor-pointer"
-                  >
-                    <div
-                      className={`w-6 h-6 rounded-full border transition-all ${
-                        isSelected ? "ring-2 ring-offset-2 ring-[#79A7D3] scale-110" : "border-gray-300 hover:scale-105"
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                    />
-                    <span className={`text-[13px] font-garamond uppercase tracking-wider transition-colors ${
-                      isSelected ? "text-[#79A7D3] font-semibold" : "text-gray-700 font-medium"
-                    }`}>
-                      {color.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                  <div key={color.id} className="flex flex-col items-center gap-1.5 group relative">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedColorId(color.id)}
+                      className="flex flex-col items-center gap-2 cursor-pointer focus:outline-none"
+                      title={color.adjustment > 0 ? `${color.name} (+₹${color.adjustment})` : color.name}
+                    >
+                      <div
+                        className={`w-11 h-11 md:w-12 md:h-12 rounded-full border overflow-hidden relative transition-all duration-200 ${
+                          isSelected
+                            ? "ring-2 ring-offset-2 ring-[#79A7D3] scale-110 shadow-sm"
+                            : "border-gray-300 hover:scale-105 hover:border-gray-400"
+                        }`}
+                        style={{ backgroundColor: color.hex || "#D8C7A5" }}
+                      >
+                        {Boolean(color.image && color.image.trim()) && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={color.image}
+                            alt={color.name}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              // If the image fails or is not found, hide it cleanly to show the solid color
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        )}
+                      </div>
+                      <span className={`text-[12.5px] md:text-[13px] font-garamond uppercase tracking-wider transition-colors ${
+                        isSelected ? "text-[#79A7D3] font-semibold" : "text-gray-700 font-medium"
+                      }`}>
+                        {color.name}
+                      </span>
+                    </button>
+            {/* Inspect Material Texture Trigger */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setInspectColorId(color.id);
+                setShowMaterialModal(true);
+              }}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-gray-400 hover:text-gray-900 underline font-garamond tracking-wider cursor-pointer -mt-1"
+              title={`Inspect ${color.name} fabric texture`}
+            >
+              Inspect
+            </button>
           </div>
-        )}
+        );
+              })}
+      </div>
+    </div>
+  )
+}
 
-        {/* STEP (Embroidery only): Share your theme */}
-        {mode === "embroidery" && (
-          <div className="mb-7 w-full max-w-xl">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
-              Share your theme
-            </label>
-            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-2.5">
-              Tell us about your theme, idea or inspiration...
-            </p>
-            <div className="border border-gray-200 rounded-md p-3.5 focus-within:border-[#79A7D3] transition-colors bg-white">
-              <textarea
-                rows={4}
-                value={themeText}
-                onChange={(e) => setThemeText(e.target.value)}
-                placeholder={modes.embroidery?.placeholder || "Tell us about your theme, idea or inspiration..."}
-                className="w-full text-[14.5px] md:text-[15px] font-garamond outline-none resize-none placeholder-gray-400 text-gray-800 bg-transparent leading-relaxed"
-              />
-              <div className="flex justify-end pt-2.5 border-t border-gray-100">
+{/* STEP (Embroidery only): Share your theme */ }
+{
+  mode === "embroidery" && (
+    <div className="mb-7 w-full max-w-xl">
+      <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 leading-snug mb-0.5">
+        Share your theme
+      </label>
+      <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 leading-snug mb-2.5">
+        Tell us about your theme, idea or inspiration...
+      </p>
+      <div className="border border-gray-200 rounded-md p-3.5 focus-within:border-[#79A7D3] transition-colors bg-white">
+        <textarea
+          rows={4}
+          value={themeText}
+          onChange={(e) => setThemeText(e.target.value)}
+          placeholder={modes.embroidery?.placeholder || "Tell us about your theme, idea or inspiration..."}
+          className="w-full text-[14.5px] md:text-[15px] font-garamond outline-none resize-none placeholder-gray-400 text-gray-800 bg-transparent leading-relaxed"
+        />
+        <div className="flex justify-end pt-2.5 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={handleShareTheme}
+            disabled={themeSubmitted}
+            className={`px-6 py-2 border text-[13.5px] md:text-[14px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer disabled:opacity-50 font-medium ${themeSubmitted
+                ? "border-green-300 bg-green-50 text-green-700"
+                : "border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6895C2] text-white shadow-xs"
+              }`}
+          >
+            {themeSubmitted ? "Theme Submitted ✓" : "Share your theme"}
+          </button>
+        </div>
+      </div>
+
+      <p className="text-[14px] font-garamond text-gray-600 mt-2.5">
+        Theme-based pieces start at ₹{calculatedPrice.toLocaleString()}+. Final pricing is confirmed after we discuss your embroidery design.
+      </p>
+      <p className="text-[13px] md:text-[13.5px] font-garamond italic text-gray-500 mt-1">
+        Each piece is made to order. Please allow 10-14 days for crafting and dispatch.
+      </p>
+    </div>
+  )
+}
+
+{/* STEP (Illustration & Solid): Your Piece Summary Card */ }
+{
+  (mode === "illustration" || mode === "solid") && (
+    <div className="mt-5 mb-5 w-full">
+      <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-2.5">
+        Your Piece
+      </label>
+      <div className="border border-gray-200 rounded-md p-5 sm:p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center max-w-xl bg-white shadow-2xs">
+        {/* Left Preview: Active Silhouette Image */}
+        <div className="w-22 h-26 sm:w-26 sm:h-30 rounded-md border border-gray-200 flex items-center justify-center p-2 bg-white shrink-0 text-gray-800">
+          {renderSilhouetteIcon(activeSilhouette)}
+        </div>
+
+        {/* Right specs */}
+        <div className="flex-1 w-full text-[14.5px] md:text-[15px] font-garamond text-gray-800 space-y-1.5">
+          <div className="grid grid-cols-[105px_1fr] gap-x-2">
+            <span className="text-gray-400">Audience</span>
+            <span className="capitalize font-medium">{audience}</span>
+          </div>
+
+          {mode === "illustration" && (
+            <>
+              <div className="grid grid-cols-[105px_1fr] gap-x-2">
+                <span className="text-gray-400">Technique</span>
+                <span className="capitalize font-medium">{technique}</span>
+              </div>
+              <div className="grid grid-cols-[105px_1fr] gap-x-2 items-center">
+                <span className="text-gray-400">Piece</span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  {activePiece.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={activePiece.image}
+                      alt={activePiece.name}
+                      className="w-4.5 h-4.5 rounded-full object-cover inline-block border border-gray-200"
+                    />
+                  )}
+                  {activePiece.name}
+                </span>
+              </div>
+            </>
+          )}
+
+          <div className="grid grid-cols-[105px_1fr] gap-x-2">
+            <span className="text-gray-400">Silhouette</span>
+            <span className="font-medium">{activeSilhouette.name}</span>
+          </div>
+
+          <div className="grid grid-cols-[105px_1fr] gap-x-2">
+            <span className="text-gray-400">Size</span>
+            <span className="font-medium">{size}</span>
+          </div>
+
+          {(mode === "solid" || (mode === "illustration" && technique === "embroidered")) && (
+            <div className="grid grid-cols-[105px_1fr] gap-x-2">
+              <span className="text-gray-400">Linen colour</span>
+              <span className="font-medium">{activeColor.name}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-[105px_1fr] gap-x-2 pt-2.5 border-t border-gray-100 mt-2.5 font-semibold text-gray-900 text-[16px] md:text-[17px]">
+            <span className="text-gray-500 font-normal text-[14.5px]">Price</span>
+            <span className="font-garamond">₹ {calculatedPrice.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Add to Cart button */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className="px-8 py-3 bg-white hover:bg-[#F4F8FB] text-[#79A7D3] border border-[#79A7D3] text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer font-medium shadow-xs"
+        >
+          Add to Cart
+        </button>
+      </div>
+
+      {/* Dispatch notice */}
+      <p className="text-[13.5px] md:text-[14px] font-garamond italic text-gray-500 mt-3.5">
+        Each piece is made to order. Please allow 10-14 days for crafting and dispatch.
+      </p>
+    </div>
+  )
+}
+
+      </div >
+
+  {/* Size Guide Modal */ }
+{
+  showSizeGuide && (
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
+        <button
+          onClick={() => setShowSizeGuide(false)}
+          className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 text-lg cursor-pointer"
+        >
+          ✕
+        </button>
+        <h3 className="font-garamond text-xl font-medium tracking-wider uppercase text-gray-900 mb-2">
+          Size Guide (Inches)
+        </h3>
+        <p className="text-[14px] text-gray-500 font-garamond mb-6">
+          Our pieces feature a relaxed, comfortable silhouette. Refer to the garment dimensions below.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[14px] font-garamond text-left border-collapse">
+            <thead>
+              <tr className="border-b border-gray-200 text-gray-400 uppercase tracking-wider">
+                <th className="py-2.5 pr-4">Size</th>
+                <th className="py-2.5 px-4">Chest</th>
+                <th className="py-2.5 px-4">Shoulder</th>
+                <th className="py-2.5 px-4">Length</th>
+                <th className="py-2.5 pl-4">Sleeve</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 text-gray-700">
+              <tr><td className="py-2.5 pr-4 font-semibold">XS</td><td className="py-2.5 px-4">38"</td><td className="py-2.5 px-4">17.5"</td><td className="py-2.5 px-4">27.5"</td><td className="py-2.5 pl-4">9"</td></tr>
+              <tr><td className="py-2.5 pr-4 font-semibold">S</td><td className="py-2.5 px-4">40"</td><td className="py-2.5 px-4">18"</td><td className="py-2.5 px-4">28"</td><td className="py-2.5 pl-4">9.5"</td></tr>
+              <tr><td className="py-2.5 pr-4 font-semibold">M</td><td className="py-2.5 px-4">42"</td><td className="py-2.5 px-4">18.5"</td><td className="py-2.5 px-4">28.5"</td><td className="py-2.5 pl-4">10"</td></tr>
+              <tr><td className="py-2.5 pr-4 font-semibold">L</td><td className="py-2.5 px-4">44"</td><td className="py-2.5 px-4">19"</td><td className="py-2.5 px-4">29"</td><td className="py-2.5 pl-4">10.5"</td></tr>
+              <tr><td className="py-2.5 pr-4 font-semibold">XL</td><td className="py-2.5 px-4">46"</td><td className="py-2.5 px-4">19.5"</td><td className="py-2.5 px-4">29.5"</td><td className="py-2.5 pl-4">11"</td></tr>
+              <tr><td className="py-2.5 pr-4 font-semibold">XXL</td><td className="py-2.5 px-4">48"</td><td className="py-2.5 px-4">20"</td><td className="py-2.5 px-4">30"</td><td className="py-2.5 pl-4">11.5"</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
+          <button
+            onClick={() => setShowSizeGuide(false)}
+            className="px-6 py-2 rounded-full bg-gray-900 text-white text-[13.5px] font-garamond uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+{/* Material & Fabric Details Modal */ }
+{
+  showMaterialModal && (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-all"
+      onClick={() => setShowMaterialModal(false)}
+    >
+      <div
+        className="bg-[#FAF9F7] border border-[#E8E6E1] rounded-2xl max-w-2xl w-full p-6 md:p-8 shadow-2xl relative overflow-hidden text-gray-900 animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          type="button"
+          onClick={() => setShowMaterialModal(false)}
+          className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 p-1 rounded-full hover:bg-gray-200/50 transition-colors cursor-pointer text-xl"
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        {/* Modal Header */}
+        <div className="mb-6">
+          <span className="text-[11px] font-garamond tracking-[0.2em] uppercase text-[#79A7D3] font-medium block mb-1">
+            Material &amp; Craftsmanship
+          </span>
+          <h3 className="font-garamond text-2xl md:text-3xl font-medium tracking-wide text-gray-900">
+            100% Pure Belgian Linen
+          </h3>
+          <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-500 mt-1">
+            Naturally textured, breathable &amp; artisan woven European flax
+          </p>
+        </div>
+
+        {/* Dynamic Content based on focused colour */}
+        {(() => {
+          const modalActiveColor =
+            (filteredLinenColors.length ? filteredLinenColors : linenColors).find(
+              (c) => c.id === (inspectColorId || activeColor.id)
+            ) || activeColor;
+
+          return (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                {/* High-Res Material Texture Preview */}
+                <div className="relative aspect-square w-full rounded-xl overflow-hidden border border-gray-200 shadow-inner bg-white flex items-center justify-center group">
+                  {modalActiveColor.image && modalActiveColor.image.trim() ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={modalActiveColor.image}
+                      alt={modalActiveColor.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full flex flex-col items-center justify-center p-6 text-center"
+                      style={{ backgroundColor: modalActiveColor.hex || "#D8C7A5" }}
+                    >
+                      <span className="text-sm font-garamond uppercase tracking-widest font-semibold px-3 py-1 bg-white/85 rounded-full text-gray-800 shadow-sm backdrop-blur-xs">
+                        {modalActiveColor.name} Solid Shade
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute bottom-3 left-3 right-3 bg-black/60 backdrop-blur-md text-white py-1.5 px-3 rounded-lg flex items-center justify-between text-xs font-garamond">
+                    <span className="uppercase tracking-wider font-medium">{modalActiveColor.name} Linen</span>
+                    {modalActiveColor.adjustment > 0 ? (
+                      <span className="text-[#A5C8E8] font-mono">+₹{modalActiveColor.adjustment}</span>
+                    ) : (
+                      <span className="text-gray-300">Standard</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Fabric Specifications */}
+                <div className="space-y-4 text-gray-700 font-garamond">
+                  <div className="space-y-1.5">
+                    <h4 className="text-[15px] font-medium text-gray-900 uppercase tracking-wider">The Flax Origin</h4>
+                    <p className="text-[13.5px] text-gray-600 leading-relaxed">
+                      Sourced from European flax fields, our linen carries a delicate slub texture with rich tactile depth. Pre-washed for a soft hand that drapes with relaxed, understated elegance.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-200/80 text-[13px]">
+                    <div>
+                      <span className="text-gray-400 block text-[11px] uppercase tracking-wider">Composition</span>
+                      <span className="font-medium text-gray-900">100% Belgian Flax</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 block text-[11px] uppercase tracking-wider">Breathability</span>
+                      <span className="font-medium text-gray-900">Airy &amp; Naturally Cool</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 block text-[11px] uppercase tracking-wider">Finish</span>
+                      <span className="font-medium text-gray-900">Tumbled Soft Drape</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 block text-[11px] uppercase tracking-wider">Care</span>
+                      <span className="font-medium text-gray-900">Gentle Cold / Air Dry</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Swatch Switcher inside the Modal */}
+              <div className="pt-4 border-t border-gray-200">
+                <span className="text-xs font-garamond uppercase tracking-wider text-gray-500 block mb-2.5">
+                  Explore Material Shades
+                </span>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {(filteredLinenColors.length ? filteredLinenColors : linenColors).map((c) => {
+                    const isCurrentInModal = c.id === modalActiveColor.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setInspectColorId(c.id)}
+                        className="flex flex-col items-center gap-1.5 group cursor-pointer focus:outline-none"
+                      >
+                        <div
+                          className={`w-9 h-9 rounded-full border overflow-hidden relative transition-all duration-200 ${isCurrentInModal
+                              ? "ring-2 ring-offset-2 ring-[#79A7D3] scale-110 shadow-sm"
+                              : "border-gray-300 hover:scale-105"
+                            }`}
+                          style={{ backgroundColor: c.hex || "#D8C7A5" }}
+                        >
+                          {c.image && c.image.trim() && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={c.image}
+                              alt={c.name}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                        <span className={`text-[11px] font-garamond uppercase tracking-wider ${isCurrentInModal ? "text-[#79A7D3] font-semibold" : "text-gray-600"
+                          }`}>
+                          {c.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="pt-4 border-t border-gray-200 flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={handleShareTheme}
-                  disabled={themeSubmitted}
-                  className={`px-6 py-2 border text-[13.5px] md:text-[14px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer disabled:opacity-50 font-medium ${
-                    themeSubmitted
-                      ? "border-green-300 bg-green-50 text-green-700"
-                      : "border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6895C2] text-white shadow-xs"
-                  }`}
+                  onClick={() => setShowMaterialModal(false)}
+                  className="px-4 py-2 text-[13.5px] font-garamond uppercase tracking-wider text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
                 >
-                  {themeSubmitted ? "Theme Submitted ✓" : "Share your theme"}
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedColorId(modalActiveColor.id);
+                    setShowMaterialModal(false);
+                  }}
+                  className="px-6 py-2.5 rounded-full bg-[#2C2B29] text-white text-[13.5px] font-garamond uppercase tracking-wider hover:bg-black transition-colors cursor-pointer shadow-sm font-medium"
+                >
+                  Select {modalActiveColor.name} Linen
                 </button>
               </div>
             </div>
-
-            <p className="text-[14px] font-garamond text-gray-600 mt-2.5">
-              Theme-based pieces start at ₹{calculatedPrice.toLocaleString()}+. Final pricing is confirmed after we discuss your embroidery design.
-            </p>
-            <p className="text-[13px] md:text-[13.5px] font-garamond italic text-gray-500 mt-1">
-              Each piece is made to order. Please allow 10-14 days for crafting and dispatch.
-            </p>
-          </div>
-        )}
-
-        {/* STEP (Illustration & Solid): Your Piece Summary Card */}
-        {(mode === "illustration" || mode === "solid") && (
-          <div className="mt-5 mb-5 w-full">
-            <label className="block text-[16px] md:text-[17px] font-garamond font-medium text-gray-900 mb-2.5">
-              Your Piece
-            </label>
-            <div className="border border-gray-200 rounded-md p-5 sm:p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center max-w-xl bg-white shadow-2xs">
-              {/* Left Preview: Active Silhouette Image */}
-              <div className="w-22 h-26 sm:w-26 sm:h-30 rounded-md border border-gray-200 flex items-center justify-center p-2 bg-white shrink-0 text-gray-800">
-                {renderSilhouetteIcon(activeSilhouette)}
-              </div>
-
-              {/* Right specs */}
-              <div className="flex-1 w-full text-[14.5px] md:text-[15px] font-garamond text-gray-800 space-y-1.5">
-                <div className="grid grid-cols-[105px_1fr] gap-x-2">
-                  <span className="text-gray-400">Audience</span>
-                  <span className="capitalize font-medium">{audience}</span>
-                </div>
-
-                {mode === "illustration" && (
-                  <>
-                    <div className="grid grid-cols-[105px_1fr] gap-x-2">
-                      <span className="text-gray-400">Technique</span>
-                      <span className="capitalize font-medium">{technique}</span>
-                    </div>
-                    <div className="grid grid-cols-[105px_1fr] gap-x-2 items-center">
-                      <span className="text-gray-400">Piece</span>
-                      <span className="flex items-center gap-1.5 font-medium">
-                        {activePiece.image && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={activePiece.image}
-                            alt={activePiece.name}
-                            className="w-4.5 h-4.5 rounded-full object-cover inline-block border border-gray-200"
-                          />
-                        )}
-                        {activePiece.name}
-                      </span>
-                    </div>
-                  </>
-                )}
-
-                <div className="grid grid-cols-[105px_1fr] gap-x-2">
-                  <span className="text-gray-400">Silhouette</span>
-                  <span className="font-medium">{activeSilhouette.name}</span>
-                </div>
-
-                <div className="grid grid-cols-[105px_1fr] gap-x-2">
-                  <span className="text-gray-400">Size</span>
-                  <span className="font-medium">{size}</span>
-                </div>
-
-                {(mode === "solid" || (mode === "illustration" && technique === "embroidered")) && (
-                  <div className="grid grid-cols-[105px_1fr] gap-x-2">
-                    <span className="text-gray-400">Linen colour</span>
-                    <span className="font-medium">{activeColor.name}</span>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-[105px_1fr] gap-x-2 pt-2.5 border-t border-gray-100 mt-2.5 font-semibold text-gray-900 text-[16px] md:text-[17px]">
-                  <span className="text-gray-500 font-normal text-[14.5px]">Price</span>
-                  <span className="font-garamond">₹ {calculatedPrice.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Add to Cart button */}
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="px-8 py-3 bg-white hover:bg-[#F4F8FB] text-[#79A7D3] border border-[#79A7D3] text-[14px] md:text-[14.5px] font-garamond uppercase tracking-wider transition-colors rounded-sm cursor-pointer font-medium shadow-xs"
-              >
-                Add to Cart
-              </button>
-            </div>
-
-            {/* Dispatch notice */}
-            <p className="text-[13.5px] md:text-[14px] font-garamond italic text-gray-500 mt-3.5">
-              Each piece is made to order. Please allow 10-14 days for crafting and dispatch.
-            </p>
-          </div>
-        )}
-
+          );
+        })()}
       </div>
-
-      {/* Size Guide Modal */}
-      {showSizeGuide && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
-            <button
-              onClick={() => setShowSizeGuide(false)}
-              className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 text-lg cursor-pointer"
-            >
-              ✕
-            </button>
-            <h3 className="font-garamond text-xl font-medium tracking-wider uppercase text-gray-900 mb-2">
-              Size Guide (Inches)
-            </h3>
-            <p className="text-[14px] text-gray-500 font-garamond mb-6">
-              Our pieces feature a relaxed, comfortable silhouette. Refer to the garment dimensions below.
-            </p>
-            <div className="overflow-x-auto">
-              <table className="w-full text-[14px] font-garamond text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-200 text-gray-400 uppercase tracking-wider">
-                    <th className="py-2.5 pr-4">Size</th>
-                    <th className="py-2.5 px-4">Chest</th>
-                    <th className="py-2.5 px-4">Shoulder</th>
-                    <th className="py-2.5 px-4">Length</th>
-                    <th className="py-2.5 pl-4">Sleeve</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-gray-700">
-                  <tr><td className="py-2.5 pr-4 font-semibold">XS</td><td className="py-2.5 px-4">38"</td><td className="py-2.5 px-4">17.5"</td><td className="py-2.5 px-4">27.5"</td><td className="py-2.5 pl-4">9"</td></tr>
-                  <tr><td className="py-2.5 pr-4 font-semibold">S</td><td className="py-2.5 px-4">40"</td><td className="py-2.5 px-4">18"</td><td className="py-2.5 px-4">28"</td><td className="py-2.5 pl-4">9.5"</td></tr>
-                  <tr><td className="py-2.5 pr-4 font-semibold">M</td><td className="py-2.5 px-4">42"</td><td className="py-2.5 px-4">18.5"</td><td className="py-2.5 px-4">28.5"</td><td className="py-2.5 pl-4">10"</td></tr>
-                  <tr><td className="py-2.5 pr-4 font-semibold">L</td><td className="py-2.5 px-4">44"</td><td className="py-2.5 px-4">19"</td><td className="py-2.5 px-4">29"</td><td className="py-2.5 pl-4">10.5"</td></tr>
-                  <tr><td className="py-2.5 pr-4 font-semibold">XL</td><td className="py-2.5 px-4">46"</td><td className="py-2.5 px-4">19.5"</td><td className="py-2.5 px-4">29.5"</td><td className="py-2.5 pl-4">11"</td></tr>
-                  <tr><td className="py-2.5 pr-4 font-semibold">XXL</td><td className="py-2.5 px-4">48"</td><td className="py-2.5 px-4">20"</td><td className="py-2.5 px-4">30"</td><td className="py-2.5 pl-4">11.5"</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
-              <button
-                onClick={() => setShowSizeGuide(false)}
-                className="px-6 py-2 rounded-full bg-gray-900 text-white text-[13.5px] font-garamond uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
+  )
+}
+
+    </div >
   );
 }

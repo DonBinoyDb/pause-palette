@@ -12,8 +12,13 @@ export interface CuratedDetails {
   technique?: "Printed" | "Embroidered" | string;
   pieceName?: string;
   silhouetteName: string;
+  silhouetteId?: string;
   size: string;
+  colorId?: string;
   colorName?: string;
+  colorHex?: string;
+  colorImage?: string | null;
+  colorAdjustment?: number;
   theme?: string;
 }
 

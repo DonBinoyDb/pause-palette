@@ -18,19 +18,20 @@ type ProductDetails = {
   collectionName?: string | null;
   categories?: { id?: string; name: string; slug?: string }[];
   hasSilhouette: boolean;
-  fits: {name: string, iconUrl: string}[];
-  accordions?: {title: string, content: string}[];
+  fits: { name: string, iconUrl: string }[];
+  accordions?: { title: string, content: string }[];
   gender: string[];
   sizes?: string[];
   fitGuideDescription?: string;
   fitGuideImage?: string;
-  colors?: {name: string, hex: string, images: string[]}[];
+  colors?: { name: string, hex: string, images: string[] }[];
   dispatchInfo?: string | null;
   imageFit?: "cover" | "contain" | string;
 };
 
 export default function ProductDetailClient({ product }: { product: ProductDetails }) {
   const isContain = product.imageFit === "contain";
+  const isLandscape = product.imageFit === "landscape";
   const [selectedSize, setSelectedSize] = useState("S");
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [isSilhouetteModalOpen, setIsSilhouetteModalOpen] = useState(false);
@@ -73,8 +74,8 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     : product.images;
 
   // Map images, fallback if empty
-  const displayImages = currentColorImages.length > 0 
-    ? currentColorImages 
+  const displayImages = currentColorImages.length > 0
+    ? currentColorImages
     : ["https://images.unsplash.com/photo-1571513722275-4b41940f54b8?q=80&w=1974&auto=format&fit=crop"];
 
   const handleAddToCart = () => {
@@ -96,7 +97,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       silhouette: selectedSilhouette,
       color: activeColor ? activeColor.name : undefined,
     });
-    
+
     setIsAdded(true);
     setIsCartModalOpen(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -110,413 +111,426 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
     { title: "The Fabric", content: "" },
     { title: "Care", content: "" },
   ];
-  
-  const accordions = product.accordions && product.accordions.length > 0 
-    ? product.accordions 
+
+  const accordions = product.accordions && product.accordions.length > 0
+    ? product.accordions
     : defaultAccordions;
 
   return (
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
-      
+
       <div className="pt-20 md:pt-32 pb-24 px-0 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
-        
+
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
-          
+
           {/* Left: Images Section */}
           <div className="w-full lg:w-7/12 flex gap-0 md:gap-8">
-            
+
             {/* Thumbnails (sticky) */}
             <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 sticky top-32 h-fit">
               {displayImages.map((src, idx) => (
-                <div key={idx} className={`aspect-[3/4] w-full relative ${isContain ? 'bg-[#FBFBFA]' : 'bg-gray-100'} cursor-pointer overflow-hidden border border-transparent hover:border-gray-300`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={`Thumbnail ${idx+1}`} className={`${isContain ? 'object-contain' : 'object-cover'} w-full h-full`} />
-                </div>
+                  <div key={idx} className={`${isLandscape ? 'aspect-[4/3]' : 'aspect-[3/4]'} w-full relative ${isContain || isLandscape ? 'bg-[#FBFBFA]' : 'bg-gray-100'} cursor-pointer overflow-hidden border border-transparent hover:border-gray-300`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Thumbnail ${idx + 1}`} className={`${isContain || isLandscape ? 'object-contain' : 'object-cover'} w-full h-full`} />
+                  </div>
               ))}
-            </div>
+                </div>
 
-            {/* Main Images (stacked on desktop, carousel on mobile) */}
-            <div className="flex-1 flex flex-row md:flex-col gap-0 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 hide-scrollbar">
-              {displayImages.map((src, idx) => (
-                <div key={idx} className={`w-full shrink-0 md:shrink relative ${isContain ? 'aspect-[3/4] md:aspect-auto md:min-h-[520px] bg-[#FBFBFA] flex items-center justify-center' : 'aspect-[3/4] bg-gray-100'} snap-start`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={`Product Image ${idx+1}`} className={`${isContain ? 'object-contain max-h-[85vh] w-full h-auto' : 'object-cover w-full h-full'}`} />
-                </div>
+            {/* Main Images (stacked on desktop, carousel on mobile) */ }
+                < div className = "flex-1 flex flex-row md:flex-col gap-0 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-4 md:pb-0 hide-scrollbar" >
+                {
+                  displayImages.map((src, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-full shrink-0 md:shrink relative snap-start ${isLandscape
+                            ? "aspect-[4/3] bg-[#FBFBFA] flex items-center justify-center"
+                            : isContain
+                              ? "aspect-[3/4] md:aspect-auto md:min-h-[520px] bg-[#FBFBFA] flex items-center justify-center"
+                              : "aspect-[3/4] bg-gray-100"
+                          }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt={`Product Image ${idx + 1}`}
+                          className={`${isLandscape || isContain
+                              ? "object-contain max-h-[85vh] w-full h-auto"
+                              : "object-cover w-full h-full"
+                            }`}
+                        />
+                      </div>
               ))}
-            </div>
+                    </div>
           </div>
 
-          {/* Right: Product Details (sticky) */}
-          <div className="w-full lg:w-5/12 sticky top-32 py-4 px-4 md:px-0">
-            <h1 className="font-garamond text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
-            {product.collectionName && (
-              <div className="flex items-center gap-2 mb-4">
-                 <p className="text-sm tracking-wide text-gray-500 font-garamond italic">
-                   {product.collectionName}
-                 </p>
-              </div>
-            )}
-            
-            <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 mb-2">
-              ₹{product.price.toLocaleString("en-IN")}
-            </p>
+            {/* Right: Product Details (sticky) */}
+            <div className="w-full lg:w-5/12 sticky top-32 py-4 px-4 md:px-0">
+              <h1 className="font-garamond text-3xl md:text-4xl text-gray-800 mb-1">{product.name}</h1>
+              {product.collectionName && (
+                <div className="flex items-center gap-2 mb-4">
+                  <p className="text-sm tracking-wide text-gray-500 font-garamond italic">
+                    {product.collectionName}
+                  </p>
+                </div>
+              )}
 
-            {/* Category Display between Price and Variants */}
-            {product.category && (
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-gray-500">Category:</span>
-                <span className="text-sm text-gray-900 font-medium">
-                  {product.category}
-                </span>
-              </div>
-            )}
+              <p className="font-garamond font-medium text-2xl md:text-3xl text-gray-900 mb-2">
+                ₹{product.price.toLocaleString("en-IN")}
+              </p>
 
-            {/* Colour Options */}
-            {colors.length > 0 && (
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm text-gray-500">Variants:</span>
+              {/* Category Display between Price and Variants */}
+              {product.category && (
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-sm text-gray-500">Category:</span>
                   <span className="text-sm text-gray-900 font-medium">
-                    {colors[selectedColorIndex]?.name || "Original"}
+                    {product.category}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {colors.map((color, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setSelectedColorIndex(idx)}
-                      title={color.name}
-                      aria-label={`Select color ${color.name}`}
-                      className={`w-11 h-14 border p-0.5 cursor-pointer transition-all group rounded-xs relative ${
-                        selectedColorIndex === idx 
-                          ? 'border-gray-900 ring-2 ring-[#79A7D3]/40 shadow-xs scale-105' 
-                          : 'border-gray-200 hover:border-gray-400 opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <div 
-                        className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 overflow-hidden rounded-2xs"
+              )}
+
+              {/* Colour Options */}
+              {colors.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm text-gray-500">Variants:</span>
+                    <span className="text-sm text-gray-900 font-medium">
+                      {colors[selectedColorIndex]?.name || "Original"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {colors.map((color, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setSelectedColorIndex(idx)}
+                        title={color.name}
+                        aria-label={`Select color ${color.name}`}
+                        className={`w-11 h-14 border p-0.5 cursor-pointer transition-all group rounded-xs relative ${selectedColorIndex === idx
+                            ? 'border-gray-900 ring-2 ring-[#79A7D3]/40 shadow-xs scale-105'
+                            : 'border-gray-200 hover:border-gray-400 opacity-80 hover:opacity-100'
+                          }`}
                       >
-                        {color.images.length > 0 ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={color.images[0]} alt={color.name} className={`w-full h-full object-cover transition-opacity ${selectedColorIndex === idx ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`} />
-                        ) : color.hex ? (
-                          <div className="w-full h-full" style={{ backgroundColor: color.hex }} />
-                        ) : (
-                          <span>{color.name.slice(0, 3)}</span>
-                        )}
-                      </div>
+                        <div
+                          className="w-full h-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 overflow-hidden rounded-2xs"
+                        >
+                          {color.images.length > 0 ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={color.images[0]} alt={color.name} className={`w-full h-full object-cover transition-opacity ${selectedColorIndex === idx ? 'opacity-100' : 'opacity-80 group-hover:opacity-100'}`} />
+                          ) : color.hex ? (
+                            <div className="w-full h-full" style={{ backgroundColor: color.hex }} />
+                          ) : (
+                            <span>{color.name.slice(0, 3)}</span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sizes */}
+              <div className="flex justify-between items-end mb-4">
+                <div className="flex gap-2">
+                  {sizes.map(size => (
+                    <button
+                      key={size}
+                      suppressHydrationWarning
+                      onClick={() => setSelectedSize(size)}
+                      className={`w-11 h-11 flex items-center justify-center text-sm border transition-all ${selectedSize === size
+                          ? 'border-[#79A7D3] bg-white text-[#79A7D3] font-medium shadow-sm'
+                          : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'
+                        }`}
+                    >
+                      {size}
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Sizes */}
-            <div className="flex justify-between items-end mb-4">
-              <div className="flex gap-2">
-                {sizes.map(size => (
-                  <button 
-                    key={size}
-                    suppressHydrationWarning
-                    onClick={() => setSelectedSize(size)}
-                    className={`w-11 h-11 flex items-center justify-center text-sm border transition-all ${
-                      selectedSize === size 
-                        ? 'border-[#79A7D3] bg-white text-[#79A7D3] font-medium shadow-sm' 
-                        : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
-              </div>
-              <button 
-                suppressHydrationWarning 
-                onClick={() => setIsFitGuideOpen(true)}
-                className="text-sm text-gray-500 hover:text-gray-800 tracking-wide"
-              >
-                Fit Guide {'>'}
-              </button>
-            </div>
-
-            {/* Silhouette Dropdown */}
-            {product.hasSilhouette && product.fits?.length > 0 && (
-              <div className="mb-6">
-                <p className="text-sm text-gray-500 italic mb-2">Prefer this illustration in another form? Choose from our available silhouettes.</p>
-                <button 
-                  suppressHydrationWarning 
-                  onClick={() => setIsSilhouetteModalOpen(true)}
-                  className="w-full border border-gray-300 py-3 px-4 flex justify-between items-center text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+                <button
+                  suppressHydrationWarning
+                  onClick={() => setIsFitGuideOpen(true)}
+                  className="text-sm text-gray-500 hover:text-gray-800 tracking-wide"
                 >
-                  <span className="mx-auto tracking-wide">
-                    {`Selected: ${selectedSilhouette}`}
-                  </span>
-                  <span className="text-gray-400">+</span>
+                  Fit Guide {'>'}
                 </button>
               </div>
-            )}
 
-            {/* Add to Cart & Wishlist */}
-            <div className="flex gap-2 mb-2">
-              <button 
-                onClick={handleAddToCart}
-                suppressHydrationWarning 
-                className={`flex-1 border font-serif text-lg tracking-wide py-4 px-4 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] ${
-                  isAdded 
-                    ? 'border-green-500 bg-green-50 text-green-700' 
-                    : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] font-medium'
-                }`}
-              >
-                {isAdded ? 'Added to Cart' : 'Add To Cart'}
-              </button>
-              
-              <button 
-                onClick={() => toggleSaved({
-                  productId: product.id,
-                  name: product.name,
-                  price: product.price,
-                  image: displayImages[0]
-                })} 
-                className={`flex items-center justify-center w-16 shrink-0 border transition-all hover:scale-[1.02] cursor-pointer ${isSaved(product.id) ? 'border-red-200 bg-red-50 text-red-500' : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3]'}`}
-              >
-                <span className="text-2xl leading-none pt-0.5">{isSaved(product.id) ? '♥' : '♡'}</span>
-              </button>
-            </div>
-            <p className="text-xs text-gray-400 italic text-center mb-10">
-              {product.dispatchInfo || "Thoughtfully made to order - Dispatches in 12-15 business days."}
-            </p>
-
-            {/* Description */}
-            <p className="text-base text-gray-600 leading-relaxed mb-10 whitespace-pre-wrap">
-              {product.description || "Thoughtfully designed, slowly crafted."}
-            </p>
-
-            {/* Accordion */}
-            <div className="border-t border-gray-200">
-              {accordions.map((item, idx) => (
-                <div key={idx} className="border-b border-gray-200">
-                  <button 
+              {/* Silhouette Dropdown */}
+              {product.hasSilhouette && product.fits?.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-sm text-gray-500 italic mb-2">Prefer this illustration in another form? Choose from our available silhouettes.</p>
+                  <button
                     suppressHydrationWarning
-                    onClick={() => setOpenAccordion(openAccordion === item.title ? null : item.title)}
-                    className="w-full py-4 flex justify-between items-center text-left"
+                    onClick={() => setIsSilhouetteModalOpen(true)}
+                    className="w-full border border-gray-300 py-3 px-4 flex justify-between items-center text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm tracking-wide text-gray-600">{item.title}</span>
-                    <span className="text-gray-400 text-sm font-light">{openAccordion === item.title ? '−' : '+'}</span>
+                    <span className="mx-auto tracking-wide">
+                      {`Selected: ${selectedSilhouette}`}
+                    </span>
+                    <span className="text-gray-400">+</span>
                   </button>
-                  {openAccordion === item.title && (
-                    <div className="pb-4 text-sm text-gray-500 leading-relaxed pr-8 whitespace-pre-wrap">
-                      {item.content || `Details for ${item.title} will be provided soon.`}
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
+              )}
 
-          </div>
-        </div>
+              {/* Add to Cart & Wishlist */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  onClick={handleAddToCart}
+                  suppressHydrationWarning
+                  className={`flex-1 border font-serif text-lg tracking-wide py-4 px-4 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] ${isAdded
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] font-medium'
+                    }`}
+                >
+                  {isAdded ? 'Added to Cart' : 'Add To Cart'}
+                </button>
 
-      </div>
-      
-      <Footer />
+                <button
+                  onClick={() => toggleSaved({
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: displayImages[0]
+                  })}
+                  className={`flex items-center justify-center w-16 shrink-0 border transition-all hover:scale-[1.02] cursor-pointer ${isSaved(product.id) ? 'border-red-200 bg-red-50 text-red-500' : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3]'}`}
+                >
+                  <span className="text-2xl leading-none pt-0.5">{isSaved(product.id) ? '♥' : '♡'}</span>
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 italic text-center mb-10">
+                {product.dispatchInfo || "Thoughtfully made to order - Dispatches in 12-15 business days."}
+              </p>
 
-      {/* Silhouette Selection Modal */}
-      {isSilhouetteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-            onClick={() => setIsSilhouetteModalOpen(false)}
-          ></div>
-          
-          {/* Modal Content */}
-          <div className="relative w-full max-w-2xl bg-[#FBF9F6] rounded-sm shadow-xl max-h-[90vh] overflow-y-auto flex flex-col">
-            <button 
-              onClick={() => setIsSilhouetteModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-            >
-              <X size={20} strokeWidth={1.5} />
-            </button>
-            
-            <div className="px-8 py-10 flex-1">
-              <h2 className="text-center font-garamond text-xl tracking-widest text-gray-800 mb-2">CHOOSE YOUR SILHOUETTE</h2>
-              <p className="text-center text-sm text-gray-600 mb-10">Select the silhouette you prefer for this illustration.</p>
+              {/* Description */}
+              <p className="text-base text-gray-600 leading-relaxed mb-10 whitespace-pre-wrap">
+                {product.description || "Thoughtfully designed, slowly crafted."}
+              </p>
 
-              {/* Dynamic Fits */}
-              <div className="mb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {product.fits.map((fitItem, idx) => (
-                    <div 
-                      key={idx} 
-                      onClick={() => setSelectedSilhouette(fitItem.name)}
-                      className={`border rounded-md p-4 flex flex-col items-center cursor-pointer transition-colors relative ${selectedSilhouette === fitItem.name ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
+              {/* Accordion */}
+              <div className="border-t border-gray-200">
+                {accordions.map((item, idx) => (
+                  <div key={idx} className="border-b border-gray-200">
+                    <button
+                      suppressHydrationWarning
+                      onClick={() => setOpenAccordion(openAccordion === item.title ? null : item.title)}
+                      className="w-full py-4 flex justify-between items-center text-left"
                     >
-                      <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center border ${selectedSilhouette === fitItem.name ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
-                        {selectedSilhouette === fitItem.name && <Check size={12} strokeWidth={3} />}
+                      <span className="text-sm tracking-wide text-gray-600">{item.title}</span>
+                      <span className="text-gray-400 text-sm font-light">{openAccordion === item.title ? '−' : '+'}</span>
+                    </button>
+                    {openAccordion === item.title && (
+                      <div className="pb-4 text-sm text-gray-500 leading-relaxed pr-8 whitespace-pre-wrap">
+                        {item.content || `Details for ${item.title} will be provided soon.`}
                       </div>
-                      <div className="w-20 h-20 bg-white border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2 p-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
-                      </div>
-                      <p className="font-garamond text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
-                    </div>
-                  ))}
-                </div>
+                    )}
+                  </div>
+                ))}
               </div>
 
             </div>
-
-            {/* Sticky Bottom Actions */}
-            <div className="px-8 pb-8 pt-4 bg-[#FBF9F6] sticky bottom-0 border-t border-gray-200">
-              <div className="flex items-start justify-center gap-2 mb-6">
-                <Info size={14} className="text-gray-500 mt-0.5 shrink-0" strokeWidth={1.5} />
-                <p className="text-xs text-gray-600 text-center max-w-sm">Illustration placement may vary slightly to complement the chosen silhouette.</p>
-              </div>
-              <button 
-                onClick={() => setIsSilhouetteModalOpen(false)}
-                className="w-full bg-[#3A3831] hover:bg-[#2A2821] text-white py-4 font-garamond tracking-widest text-sm transition-colors"
-              >
-                CONFIRM SILHOUETTE
-              </button>
-            </div>
-            
           </div>
+
         </div>
-      )}
 
-      {/* Fit Guide Slide-over Drawer */}
-      <div 
-        className={`fixed inset-0 z-50 transition-opacity duration-300 ${isFitGuideOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-      >
-        <div 
-          className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-          onClick={() => setIsFitGuideOpen(false)}
-        />
-        
-        <div 
-          className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out transform ${isFitGuideOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h2 className="font-garamond text-xl tracking-widest text-gray-900">FIT GUIDE</h2>
-            <button 
-              onClick={() => setIsFitGuideOpen(false)}
-              className="p-2 text-gray-400 hover:text-gray-800 transition-colors bg-gray-50 rounded-full"
-            >
-              <X size={20} strokeWidth={1.5} />
-            </button>
-          </div>
+        <Footer />
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-8">
-            {product.fitGuideDescription ? (
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-10">
-                {product.fitGuideDescription}
-              </p>
-            ) : (
-              <p className="text-sm text-gray-500 italic mb-10">
-                Fit guide description is not available for this piece yet.
-              </p>
-            )}
+        {/* Silhouette Selection Modal */}
+        {isSilhouetteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+              onClick={() => setIsSilhouetteModalOpen(false)}
+            ></div>
 
-            {product.fitGuideImage && (
-              <div className="w-full bg-gray-50">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={product.fitGuideImage} 
-                  alt="Fit Guide" 
-                  className="w-full h-auto object-contain mix-blend-multiply"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Added to Cart Popup Modal */}
-      {isCartModalOpen && (
-        <div 
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
-          onClick={() => setIsCartModalOpen(false)}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-md bg-white rounded-none sm:rounded-xs shadow-2xl p-6 sm:p-8 text-center border border-[#DCE8F3] animate-in zoom-in-95 duration-200"
-          >
-            {/* Close Button */}
-            <button 
-              type="button"
-              onClick={() => setIsCartModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-[#79A7D3] transition-colors p-1.5 cursor-pointer"
-              aria-label="Close"
-            >
-              <X size={18} strokeWidth={1.5} />
-            </button>
-
-            {/* Checkmark Icon in brand soft blue badge */}
-            <div className="w-12 h-12 rounded-full bg-[#F4F8FB] border border-[#D5E5F2] text-[#79A7D3] flex items-center justify-center mx-auto mb-3 shadow-2xs">
-              <Check size={22} strokeWidth={2.5} />
-            </div>
-
-            {/* Brand Title & Subtitle */}
-            <h3 className="font-garamond text-2xl text-gray-900 tracking-wide mb-1 font-normal uppercase">
-              Added to Cart
-            </h3>
-            <p className="text-xs text-gray-500 font-serif italic mb-5">
-              Your piece has been thoughtfully added to your shopping bag.
-            </p>
-
-            {/* Product Card Snapshot */}
-            <div className="bg-[#FAF8F5] border border-[#EAE6DF] rounded-none sm:rounded-xs p-3.5 flex items-center gap-4 text-left mb-6">
-              <div className="w-16 h-20 bg-white border border-gray-100 shrink-0 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={displayImages[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-garamond text-sm text-gray-900 font-medium truncate uppercase tracking-wide">
-                  {product.name}
-                </p>
-                <div className="text-[12px] text-gray-500 mt-0.5 space-y-0.5 font-light">
-                  <p>Size: <span className="text-gray-800 font-normal">{selectedSize}</span></p>
-                  {product.hasSilhouette && selectedSilhouette && (
-                    <p className="truncate">Fit: <span className="text-gray-800 font-normal">{selectedSilhouette}</span></p>
-                  )}
-                </div>
-                <p className="text-sm font-serif text-[#4A7DAF] font-semibold mt-1.5">
-                  ₹{product.price.toLocaleString("en-IN")}
-                </p>
-              </div>
-            </div>
-
-            {/* Two Signature Blue Action Buttons */}
-            <div className="flex flex-col gap-2.5">
+            {/* Modal Content */}
+            <div className="relative w-full max-w-2xl bg-[#FBF9F6] rounded-sm shadow-xl max-h-[90vh] overflow-y-auto flex flex-col">
               <button
-                type="button"
-                onClick={() => {
-                  setIsCartModalOpen(false);
-                  router.push("/cart");
-                }}
-                className="w-full border border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6894BE] text-white py-3.5 px-6 font-serif text-xs sm:text-[13px] tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] font-medium flex items-center justify-center gap-2"
+                onClick={() => setIsSilhouetteModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
               >
-                <ShoppingBag size={15} /> Go To Cart
+                <X size={20} strokeWidth={1.5} />
               </button>
+
+              <div className="px-8 py-10 flex-1">
+                <h2 className="text-center font-garamond text-xl tracking-widest text-gray-800 mb-2">CHOOSE YOUR SILHOUETTE</h2>
+                <p className="text-center text-sm text-gray-600 mb-10">Select the silhouette you prefer for this illustration.</p>
+
+                {/* Dynamic Fits */}
+                <div className="mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {product.fits.map((fitItem, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => setSelectedSilhouette(fitItem.name)}
+                        className={`border rounded-md p-4 flex flex-col items-center cursor-pointer transition-colors relative ${selectedSilhouette === fitItem.name ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
+                      >
+                        <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center border ${selectedSilhouette === fitItem.name ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
+                          {selectedSilhouette === fitItem.name && <Check size={12} strokeWidth={3} />}
+                        </div>
+                        <div className="w-20 h-20 bg-white border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2 p-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
+                        </div>
+                        <p className="font-garamond text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Sticky Bottom Actions */}
+              <div className="px-8 pb-8 pt-4 bg-[#FBF9F6] sticky bottom-0 border-t border-gray-200">
+                <div className="flex items-start justify-center gap-2 mb-6">
+                  <Info size={14} className="text-gray-500 mt-0.5 shrink-0" strokeWidth={1.5} />
+                  <p className="text-xs text-gray-600 text-center max-w-sm">Illustration placement may vary slightly to complement the chosen silhouette.</p>
+                </div>
+                <button
+                  onClick={() => setIsSilhouetteModalOpen(false)}
+                  className="w-full bg-[#3A3831] hover:bg-[#2A2821] text-white py-4 font-garamond tracking-widest text-sm transition-colors"
+                >
+                  CONFIRM SILHOUETTE
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* Fit Guide Slide-over Drawer */}
+        <div
+          className={`fixed inset-0 z-50 transition-opacity duration-300 ${isFitGuideOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        >
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setIsFitGuideOpen(false)}
+          />
+
+          <div
+            className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out transform ${isFitGuideOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="font-garamond text-xl tracking-widest text-gray-900">FIT GUIDE</h2>
+              <button
+                onClick={() => setIsFitGuideOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-800 transition-colors bg-gray-50 rounded-full"
+              >
+                <X size={20} strokeWidth={1.5} />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-8">
+              {product.fitGuideDescription ? (
+                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-10">
+                  {product.fitGuideDescription}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 italic mb-10">
+                  Fit guide description is not available for this piece yet.
+                </p>
+              )}
+
+              {product.fitGuideImage && (
+                <div className="w-full bg-gray-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={product.fitGuideImage}
+                    alt="Fit Guide"
+                    className="w-full h-auto object-contain mix-blend-multiply"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Added to Cart Popup Modal */}
+        {isCartModalOpen && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200"
+            onClick={() => setIsCartModalOpen(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md bg-white rounded-none sm:rounded-xs shadow-2xl p-6 sm:p-8 text-center border border-[#DCE8F3] animate-in zoom-in-95 duration-200"
+            >
+              {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setIsCartModalOpen(false)}
-                className="w-full border border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] py-3.5 px-6 font-serif text-xs sm:text-[13px] tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer active:scale-[0.99] font-medium"
+                className="absolute top-4 right-4 text-gray-400 hover:text-[#79A7D3] transition-colors p-1.5 cursor-pointer"
+                aria-label="Close"
               >
-                Continue Browsing
+                <X size={18} strokeWidth={1.5} />
               </button>
+
+              {/* Checkmark Icon in brand soft blue badge */}
+              <div className="w-12 h-12 rounded-full bg-[#F4F8FB] border border-[#D5E5F2] text-[#79A7D3] flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                <Check size={22} strokeWidth={2.5} />
+              </div>
+
+              {/* Brand Title & Subtitle */}
+              <h3 className="font-garamond text-2xl text-gray-900 tracking-wide mb-1 font-normal uppercase">
+                Added to Cart
+              </h3>
+              <p className="text-xs text-gray-500 font-serif italic mb-5">
+                Your piece has been thoughtfully added to your shopping bag.
+              </p>
+
+              {/* Product Card Snapshot */}
+              <div className="bg-[#FAF8F5] border border-[#EAE6DF] rounded-none sm:rounded-xs p-3.5 flex items-center gap-4 text-left mb-6">
+                <div className="w-16 h-20 bg-white border border-gray-100 shrink-0 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={displayImages[0]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-garamond text-sm text-gray-900 font-medium truncate uppercase tracking-wide">
+                    {product.name}
+                  </p>
+                  <div className="text-[12px] text-gray-500 mt-0.5 space-y-0.5 font-light">
+                    <p>Size: <span className="text-gray-800 font-normal">{selectedSize}</span></p>
+                    {product.hasSilhouette && selectedSilhouette && (
+                      <p className="truncate">Fit: <span className="text-gray-800 font-normal">{selectedSilhouette}</span></p>
+                    )}
+                  </div>
+                  <p className="text-sm font-serif text-[#4A7DAF] font-semibold mt-1.5">
+                    ₹{product.price.toLocaleString("en-IN")}
+                  </p>
+                </div>
+              </div>
+
+              {/* Two Signature Blue Action Buttons */}
+              <div className="flex flex-col gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCartModalOpen(false);
+                    router.push("/cart");
+                  }}
+                  className="w-full border border-[#79A7D3] bg-[#79A7D3] hover:bg-[#6894BE] text-white py-3.5 px-6 font-serif text-xs sm:text-[13px] tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] font-medium flex items-center justify-center gap-2"
+                >
+                  <ShoppingBag size={15} /> Go To Cart
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCartModalOpen(false)}
+                  className="w-full border border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] py-3.5 px-6 font-serif text-xs sm:text-[13px] tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer active:scale-[0.99] font-medium"
+                >
+                  Continue Browsing
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </main>
   );
 }

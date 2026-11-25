@@ -24,6 +24,9 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const originalBuffer = Buffer.from(bytes);
 
+    const kind = (data.get("type") as string) || (data.get("kind") as string) || "";
+    const isSwatch = kind.toLowerCase() === "swatch";
+
     const isVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|ogg)$/i.test(file.name);
     let uploadBuffer = originalBuffer;
     let contentType = file.type || "application/octet-stream";
@@ -38,12 +41,20 @@ export async function POST(request: Request) {
       contentType = file.type || `video/${ext}`;
     } else {
       try {
-        // Auto-orient based on EXIF metadata (preserves portrait/vertical orientation for mobile photos) and convert to WebP
-        uploadBuffer = await sharp(originalBuffer)
-          .rotate()
+        // Auto-orient based on EXIF metadata and convert to WebP
+        let pipeline = sharp(originalBuffer).rotate();
+        
+        // If uploaded as fabric swatch, optimize dimensions to 160x160 square thumbnail
+        if (isSwatch) {
+          pipeline = pipeline.resize(160, 160, { fit: "cover", position: "center" });
+        }
+
+        uploadBuffer = await pipeline
           .webp({ quality: 85 })
           .toBuffer();
-        filename = `${uniqueSuffix}-${sanitizedName}.webp`;
+        filename = isSwatch
+          ? `swatch-${uniqueSuffix}-${sanitizedName}.webp`
+          : `${uniqueSuffix}-${sanitizedName}.webp`;
         contentType = "image/webp";
       } catch (sharpError) {
         // Fallback to original buffer if sharp cannot process

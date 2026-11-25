@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Save, Plus, Info, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Upload, X, Trash2, Check, Eye, EyeOff, Save, Plus, Info, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -35,8 +35,11 @@ export default function NewProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [isPublished, setIsPublished] = useState(false);
   const [isNew, setIsNew] = useState(true);
-  const [imageFit, setImageFit] = useState<"cover" | "contain">("cover");
+  const [imageFit, setImageFit] = useState<"cover" | "contain" | "landscape">("cover");
   const [dispatchInfo, setDispatchInfo] = useState("Thoughtfully made to order - Dispatches in 12-15 business days.");
+  const [pendingRotations, setPendingRotations] = useState<Record<number, number>>({});
+  const [rotatingIndex, setRotatingIndex] = useState<number | null>(null);
+  const [variantRotatingKey, setVariantRotatingKey] = useState<string | null>(null);
 
   const [fitGuideDescription, setFitGuideDescription] = useState("");
   const [fitGuideImage, setFitGuideImage] = useState("");
@@ -275,6 +278,102 @@ export default function NewProductPage() {
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setPendingRotations(prev => {
+      const copy = { ...prev };
+      delete copy[index];
+      return copy;
+    });
+  };
+
+  const handleRotateImage = (idx: number) => {
+    setPendingRotations((prev) => {
+      const current = prev[idx] || 0;
+      const nextAngle = (current + 90) % 360;
+      return { ...prev, [idx]: nextAngle };
+    });
+  };
+
+  const handleApplyRotation = async (idx: number) => {
+    const angle = pendingRotations[idx] || 0;
+    if (!angle || angle === 0) return;
+    const currentUrl = images[idx];
+    if (!currentUrl) return;
+
+    try {
+      setRotatingIndex(idx);
+      toast.loading(`Applying ${angle}° rotation...`, { id: `rot-${idx}` });
+
+      const res = await fetch("/api/admin/rotate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl: currentUrl,
+          degrees: angle,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success || !data.url) {
+        throw new Error(data.message || "Rotation failed");
+      }
+
+      setImages((prev) => {
+        const next = [...prev];
+        next[idx] = data.url;
+        return next;
+      });
+
+      setPendingRotations((prev) => {
+        const copy = { ...prev };
+        delete copy[idx];
+        return copy;
+      });
+
+      toast.success("Image rotation applied!", { id: `rot-${idx}` });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to rotate image", { id: `rot-${idx}` });
+    } finally {
+      setRotatingIndex(null);
+    }
+  };
+
+  const handleRotateVariantImage = async (colorIdx: number, imgIdx: number) => {
+    const key = `${colorIdx}-${imgIdx}`;
+    const currentUrl = colors[colorIdx]?.images?.[imgIdx];
+    if (!currentUrl) return;
+
+    try {
+      setVariantRotatingKey(key);
+      toast.loading("Rotating variant image (90°)...", { id: `rot-v-${key}` });
+
+      const res = await fetch("/api/admin/rotate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl: currentUrl,
+          degrees: 90,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success || !data.url) {
+        throw new Error(data.message || "Rotation failed");
+      }
+
+      setColors((prev) => {
+        const next = [...prev];
+        const nextImgs = [...next[colorIdx].images];
+        nextImgs[imgIdx] = data.url;
+        next[colorIdx] = { ...next[colorIdx], images: nextImgs };
+        return next;
+      });
+
+      toast.success("Variant image rotated 90°!", { id: `rot-v-${key}` });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to rotate variant image", { id: `rot-v-${key}` });
+    } finally {
+      setVariantRotatingKey(null);
+    }
   };
 
   const moveImage = (index: number, direction: "up" | "down") => {
@@ -363,6 +462,38 @@ export default function NewProductPage() {
     setIsPublished(publishStatus);
 
     try {
+      // Commit any pending image rotations in a single physical pass before saving
+      let finalImages = [...images];
+      const pendingIndices = Object.keys(pendingRotations)
+        .map(Number)
+        .filter((i) => (pendingRotations[i] || 0) > 0 && finalImages[i]);
+
+      if (pendingIndices.length > 0) {
+        toast.loading("Applying pending image rotations...", { id: "pending-rot" });
+        for (const idx of pendingIndices) {
+          const angle = pendingRotations[idx];
+          try {
+            const rotRes = await fetch("/api/admin/rotate-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                imageUrl: finalImages[idx],
+                degrees: angle,
+              }),
+            });
+            const rotData = await rotRes.json();
+            if (rotData.success && rotData.url) {
+              finalImages[idx] = rotData.url;
+            }
+          } catch (rotErr) {
+            console.error("Failed auto-rotating image on create:", rotErr);
+          }
+        }
+        toast.dismiss("pending-rot");
+        setImages(finalImages);
+        setPendingRotations({});
+      }
+
       const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -381,11 +512,11 @@ export default function NewProductPage() {
           isNew,
           imageFit,
           dispatchInfo,
-          images,
+          images: finalImages,
           fitGuideDescription,
           fitGuideImage,
           colors: [
-            { name: mainColorName, hex: "#000000", images: images, isMain: true },
+            { name: mainColorName, hex: "#000000", images: finalImages, isMain: true },
             ...colors
           ]
         }),
@@ -464,225 +595,292 @@ export default function NewProductPage() {
             </button>
           </div>
 
-          <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden" title="Portrait image fitting: Fill Frame (Cover) or Full Image (Contain)">
-            <button
-              type="button"
-              onClick={() => setImageFit(imageFit === "cover" ? "contain" : "cover")}
-              className={`px-3 py-2.5 text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5 transition-colors ${imageFit === "contain" ? 'bg-amber-50 text-amber-800 font-semibold' : 'text-gray-500 hover:bg-gray-50'}`}
-            >
-              <span>{imageFit === "contain" ? "Fit: Full Portrait" : "Fit: Fill Frame"}</span>
-            </button>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading || uploading}
-            className="px-6 py-2.5 text-[10px] tracking-[0.15em] uppercase bg-[#2C2B29] text-white hover:bg-black transition-colors rounded-sm flex items-center gap-2 shadow-sm disabled:opacity-50 font-semibold"
-          >
-            <Save size={13} />
-            <span>{loading ? "SAVING..." : "SAVE PRODUCT"}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Editor Canvas */}
-      <div className="bg-white shadow-2xl rounded-md border border-gray-100 overflow-hidden mb-24 relative">
-
-        {/* Fake Browser Header */}
-        <div className="bg-gray-50 border-b border-gray-200 py-3 px-6 flex items-center gap-4">
-          <div className="flex gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-400"></div>
-            <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-            <div className="w-3 h-3 rounded-full bg-green-400"></div>
-          </div>
-          <div className="flex-1 bg-white border border-gray-200 rounded-md py-1.5 px-4 text-[10px] text-gray-400 font-mono flex items-center gap-2 max-w-sm mx-auto">
-            <span>pause-palette.com/product/</span>
-            <input
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              className="bg-transparent border-none outline-none text-gray-700 w-full"
-            />
-          </div>
-        </div>
-
-        <div className="pt-16 pb-24 px-6 md:px-12 lg:px-16 w-full">
-
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
-
-            {/* Left: Images Section */}
-            <div className="w-full lg:w-7/12 flex gap-4 md:gap-8">
-              <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 h-fit">
-                {displayImages.map((src, idx) => (
-                  <div key={idx} className="aspect-[3/4] w-full relative bg-gray-100 cursor-pointer overflow-hidden border border-gray-200 group rounded-xs">
-                    {src ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt="Thumb" className="object-cover w-full h-full" />
-                        <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[9px] font-mono px-1 rounded-xs">
-                          {idx + 1}
-                        </span>
-                        {/* Thumbnail overlay with reorder arrows */}
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-between p-1 transition-opacity">
-                          <div className="flex items-center gap-1">
-                            {idx > 0 && (
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); moveImage(idx, "up"); }}
-                                className="p-0.5 hover:bg-white/20 rounded-xs text-white"
-                                title="Move up"
-                              >
-                                <ChevronUp size={14} />
-                              </button>
-                            )}
-                            {idx < images.length - 1 && (
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); moveImage(idx, "down"); }}
-                                className="p-0.5 hover:bg-white/20 rounded-xs text-white"
-                                title="Move down"
-                              >
-                                <ChevronDown size={14} />
-                              </button>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
-                            className="p-1 hover:text-red-400 text-white transition-colors"
-                            title="Remove image"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <Upload size={16} />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex-1 flex flex-col gap-4">
-                {displayImages.map((src, idx) => (
-                  <div key={idx} className="aspect-[3/4] w-full relative bg-gray-50 border border-gray-200 border-dashed group overflow-hidden">
-                    {src ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={src} alt={`Main ${idx + 1}`} className={`w-full h-full ${imageFit === "contain" ? "object-contain bg-white" : "object-cover"}`} />
-
-                        {/* Top-left: Position Badge & Set as Cover */}
-                        <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
-                          <span className="bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono uppercase px-2.5 py-1 rounded-sm shadow-xs font-semibold">
-                            {idx === 0 ? "★ Cover / 1st" : `#${idx + 1}`}
-                          </span>
-                          {idx > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => setAsCoverImage(idx)}
-                              className="bg-white/95 hover:bg-black hover:text-white text-gray-800 text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-sm shadow-md font-medium transition-all opacity-0 group-hover:opacity-100"
-                              title="Make this the first/cover image"
-                            >
-                              Make Cover
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Top-right: Reorder (Up/Down) & Delete Controls */}
-                        <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {idx > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => moveImage(idx, "up")}
-                              title="Move Image Up"
-                              className="bg-white/95 hover:bg-gray-100 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95"
-                            >
-                              <ChevronUp size={18} />
-                            </button>
-                          )}
-                          {idx < images.length - 1 && (
-                            <button
-                              type="button"
-                              onClick={() => moveImage(idx, "down")}
-                              title="Move Image Down"
-                              className="bg-white/95 hover:bg-gray-100 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95"
-                            >
-                              <ChevronDown size={18} />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => removeImage(idx)}
-                            title="Remove Image"
-                            className="bg-white/95 hover:bg-red-50 hover:text-red-500 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95"
-                          >
-                            <X size={18} />
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                      >
-                        {uploading ? (
-                          <span className="text-[10px] tracking-[0.2em] uppercase">Uploading...</span>
-                        ) : (
-                          <>
-                            <Upload size={24} className="mb-4" />
-                            <span className="text-[10px] tracking-[0.2em] uppercase">Click to add hero image</span>
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                ))}
-
-                {images.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="aspect-[3/4] w-full relative bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                  >
-                    {uploading ? (
-                      <span className="text-[10px] tracking-[0.2em] uppercase">Uploading...</span>
-                    ) : (
-                      <>
-                        <Upload size={24} className="mb-4" />
-                        <span className="text-[10px] tracking-[0.2em] uppercase">Add another image</span>
-                      </>
-                    )}
-                  </button>
-                )}
-
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                />
-
-                <div className="mt-4 flex flex-col gap-2 bg-gray-50 p-4 border border-gray-200 rounded-sm">
-                  <label className="text-[11px] uppercase tracking-widest text-gray-500 font-medium">Main Images Variant Name</label>
-                  <input
-                    type="text"
-                    value={mainColorName}
-                    onChange={(e) => setMainColorName(e.target.value)}
-                    placeholder="e.g. Original, Ivory, Default"
-                    className="w-full text-sm font-medium text-gray-900 border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
-                  />
-                  <p className="text-[10px] text-gray-400 italic">This name will be displayed for the main images color swatch on the product page.</p>
-                </div>
-              </div>
+            <div className="flex items-center bg-white border border-gray-200 rounded-sm overflow-hidden text-[10px] tracking-[0.12em] uppercase font-medium">
+              <span className="px-2.5 py-2.5 text-gray-400 bg-gray-50 border-r border-gray-200 hidden sm:inline">Framing:</span>
+              <button
+                type="button"
+                onClick={() => setImageFit("cover")}
+                className={`px-3 py-2.5 transition-colors cursor-pointer ${imageFit === "cover" ? 'bg-[#2C2B29] text-white font-semibold' : 'text-gray-500 hover:bg-gray-50'}`}
+                title="Standard Portrait 3:4 (Fill Frame)"
+              >
+                Portrait
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageFit("contain")}
+                className={`px-3 py-2.5 border-l border-gray-200 transition-colors cursor-pointer ${imageFit === "contain" ? 'bg-amber-600 text-white font-semibold' : 'text-gray-500 hover:bg-gray-50'}`}
+                title="Full Garment 3:4 with Natural Margins"
+              >
+                Contain
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageFit("landscape")}
+                className={`px-3 py-2.5 border-l border-gray-200 transition-colors cursor-pointer ${imageFit === "landscape" ? 'bg-blue-600 text-white font-semibold' : 'text-gray-500 hover:bg-gray-50'}`}
+                title="Landscape 4:3 Aspect Frame"
+              >
+                Landscape
+              </button>
             </div>
 
-            {/* Right: Product Details */}
-            <div className="w-full lg:w-5/12 py-4">
+            <button
+              type="submit"
+              disabled={loading || uploading}
+              className="px-6 py-2.5 text-[10px] tracking-[0.15em] uppercase bg-[#2C2B29] text-white hover:bg-black transition-colors rounded-sm flex items-center gap-2 shadow-sm disabled:opacity-50 font-semibold"
+            >
+              <Save size={13} />
+              <span>{loading ? "SAVING..." : "SAVE PRODUCT"}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Editor Canvas */}
+        <div className="bg-white shadow-2xl rounded-md border border-gray-100 overflow-hidden mb-24 relative">
+
+          {/* Fake Browser Header */}
+          <div className="bg-gray-50 border-b border-gray-200 py-3 px-6 flex items-center gap-4">
+            <div className="flex gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-400"></div>
+              <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+              <div className="w-3 h-3 rounded-full bg-green-400"></div>
+            </div>
+            <div className="flex-1 bg-white border border-gray-200 rounded-md py-1.5 px-4 text-[10px] text-gray-400 font-mono flex items-center gap-2 max-w-sm mx-auto">
+              <span>pause-palette.com/product/</span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                className="bg-transparent border-none outline-none text-gray-700 w-full"
+              />
+            </div>
+          </div>
+
+          <div className="pt-16 pb-24 px-6 md:px-12 lg:px-16 w-full">
+
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
+
+              {/* Left: Images Section */}
+              <div className="w-full lg:w-7/12 flex gap-4 md:gap-8">
+                <div className="hidden md:flex flex-col gap-4 w-20 shrink-0 h-fit">
+                  {displayImages.map((src, idx) => (
+                    <div key={idx} className="aspect-[3/4] w-full relative bg-gray-100 cursor-pointer overflow-hidden border border-gray-200 group rounded-xs">
+                      {src ? (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt="Thumb" className="object-cover w-full h-full" />
+                          <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[9px] font-mono px-1 rounded-xs">
+                            {idx + 1}
+                          </span>
+                          {/* Thumbnail overlay with reorder arrows */}
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-between p-1 transition-opacity">
+                            <div className="flex items-center gap-1">
+                              {idx > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); moveImage(idx, "up"); }}
+                                  className="p-0.5 hover:bg-white/20 rounded-xs text-white"
+                                  title="Move up"
+                                >
+                                  <ChevronUp size={14} />
+                                </button>
+                              )}
+                              {idx < images.length - 1 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); moveImage(idx, "down"); }}
+                                  className="p-0.5 hover:bg-white/20 rounded-xs text-white"
+                                  title="Move down"
+                                >
+                                  <ChevronDown size={14} />
+                                </button>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                              className="p-1 hover:text-red-400 text-white transition-colors"
+                              title="Remove image"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <Upload size={16} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex-1 flex flex-col gap-4">
+                  {displayImages.map((src, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-full relative bg-gray-50 border border-gray-200 border-dashed group overflow-hidden transition-all duration-300 ${imageFit === "landscape" ? "aspect-[4/3]" : "aspect-[3/4]"
+                          }`}
+                      >
+                        {src ? (
+                          <>
+                            <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={src}
+                                alt={`Main ${idx + 1}`}
+                                style={{
+                                  transform: pendingRotations[idx] ? `rotate(${pendingRotations[idx]}deg)` : undefined,
+                                  transition: "transform 0.25s ease",
+                                }}
+                                className={`w-full h-full ${imageFit === "contain"
+                                    ? "object-contain bg-white"
+                                    : imageFit === "landscape"
+                                      ? "object-contain bg-[#FBFBFA]"
+                                      : "object-cover"
+                                  }`}
+                              />
+                            </div>
+
+                              {/* Top-left: Position Badge, Cover Button & Pending Rotation Badge */}
+                              <div className="absolute top-4 left-4 flex flex-wrap items-center gap-1.5 z-10">
+                                <span className="bg-black/80 backdrop-blur-xs text-white text-[10px] font-mono uppercase px-2.5 py-1 rounded-sm shadow-xs font-semibold">
+                                  {idx === 0 ? "★ Cover / 1st" : `#${idx + 1}`}
+                                </span>
+                                {pendingRotations[idx] ? (
+                                  <span className="bg-blue-600 text-white text-[10px] font-mono px-2 py-0.5 rounded-sm shadow-sm font-semibold flex items-center gap-1">
+                                    <RotateCw size={10} />
+                                    {pendingRotations[idx]}° (Pending)
+                                  </span>
+                                ) : null}
+                                {idx > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setAsCoverImage(idx)}
+                                    className="bg-white/95 hover:bg-black hover:text-white text-gray-800 text-[10px] tracking-wider uppercase px-2.5 py-1 rounded-sm shadow-md font-medium transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+                                    title="Make this the first/cover image"
+                                  >
+                                    Make Cover
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Top-right: Rotate, Reorder & Delete Controls */}
+                              <div className="absolute top-4 right-4 flex items-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {/* Rotate Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleRotateImage(idx)}
+                                  disabled={rotatingIndex === idx || loading}
+                                  title="Rotate 90° Clockwise"
+                                  className="bg-white/95 hover:bg-blue-50 text-gray-700 hover:text-blue-600 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
+                                >
+                                  <RotateCw size={16} className={rotatingIndex === idx ? "animate-spin text-blue-600" : ""} />
+                                </button>
+
+                                {/* Apply Rotation Button */}
+                                {pendingRotations[idx] ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApplyRotation(idx)}
+                                    disabled={rotatingIndex === idx || loading}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] uppercase tracking-wider font-semibold px-2 py-1.5 shadow-md rounded-sm transition-all cursor-pointer"
+                                    title="Save physical rotation now"
+                                  >
+                                    {rotatingIndex === idx ? "Applying..." : "Apply"}
+                                  </button>
+                                ) : null}
+
+                                {idx > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => moveImage(idx, "up")}
+                                    title="Move Image Up"
+                                    className="bg-white/95 hover:bg-gray-100 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                                  >
+                                    <ChevronUp size={18} />
+                                  </button>
+                                )}
+                                {idx < images.length - 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => moveImage(idx, "down")}
+                                    title="Move Image Down"
+                                    className="bg-white/95 hover:bg-gray-100 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                                  >
+                                    <ChevronDown size={18} />
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(idx)}
+                                  title="Remove Image"
+                                  className="bg-white/95 hover:bg-red-50 hover:text-red-500 text-gray-700 p-2 shadow-md rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                                >
+                                  <X size={18} />
+                                </button>
+                              </div>
+                            </>
+                            ) : (
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                            >
+                              {uploading ? (
+                                <span className="text-[10px] tracking-[0.2em] uppercase">Uploading...</span>
+                              ) : (
+                                <>
+                                  <Upload size={24} className="mb-4" />
+                                  <span className="text-[10px] tracking-[0.2em] uppercase">Click to add hero image</span>
+                                </>
+                              )}
+                            </button>
+                    )}
+                          </div>
+                ))}
+
+                        {images.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="aspect-[3/4] w-full relative bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                          >
+                            {uploading ? (
+                              <span className="text-[10px] tracking-[0.2em] uppercase">Uploading...</span>
+                            ) : (
+                              <>
+                                <Upload size={24} className="mb-4" />
+                                <span className="text-[10px] tracking-[0.2em] uppercase">Add another image</span>
+                              </>
+                            )}
+                          </button>
+                        )}
+
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleImageUpload}
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                        />
+
+                        <div className="mt-4 flex flex-col gap-2 bg-gray-50 p-4 border border-gray-200 rounded-sm">
+                          <label className="text-[11px] uppercase tracking-widest text-gray-500 font-medium">Main Images Variant Name</label>
+                          <input
+                            type="text"
+                            value={mainColorName}
+                            onChange={(e) => setMainColorName(e.target.value)}
+                            placeholder="e.g. Original, Ivory, Default"
+                            className="w-full text-sm font-medium text-gray-900 border border-gray-300 focus:border-gray-800 outline-none p-2 rounded-sm bg-white"
+                          />
+                          <p className="text-[10px] text-gray-400 italic">This name will be displayed for the main images color swatch on the product page.</p>
+                        </div>
+                      </div>
+                    </div>
+
+            {/* Right: Product Details */ }
+                    < div className = "w-full lg:w-5/12 py-4" >
 
               <input
                 type="text"
@@ -735,25 +933,25 @@ export default function NewProductPage() {
                 />
               </div>
 
-              {/* Sizes Selection & Fit Guide Editor */}
-              <div className="mb-6">
-                <div className="flex justify-between items-end mb-4">
-                  <div className="flex gap-2">
-                    {["XS", "S", "M", "L", "XL", "XXL"].map(size => (
-                      <button
-                        type="button"
-                        key={size}
-                        onClick={() => toggleSize(size)}
-                        className={`w-9 h-9 flex items-center justify-center text-xs border transition-colors ${sizes.includes(size) ? 'border-[#79A7D3] bg-[#79A7D3] text-white font-medium shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              {/* Sizes Selection & Fit Guide Editor */ }
+                    < div className = "mb-6" >
+                    <div className="flex justify-between items-end mb-4">
+                      <div className="flex gap-2">
+                        {["XS", "S", "M", "L", "XL", "XXL"].map(size => (
+                          <button
+                            type="button"
+                            key={size}
+                            onClick={() => toggleSize(size)}
+                            className={`w-9 h-9 flex items-center justify-center text-xs border transition-colors ${sizes.includes(size) ? 'border-[#79A7D3] bg-[#79A7D3] text-white font-medium shadow-sm' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                {/* Fit Guide Slider Content */}
-                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                {/* Fit Guide Slider Content */ }
+                    < div className = "bg-gray-50 p-4 rounded-md border border-gray-200" >
                   <p className="text-[11px] uppercase tracking-widest text-gray-500 mb-3 font-medium">Fit Guide Slider Content</p>
 
                   <div className="flex flex-col gap-4">
@@ -848,6 +1046,15 @@ export default function NewProductPage() {
                                       <ChevronLeft size={14} />
                                     </button>
                                   ) : <span className="w-3" />}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRotateVariantImage(colorIdx, imgIdx)}
+                                    disabled={variantRotatingKey === `${colorIdx}-${imgIdx}`}
+                                    className="text-white hover:text-blue-300 p-0.5 cursor-pointer"
+                                    title="Rotate 90° Clockwise"
+                                  >
+                                    <RotateCw size={12} className={variantRotatingKey === `${colorIdx}-${imgIdx}` ? "animate-spin text-blue-300" : ""} />
+                                  </button>
                                   <button
                                     type="button"
                                     onClick={() => removeColorImage(colorIdx, imgIdx)}

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireUser } from "@/lib/authHelpers";
 import { generateOrderNumber } from "@/lib/orderHelpers";
-import { calculateCuratedItemPrice } from "@/lib/curatorPricing";
+import { calculateCuratedItemPrice, resolveCuratedItem } from "@/lib/curatorPricing";
 import { z } from "zod";
 
 const createOrderSchema = z.object({
@@ -130,6 +130,8 @@ export async function POST(req: NextRequest) {
       let finalImage = item.image || null;
       let dbProductId: string | null = null;
 
+      let finalCuratedDetails = item.curatedDetails || null;
+
       if (item.productId && !item.productId.startsWith("curated-")) {
         const dbProduct = productMap.get(item.productId);
         if (!dbProduct) {
@@ -143,8 +145,10 @@ export async function POST(req: NextRequest) {
         finalImage = dbProduct.images?.[0] || finalImage;
         dbProductId = dbProduct.id;
       } else {
-        // Curated bespoke piece
-        finalPrice = await calculateCuratedItemPrice(item.curatedDetails);
+        // Curated bespoke piece - compute price & freeze snapshot strictly server-side
+        const { verifiedPrice, frozenDetails } = await resolveCuratedItem(item.curatedDetails);
+        finalPrice = verifiedPrice;
+        finalCuratedDetails = frozenDetails;
       }
 
       totalAmount += finalPrice * item.quantity;
@@ -157,7 +161,7 @@ export async function POST(req: NextRequest) {
         size: item.size || null,
         silhouette: item.silhouette || null,
         color: item.color || null,
-        curatedDetails: item.curatedDetails || null,
+        curatedDetails: finalCuratedDetails,
       });
     }
 

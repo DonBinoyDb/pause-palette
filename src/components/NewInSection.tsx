@@ -47,7 +47,7 @@ export default function NewInSection({
 
     const { scrollLeft, scrollWidth, clientWidth } = el;
     const maxScroll = scrollWidth - clientWidth;
-    
+
     setHasOverflow(maxScroll > 10);
     setCanScrollLeft(scrollLeft > 5);
     setCanScrollRight(scrollLeft < maxScroll - 5);
@@ -113,7 +113,7 @@ export default function NewInSection({
   return (
     <section className="bg-white pt-8 md:pt-14 pb-16 md:pb-24 border-t border-gray-100 overflow-hidden">
       <div className="w-full max-w-[1700px] mx-auto px-4 md:px-8 lg:px-16">
-        
+
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-10 gap-4">
           <div>
@@ -123,7 +123,7 @@ export default function NewInSection({
               </span>
             )}
             {title?.trim() && (
-              <h2 
+              <h2
                 className="text-2xl md:text-3xl lg:text-4xl text-gray-900 font-normal leading-tight mt-1"
                 style={{ fontFamily: "'EB Garamond', Garamond, serif" }}
               >
@@ -136,7 +136,7 @@ export default function NewInSection({
               </p>
             )}
           </div>
-          
+
           {/* Header Controls: Slide Arrows & Explore All Link */}
           <div className="flex items-center gap-4 self-end md:self-auto">
             {/* Slide Arrows (visible when more items than screen width) */}
@@ -165,7 +165,7 @@ export default function NewInSection({
 
             {hasOverflow && <div className="h-4 w-px bg-gray-200 hidden md:block" />}
 
-            <Link 
+            <Link
               href={targetLink}
               className="hidden md:inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors font-semibold group"
             >
@@ -192,6 +192,7 @@ export default function NewInSection({
               const mainImage = product.images?.[0] || "https://images.unsplash.com/photo-1571513722275-4b41940f54b8?q=80&w=1974&auto=format&fit=crop";
               const secondaryImage = product.images?.[1];
               const categoryName = product.collection?.name || "Pause Palette";
+              const isLandscapeOrContain = (product as any).imageFit === "contain" || (product as any).imageFit === "landscape";
 
               return (
                 <Link
@@ -209,9 +210,9 @@ export default function NewInSection({
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=2070&auto=format&fit=crop";
                       }}
-                      className={`w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+                      className={`w-full h-full transition-all duration-700 ease-out group-hover:scale-105 ${
                         secondaryImage ? "group-hover:opacity-0" : ""
-                      }`}
+                      } ${isLandscapeOrContain ? "object-contain bg-[#FBFBFA]" : "object-cover"}`}
                     />
 
                     {/* Secondary Image for smooth crossfade/slide hover */}
@@ -238,17 +239,15 @@ export default function NewInSection({
                           image: mainImage,
                         });
                       }}
-                      className={`absolute top-3 right-3 z-10 w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm transition-all duration-300 shadow-2xs ${
-                        isSaved(product.id)
+                      className={`absolute top-3 right-3 z-10 w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-sm transition-all duration-300 shadow-2xs ${isSaved(product.id)
                           ? "text-red-500 opacity-100"
                           : "text-gray-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:text-gray-900 hover:scale-110"
-                      }`}
+                        }`}
                       aria-label="Save to Wishlist"
                     >
                       <Heart
-                        className={`w-4 h-4 ${
-                          isSaved(product.id) ? "fill-current text-red-500" : "stroke-[1.5]"
-                        }`}
+                        className={`w-4 h-4 ${isSaved(product.id) ? "fill-current text-red-500" : "stroke-[1.5]"
+                          }`}
                       />
                     </button>
                   </div>
@@ -281,7 +280,7 @@ export default function NewInSection({
                   style={{ width: `${Math.max(20, scrollProgress)}%` }}
                 />
               </div>
-              
+
               <span className="text-[10px] tracking-[0.15em] uppercase text-gray-400 font-sans">
                 Slide to explore ({products.length})
               </span>
@@ -291,7 +290,7 @@ export default function NewInSection({
 
         {/* Mobile View All Button */}
         <div className="mt-8 text-center md:hidden">
-          <Link 
+          <Link
             href={targetLink}
             className="inline-flex items-center gap-2 text-[11px] tracking-[0.2em] uppercase text-gray-700 hover:text-black font-semibold border border-gray-200 px-6 py-3 rounded-full hover:border-gray-900 transition-colors"
           >
