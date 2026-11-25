@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, ArrowRight, Eye, Play } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { X, ArrowRight, Eye, Play, ChevronLeft, ChevronRight } from "lucide-react";
 
 type Journal = {
   id: string;
@@ -19,6 +19,10 @@ const isVideoUrl = (url?: string | null) => {
 export default function JournalGridClient({ journals }: { journals: Journal[] }) {
   const [activeTab, setActiveTab] = useState<"all" | "photos" | "videos">("all");
   const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   // Filter journals based on selected tab
   const filteredJournals = journals.filter((j) => {
@@ -31,13 +35,76 @@ export default function JournalGridClient({ journals }: { journals: Journal[] })
   // If filtered is empty for videos, fallback gracefully to all journals
   const displayItems = filteredJournals.length > 0 ? filteredJournals : journals;
 
-  // Duplicate items to ensure seamless infinite ribbon loop with translateX(-50%)
-  // Base set repeats enough times to fill screens, then doubled to create 2 identical halves [baseSet, baseSet]
-  const baseMultiples = Math.max(1, Math.ceil(6 / (displayItems.length || 1)));
-  const baseSet = Array.from({ length: baseMultiples }).flatMap(() => displayItems);
-  const ribbonItems = [...baseSet, ...baseSet];
+  // Calculate card width + gap for accurate 1-by-1 sliding
+  const getStep = useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return 320;
+    const card = el.firstElementChild as HTMLElement | null;
+    const cardWidth = card?.offsetWidth || 300;
+    // Gap: 16px on mobile, 24px on md+
+    const gap = window.innerWidth >= 768 ? 24 : 16;
+    return cardWidth + gap;
+  }, []);
 
-  // Close on ESC key and lock body scroll when modal is open
+  const handlePrev = useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const step = getStep();
+    const newScroll = Math.max(0, el.scrollLeft - step);
+    el.scrollTo({ left: newScroll, behavior: "smooth" });
+  }, [getStep]);
+
+  const handleNext = useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const step = getStep();
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (el.scrollLeft >= maxScroll - 15) {
+      // Loop back to start
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: step, behavior: "smooth" });
+    }
+  }, [getStep]);
+
+  const scrollToIndex = (index: number) => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const step = getStep();
+    el.scrollTo({ left: index * step, behavior: "smooth" });
+    setActiveIndex(index);
+  };
+
+  // Sync active index based on scroll position
+  const handleScroll = useCallback(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const step = getStep();
+    if (step <= 0) return;
+    const index = Math.round(el.scrollLeft / step);
+    setActiveIndex(Math.min(Math.max(0, index), displayItems.length - 1));
+  }, [displayItems.length, getStep]);
+
+  // Auto-slide: Advances one by one every 4 seconds, pauses on hover/touch
+  useEffect(() => {
+    if (isPaused || displayItems.length <= 1) return;
+
+    const timer = setInterval(() => {
+      handleNext();
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [isPaused, displayItems.length, handleNext]);
+
+  // Reset scroll and active index when tab changes
+  useEffect(() => {
+    setActiveIndex(0);
+    if (sliderRef.current) {
+      sliderRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    }
+  }, [activeTab]);
+
+  // Close modal on ESC key and lock body scroll when open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -60,20 +127,20 @@ export default function JournalGridClient({ journals }: { journals: Journal[] })
 
   return (
     <>
-      {/* Category Tabs */}
-      <div className="flex items-center justify-between gap-8 mb-10 pb-2 border-b border-gray-100">
-        <div className="flex gap-8 md:gap-12 text-[12px] md:text-[13px] tracking-[0.08em] font-serif uppercase">
+      {/* Category Tabs & Header Controls */}
+      <div className="flex items-center justify-between gap-4 mb-8 pb-3 border-b border-gray-100">
+        <div className="flex gap-6 sm:gap-8 md:gap-12 text-[12px] md:text-[13px] tracking-[0.08em] font-serif uppercase">
           <button
             type="button"
             suppressHydrationWarning
-            onClick={() => setActiveTab("videos")}
+            onClick={() => setActiveTab("all")}
             className={`pb-1 transition-colors cursor-pointer ${
-              activeTab === "videos"
+              activeTab === "all"
                 ? "text-[#79A7D3] border-b-2 border-[#79A7D3] font-medium"
                 : "text-gray-400 hover:text-gray-700"
             }`}
           >
-            Videos
+            All
           </button>
           <button
             type="button"
@@ -90,43 +157,61 @@ export default function JournalGridClient({ journals }: { journals: Journal[] })
           <button
             type="button"
             suppressHydrationWarning
-            onClick={() => setActiveTab("all")}
+            onClick={() => setActiveTab("videos")}
             className={`pb-1 transition-colors cursor-pointer ${
-              activeTab === "all"
+              activeTab === "videos"
                 ? "text-[#79A7D3] border-b-2 border-[#79A7D3] font-medium"
                 : "text-gray-400 hover:text-gray-700"
             }`}
           >
-            All
+            Videos
           </button>
         </div>
 
-        {/* Ribbon Movement Hint */}
-        <div className="hidden sm:flex items-center gap-2 text-[11px] text-gray-400 tracking-wider font-light italic">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#79A7D3] animate-pulse"></span>
-          <span>Hover to pause • Click story to open</span>
+        {/* Top Right Mini Arrow Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label="Previous story"
+            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:border-gray-400 transition-all cursor-pointer bg-white shadow-2xs hover:scale-105 active:scale-95"
+          >
+            <ChevronLeft size={14} />
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label="Next story"
+            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:border-gray-400 transition-all cursor-pointer bg-white shadow-2xs hover:scale-105 active:scale-95"
+          >
+            <ChevronRight size={14} />
+          </button>
         </div>
       </div>
 
-      {/* Running Ribbon Container */}
-      <div className="relative w-full overflow-hidden mb-24 py-4 select-none group">
-        
-        {/* Soft edge gradients for editorial aesthetic */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 md:w-20 bg-gradient-to-r from-white via-white/80 to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 md:w-20 bg-gradient-to-l from-white via-white/80 to-transparent z-10" />
-
+      {/* Discrete 1-by-1 Slider Container (Clean edges, NO fade blur overlays) */}
+      <div
+        className="relative w-full mb-8 select-none"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+      >
         {displayItems.length === 0 ? (
           <div className="py-24 text-center text-gray-400 text-sm italic font-garamond">
-            No journal entries found. Check back soon.
+            No journal entries found in this category.
           </div>
         ) : (
-          /* Marquee Ribbon Track */
-          <div className="animate-ribbon flex gap-6 md:gap-8 items-start py-2">
-            {ribbonItems.map((journal, idx) => (
+          <div
+            ref={sliderRef}
+            onScroll={handleScroll}
+            className="flex gap-4 md:gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 px-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {displayItems.map((journal) => (
               <div
-                key={`${journal.id}-${idx}`}
+                key={journal.id}
                 onClick={() => setSelectedJournal(journal)}
-                className="w-[260px] sm:w-[300px] md:w-[340px] shrink-0 cursor-pointer group/card flex flex-col transition-all duration-300"
+                className="w-[82vw] sm:w-[calc((100%-16px)/2)] lg:w-[calc((100%-48px)/3)] shrink-0 snap-start cursor-pointer group/card flex flex-col transition-all duration-300"
               >
                 {/* Image / Video Card Container */}
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-100 mb-3.5 rounded-xs border border-gray-100 shadow-2xs group-hover/card:shadow-md transition-all">
@@ -184,6 +269,49 @@ export default function JournalGridClient({ journals }: { journals: Journal[] })
           </div>
         )}
       </div>
+
+      {/* Indicator Dots & Centered Navigation Controls */}
+      {displayItems.length > 1 && (
+        <div className="flex items-center justify-center gap-4 mb-20">
+          <button
+            type="button"
+            onClick={handlePrev}
+            aria-label="Previous slide"
+            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:border-gray-400 transition-all cursor-pointer bg-white shadow-2xs hover:scale-105 active:scale-95"
+          >
+            <ChevronLeft size={14} />
+          </button>
+
+          {/* Indicator Dots */}
+          <div className="flex gap-2 items-center px-1">
+            {displayItems.map((_, idx) => {
+              const isSelected = activeIndex === idx;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => scrollToIndex(idx)}
+                  aria-label={`Go to item ${idx + 1}`}
+                  className={`rounded-full transition-all cursor-pointer ${
+                    isSelected
+                      ? "w-6 h-1.5 bg-[#79A7D3]"
+                      : "w-1.5 h-1.5 bg-gray-300 hover:bg-gray-400"
+                  }`}
+                />
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            aria-label="Next slide"
+            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:border-gray-400 transition-all cursor-pointer bg-white shadow-2xs hover:scale-105 active:scale-95"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Pop-Up Modal */}
       {selectedJournal && (
