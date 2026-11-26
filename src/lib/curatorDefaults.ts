@@ -132,7 +132,7 @@ export const DEFAULT_MODES = {
   embroidery: {
     enabled: true,
     title: "THEME-BASED EMBROIDERY",
-    description: "Your idea, our illustration",
+    description: "Choose your silhouette, size and available linen colour, then share the theme you'd like us to explore and interpret through embroidery.",
     icon: "/images/needle.png",
     startingPrice: 2000,
     placeholder: "Tell us about your theme, idea or inspiration...",

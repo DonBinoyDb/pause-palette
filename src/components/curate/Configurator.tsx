@@ -375,7 +375,7 @@ export default function Configurator() {
             {modes.embroidery?.title || "THEME-BASED EMBROIDERY"}
           </h2>
           <p className="text-[14.5px] md:text-[15.5px] text-gray-600 font-garamond leading-relaxed">
-            {modes.embroidery?.description || "Choose yarn to breathe into our available linen colour tone share the theme you'd like us to explore and interpret through embroidery."}
+            {modes.embroidery?.description || "Choose your silhouette, size and available linen colour, then share the theme you'd like us to explore and interpret through embroidery."}
           </p>
         </button>
 
