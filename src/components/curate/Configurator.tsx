@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useShop } from "@/context/ShopContext";
-import { DEFAULT_MODES, DEFAULT_PRICING, DEFAULT_SILHOUETTES, normalizeLinenColors, LinenColorSwatch } from "@/lib/curatorDefaults";
+import {
+  DEFAULT_MODES,
+  DEFAULT_PRICING,
+  DEFAULT_SILHOUETTES,
+  normalizeLinenColors,
+  LinenColorSwatch,
+  getSilhouetteMeasurements,
+  getSilhouetteFitDescription,
+} from "@/lib/curatorDefaults";
 
 type Mode = "illustration" | "embroidery" | "solid";
 type Audience = "men" | "women";
@@ -72,6 +80,7 @@ export default function Configurator() {
   const [themeText, setThemeText] = useState("");
   const [themeSubmitted, setThemeSubmitted] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [inspectSilId, setInspectSilId] = useState<string>("");
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [inspectColorId, setInspectColorId] = useState<string | null>(null);
 
@@ -599,7 +608,10 @@ export default function Configurator() {
             </div>
             <button
               type="button"
-              onClick={() => setShowSizeGuide(true)}
+              onClick={() => {
+                setInspectSilId(activeSilhouette.id);
+                setShowSizeGuide(true);
+              }}
               className="text-[14px] text-gray-500 underline font-garamond hover:text-gray-900 transition-colors cursor-pointer"
             >
               Size guide
@@ -625,21 +637,38 @@ export default function Configurator() {
                   setInspectColorId(activeColor.id);
                   setShowMaterialModal(true);
                 }}
-                className="text-[13.5px] md:text-[14px] text-gray-500 underline font-garamond hover:text-gray-900 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[13.5px] md:text-[14px] text-gray-500 hover:text-gray-900 transition-colors cursor-pointer group"
               >
-                Material &amp; fabric details
+                <svg className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-800 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span className="underline font-garamond">Material &amp; fabric details</span>
               </button>
             </div>
-            <div className="flex flex-wrap gap-6 items-center pt-1">
+            <div className="flex flex-wrap gap-x-3 gap-y-5 items-start pt-1">
               {(filteredLinenColors.length ? filteredLinenColors : linenColors).map((color) => {
                 const isSelected = selectedColorId ? selectedColorId === color.id : activeColor.id === color.id;
                 return (
-                  <div key={color.id} className="flex flex-col items-center gap-1.5 group relative">
+                  <div key={color.id} className="w-[78px] sm:w-[84px] flex flex-col items-center gap-1 group relative">
                     <button
                       type="button"
-                      onClick={() => setSelectedColorId(color.id)}
-                      className="flex flex-col items-center gap-2 cursor-pointer focus:outline-none"
-                      title={color.adjustment > 0 ? `${color.name} (+₹${color.adjustment})` : color.name}
+                      onClick={() => {
+                        if (isSelected) {
+                          setInspectColorId(color.id);
+                          setShowMaterialModal(true);
+                        } else {
+                          setSelectedColorId(color.id);
+                        }
+                      }}
+                      className="flex flex-col items-center gap-1.5 cursor-pointer focus:outline-none"
+                      title={
+                        isSelected
+                          ? `Click to view ${color.name} fabric details`
+                          : color.adjustment > 0
+                          ? `${color.name} (+₹${color.adjustment})`
+                          : color.name
+                      }
                     >
                       <div
                         className={`w-11 h-11 md:w-12 md:h-12 rounded-full border overflow-hidden relative transition-all duration-200 ${
@@ -662,30 +691,37 @@ export default function Configurator() {
                             }}
                           />
                         )}
+                        {isSelected && (
+                          <div className="absolute inset-0 bg-black/15 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg className="w-3.5 h-3.5 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
-                      <span className={`text-[12.5px] md:text-[13px] font-garamond uppercase tracking-wider transition-colors ${
+                      <span className={`text-[12.5px] md:text-[13px] font-garamond uppercase tracking-wider text-center leading-tight transition-colors ${
                         isSelected ? "text-[#79A7D3] font-semibold" : "text-gray-700 font-medium"
                       }`}>
                         {color.name}
                       </span>
                     </button>
-            {/* Inspect Material Texture Trigger */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setInspectColorId(color.id);
-                setShowMaterialModal(true);
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-gray-400 hover:text-gray-900 underline font-garamond tracking-wider cursor-pointer -mt-1"
-              title={`Inspect ${color.name} fabric texture`}
-            >
-              Inspect
-            </button>
-          </div>
-        );
+                    {/* Direct Material Details Trigger */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setInspectColorId(color.id);
+                        setShowMaterialModal(true);
+                      }}
+                      className="text-[10px] text-gray-400 hover:text-gray-900 underline font-garamond tracking-wider cursor-pointer -mt-0.5 transition-colors"
+                      title={`Inspect ${color.name} fabric texture`}
+                    >
+                      View fabric
+                    </button>
+                  </div>
+                );
               })}
-      </div>
+            </div>
     </div>
   )
 }
@@ -821,56 +857,161 @@ export default function Configurator() {
 
       </div >
 
-  {/* Size Guide Modal */ }
-{
-  showSizeGuide && (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 md:p-8 shadow-2xl relative">
-        <button
-          onClick={() => setShowSizeGuide(false)}
-          className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 text-lg cursor-pointer"
+  {/* Dynamic Size & Fit Guide Modal */}
+  {showSizeGuide && (() => {
+    const currentSilList = filteredSilhouettes.length ? filteredSilhouettes : silhouettes;
+    const modalSil = currentSilList.find(
+      (s) => s.id === (inspectSilId || activeSilhouette.id)
+    ) || activeSilhouette;
+    const measurements = getSilhouetteMeasurements(modalSil);
+    const fitNotes = getSilhouetteFitDescription(modalSil);
+    const silActiveSizes = getActiveSilhouetteSizes(modalSil, pricing.sizeValues).map((s: any) => s.size);
+
+    return (
+      <div
+        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-all"
+        onClick={() => setShowSizeGuide(false)}
+      >
+        <div
+          className="bg-[#FAF9F7] border border-[#E8E6E1] rounded-2xl max-w-xl w-full p-6 md:p-8 shadow-2xl relative overflow-hidden text-gray-900 animate-in fade-in zoom-in-95 duration-200"
+          onClick={(e) => e.stopPropagation()}
         >
-          ✕
-        </button>
-        <h3 className="font-garamond text-xl font-medium tracking-wider uppercase text-gray-900 mb-2">
-          Size Guide (Inches)
-        </h3>
-        <p className="text-[14px] text-gray-500 font-garamond mb-6">
-          Our pieces feature a relaxed, comfortable silhouette. Refer to the garment dimensions below.
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[14px] font-garamond text-left border-collapse">
-            <thead>
-              <tr className="border-b border-gray-200 text-gray-400 uppercase tracking-wider">
-                <th className="py-2.5 pr-4">Size</th>
-                <th className="py-2.5 px-4">Chest</th>
-                <th className="py-2.5 px-4">Shoulder</th>
-                <th className="py-2.5 px-4">Length</th>
-                <th className="py-2.5 pl-4">Sleeve</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-gray-700">
-              <tr><td className="py-2.5 pr-4 font-semibold">XS</td><td className="py-2.5 px-4">38"</td><td className="py-2.5 px-4">17.5"</td><td className="py-2.5 px-4">27.5"</td><td className="py-2.5 pl-4">9"</td></tr>
-              <tr><td className="py-2.5 pr-4 font-semibold">S</td><td className="py-2.5 px-4">40"</td><td className="py-2.5 px-4">18"</td><td className="py-2.5 px-4">28"</td><td className="py-2.5 pl-4">9.5"</td></tr>
-              <tr><td className="py-2.5 pr-4 font-semibold">M</td><td className="py-2.5 px-4">42"</td><td className="py-2.5 px-4">18.5"</td><td className="py-2.5 px-4">28.5"</td><td className="py-2.5 pl-4">10"</td></tr>
-              <tr><td className="py-2.5 pr-4 font-semibold">L</td><td className="py-2.5 px-4">44"</td><td className="py-2.5 px-4">19"</td><td className="py-2.5 px-4">29"</td><td className="py-2.5 pl-4">10.5"</td></tr>
-              <tr><td className="py-2.5 pr-4 font-semibold">XL</td><td className="py-2.5 px-4">46"</td><td className="py-2.5 px-4">19.5"</td><td className="py-2.5 px-4">29.5"</td><td className="py-2.5 pl-4">11"</td></tr>
-              <tr><td className="py-2.5 pr-4 font-semibold">XXL</td><td className="py-2.5 px-4">48"</td><td className="py-2.5 px-4">20"</td><td className="py-2.5 px-4">30"</td><td className="py-2.5 pl-4">11.5"</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end">
+          {/* Close Button */}
           <button
+            type="button"
             onClick={() => setShowSizeGuide(false)}
-            className="px-6 py-2 rounded-full bg-gray-900 text-white text-[13.5px] font-garamond uppercase tracking-wider hover:bg-black transition-colors cursor-pointer"
+            className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 p-1 rounded-full hover:bg-gray-200/50 transition-colors cursor-pointer text-xl"
+            aria-label="Close"
           >
-            Close
+            ✕
           </button>
+
+          {/* Header */}
+          <div className="mb-5">
+            <span className="text-[11px] font-garamond tracking-[0.2em] uppercase text-[#79A7D3] font-medium block mb-1">
+              Garment Sizing &amp; Cut
+            </span>
+            <h3 className="font-garamond text-2xl md:text-3xl font-medium tracking-wide text-gray-900">
+              Size Guide — {modalSil.name}
+            </h3>
+            <p className="text-[14px] md:text-[14.5px] font-garamond italic text-gray-600 mt-1.5 leading-relaxed">
+              {fitNotes}
+            </p>
+          </div>
+
+          {/* Collar Cut Comparison Switcher */}
+          {currentSilList.length > 1 && (
+            <div className="mb-5 pb-4 border-b border-gray-200/80">
+              <span className="text-[11.5px] font-garamond uppercase tracking-wider text-gray-400 block mb-2">
+                Compare Collar Silhouettes
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {currentSilList.map((sil) => {
+                  const isTabActive = sil.id === modalSil.id;
+                  return (
+                    <button
+                      key={sil.id}
+                      type="button"
+                      onClick={() => setInspectSilId(sil.id)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-garamond tracking-wide transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isTabActive
+                          ? "bg-[#2C2B29] text-white shadow-xs font-medium"
+                          : "bg-white border border-gray-200 text-gray-700 hover:border-gray-400"
+                      }`}
+                    >
+                      <span>{sil.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Dimensions Table */}
+          <div className="overflow-x-auto rounded-lg border border-gray-200/70 bg-white">
+            <table className="w-full text-[13.5px] font-garamond text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50/80 border-b border-gray-200 text-gray-400 uppercase text-[11px] tracking-wider">
+                  <th className="py-2.5 px-4 font-medium">Size</th>
+                  <th className="py-2.5 px-4 font-medium">Chest</th>
+                  <th className="py-2.5 px-4 font-medium">Shoulder</th>
+                  <th className="py-2.5 px-4 font-medium">Length</th>
+                  <th className="py-2.5 px-4 font-medium">Sleeve</th>
+                  <th className="py-2.5 px-4 text-right font-medium">Availability</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-gray-700">
+                {measurements.map((row) => {
+                  const isSelectedSize = size === row.size;
+                  const isOffered = silActiveSizes.includes(row.size);
+                  return (
+                    <tr
+                      key={row.size}
+                      className={`transition-colors ${
+                        isSelectedSize
+                          ? "bg-[#79A7D3]/10 font-medium"
+                          : isOffered
+                          ? "hover:bg-gray-50/60"
+                          : "opacity-45 bg-gray-50/40"
+                      }`}
+                    >
+                      <td className="py-2.5 px-4 font-semibold text-gray-900 flex items-center gap-1.5">
+                        {row.size}
+                        {isSelectedSize && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#79A7D3]"></span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-4">{row.chest}</td>
+                      <td className="py-2.5 px-4">{row.shoulder}</td>
+                      <td className="py-2.5 px-4">{row.length}</td>
+                      <td className="py-2.5 px-4">{row.sleeve}</td>
+                      <td className="py-2.5 px-4 text-right">
+                        {isOffered ? (
+                          <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            Available
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-gray-400 italic">Not offered</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer notes & actions */}
+          <div className="mt-5 pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-gray-500 font-garamond">
+            <p className="italic leading-snug">
+              Measurements are in inches. Garments feature a relaxed fluid cut tailored in 100% Belgian flax.
+            </p>
+            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              {modalSil.id !== activeSilhouette.id && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedSilhouetteId(modalSil.id);
+                    setShowSizeGuide(false);
+                  }}
+                  className="px-4 py-1.5 rounded-full bg-[#2C2B29] text-white text-[12.5px] uppercase tracking-wider hover:bg-black transition-colors cursor-pointer shadow-xs font-medium"
+                >
+                  Choose {modalSil.name}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowSizeGuide(false)}
+                className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-700 text-[12.5px] uppercase tracking-wider hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
+    );
+  })()}
 
 {/* Material & Fabric Details Modal */ }
 {

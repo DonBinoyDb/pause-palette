@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import JournalGridClient from "./JournalGridClient";
+import BackButton from "@/components/BackButton";
 
 export default async function MakingJournalPage() {
   const journals = await prisma.journal.findMany({
@@ -15,6 +16,10 @@ export default async function MakingJournalPage() {
       <Navbar variant="dark" />
 
       <div className="pt-28 md:pt-32 pb-20 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
+
+        <div className="mb-4 pt-4">
+          <BackButton fallbackHref="/" />
+        </div>
 
         {/* Hero Section */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6 md:gap-8 relative">

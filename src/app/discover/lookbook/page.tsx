@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import LookbookGridClient from "./LookbookGridClient";
+import BackButton from "@/components/BackButton";
 
 export default async function LookbookPage() {
   const lookbookItems = await prisma.lookbookItem.findMany({
@@ -15,6 +16,10 @@ export default async function LookbookPage() {
       
       <div className="pt-32 pb-12 w-full">
         
+        <div className="px-4 md:px-8 lg:px-16 max-w-[1400px] mx-auto mb-4">
+          <BackButton fallbackHref="/" />
+        </div>
+
         {/* Header Section */}
         <div className="text-center mb-12 px-6 max-w-[1400px] mx-auto">
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">

@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import CollectionCarousel from "@/components/CollectionCarousel";
+import BackButton from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,10 @@ export default async function CollectionsPage() {
 
       {/* Page Content */}
       <div className="pt-28 md:pt-36 pb-20 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
+
+        <div className="mb-4 md:mb-6">
+          <BackButton fallbackHref="/" />
+        </div>
 
         {/* Header Section */}
         <header className="mb-16 md:mb-20 flex flex-col items-center text-center">

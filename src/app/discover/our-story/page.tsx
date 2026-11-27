@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 
 function LogoIllustration({ isMobile }: { isMobile?: boolean }) {
   return (
@@ -124,6 +125,10 @@ export default function OurStoryPage() {
         
         <div className="max-w-[1200px] mx-auto px-6 lg:px-12">
           
+          <div className="pt-4 mb-4">
+            <BackButton fallbackHref="/" />
+          </div>
+
           {/* MOBILE VIEW (lg:hidden) */}
           <div className="flex lg:hidden flex-col gap-12 pt-4">
             {/* 1. OUR STORY title at the top */}

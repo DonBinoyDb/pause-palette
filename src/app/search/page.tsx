@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
+import BackButton from "@/components/BackButton";
 import { Search as SearchIcon, X, ArrowRight, Loader2, Sparkles } from "lucide-react";
 
 interface ProductItem {
@@ -112,6 +113,10 @@ function SearchContent() {
   return (
     <div className="pt-36 md:pt-44 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px] flex-1 flex flex-col items-center">
       
+      <div className="w-full mb-4 md:mb-6 flex justify-start">
+        <BackButton fallbackHref="/" />
+      </div>
+
       {/* Search Input Box */}
       <div className="w-full max-w-3xl mb-12">
         <div className="relative border-b-2 border-gray-300 pb-2 focus-within:border-gray-800 transition-colors group">

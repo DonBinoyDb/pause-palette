@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
@@ -337,6 +338,10 @@ export default function ProfilePage() {
       <div className="pt-40 pb-32 px-6 sm:px-10 md:px-20 container mx-auto w-full max-w-[1400px] flex-1">
 
         {/* Header */}
+        <div className="mb-6">
+          <BackButton fallbackHref="/" />
+        </div>
+
         <div className="mb-16 md:mb-20 text-center">
           <h1 className="font-garamond text-3xl md:text-4xl text-gray-900 tracking-wide mb-3">
             My Account

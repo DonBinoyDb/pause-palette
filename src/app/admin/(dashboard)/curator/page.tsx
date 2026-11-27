@@ -4,7 +4,16 @@ import { useState, useEffect } from "react";
 import { Plus, X, Save, Palette, Shirt, Sparkles, Scissors, Check, Trash2, ShoppingBag, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
-import { DEFAULT_PRICING, DEFAULT_SILHOUETTES, DEFAULT_VISIBILITY, DEFAULT_MODES } from "@/lib/curatorDefaults";
+import {
+  DEFAULT_PRICING,
+  DEFAULT_SILHOUETTES,
+  DEFAULT_VISIBILITY,
+  DEFAULT_MODES,
+  DEFAULT_SILHOUETTE_MEASUREMENTS,
+  getSilhouetteMeasurements,
+  getSilhouetteFitDescription,
+  SilhouetteMeasurement,
+} from "@/lib/curatorDefaults";
 import StickySaveBar from "@/components/admin/StickySaveBar";
 
 type Tab = "illustration" | "embroidery" | "solid";
@@ -77,6 +86,8 @@ export default function CuratorSettingsPage() {
   const [editingSilBasePrice, setEditingSilBasePrice] = useState<number>(500);
   const [newCustomSizeName, setNewCustomSizeName] = useState("");
   const [newCustomSizePrice, setNewCustomSizePrice] = useState("500");
+  const [editingSilFitDesc, setEditingSilFitDesc] = useState<string>("");
+  const [editingSilMeasurements, setEditingSilMeasurements] = useState<SilhouetteMeasurement[]>([]);
 
   // Two tabs inside Original Illustration: Printed vs Embroidered
   const [illustrationTab, setIllustrationTab] = useState<"printed" | "embroidered">("printed");
@@ -603,6 +614,8 @@ export default function CuratorSettingsPage() {
     const currentSizes = getSilhouetteSizes(sil, settings.pricing.sizeValues);
     setEditingSilSizes(JSON.parse(JSON.stringify(currentSizes)));
     setEditingSilBasePrice(Number(sil.basePrice) || 500);
+    setEditingSilFitDesc(getSilhouetteFitDescription(sil));
+    setEditingSilMeasurements(JSON.parse(JSON.stringify(getSilhouetteMeasurements(sil))));
     setNewCustomSizeName("");
     setNewCustomSizePrice(String(sil.basePrice || 500));
     setIsSilSizesModalOpen(true);
@@ -624,6 +637,25 @@ export default function CuratorSettingsPage() {
     );
   };
 
+  const handleMeasurementChange = (sz: string, field: keyof SilhouetteMeasurement, value: string) => {
+    setEditingSilMeasurements((prev) => {
+      const exists = prev.some((m) => m.size === sz);
+      if (exists) {
+        return prev.map((item) =>
+          item.size === sz ? { ...item, [field]: value } : item
+        );
+      }
+      return [...prev, { size: sz, chest: "-", shoulder: "-", length: "-", sleeve: "-", [field]: value }];
+    });
+  };
+
+  const handleResetMeasurements = () => {
+    if (!editingSilId) return;
+    const defaults = DEFAULT_SILHOUETTE_MEASUREMENTS[editingSilId] || DEFAULT_SILHOUETTE_MEASUREMENTS["classic-point-collar"];
+    setEditingSilMeasurements(JSON.parse(JSON.stringify(defaults)));
+    toast.success("Reset measurements to tailoring standards.");
+  };
+
   const handleAddCustomSizeToSil = () => {
     if (!newCustomSizeName.trim()) {
       toast.error("Please enter a size name (e.g. S, XL, 3XL).");
@@ -639,12 +671,17 @@ export default function CuratorSettingsPage() {
       ...prev,
       { size: cleanName, price: priceNum, enabled: true },
     ]);
+    setEditingSilMeasurements((prev) => [
+      ...prev,
+      { size: cleanName, chest: "50\"", shoulder: "21\"", length: "30.5\"", sleeve: "12\"" }
+    ]);
     setNewCustomSizeName("");
     toast.success(`Added size ${cleanName} to silhouette.`);
   };
 
   const handleRemoveSizeFromSil = (sz: string) => {
     setEditingSilSizes((prev) => prev.filter((item) => item.size !== sz));
+    setEditingSilMeasurements((prev) => prev.filter((item) => item.size !== sz));
   };
 
   const handleSaveSilSizes = () => {
@@ -657,12 +694,15 @@ export default function CuratorSettingsPage() {
               ...s,
               basePrice: editingSilBasePrice,
               sizes: editingSilSizes,
+              fitDescription: editingSilFitDesc.trim(),
+              measurements: editingSilMeasurements,
             }
           : s
       ),
     }));
     setIsSilSizesModalOpen(false);
-    toast.success("Silhouette sizes updated! Remember to click 'Save Changes' to apply.");
+    setEditingSilId(null);
+    toast.success("Silhouette sizes & fit guide updated! Click 'Save Changes' to publish.");
   };
 
   const quickSetSilSizes = (preset: "all" | "sl" | "s_m_l_xl") => {
@@ -2207,18 +2247,18 @@ export default function CuratorSettingsPage() {
       {/* ========================================================================= */}
       {isSilSizesModalOpen && editingSilId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in-up">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-fade-in-up">
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-gray-200 flex items-start justify-between bg-gray-50/70">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#79A7D3]" />
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 font-garamond">
-                    Customize Silhouette Sizes & Pricing
+                    Customize Silhouette Sizes &amp; Fit Guide
                   </h3>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Configure available sizes and individual prices for{" "}
+                  Configure available sizes, prices, and tailor measurement chart for{" "}
                   <strong className="text-gray-800">
                     {settings.silhouettes.find((s: any) => s.id === editingSilId)?.name || "Silhouette"}
                   </strong>
@@ -2235,6 +2275,21 @@ export default function CuratorSettingsPage() {
 
             {/* Modal Body */}
             <div className="p-4 sm:p-5 overflow-y-auto space-y-4 sm:space-y-5 flex-1">
+              {/* Fit & Tailoring Notes */}
+              <div className="bg-gray-50/70 p-3.5 rounded-xl border border-gray-200 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-800">Fit &amp; Tailoring Notes</span>
+                  <span className="text-[11px] text-gray-400">Shown in customer Size Guide</span>
+                </div>
+                <textarea
+                  rows={2}
+                  value={editingSilFitDesc}
+                  onChange={(e) => setEditingSilFitDesc(e.target.value)}
+                  placeholder="e.g. Relaxed boxy cut with an open notch resort collar. Designed with a clean straight hem..."
+                  className="w-full text-xs p-2.5 bg-white border border-gray-300 rounded-lg outline-none focus:ring-1 focus:ring-[#79A7D3] text-gray-800"
+                />
+              </div>
+
               {/* Quick Presets */}
               <div className="bg-gray-50 p-3 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <span className="text-xs font-medium text-gray-600">Quick Size Presets:</span>
@@ -2245,7 +2300,7 @@ export default function CuratorSettingsPage() {
                     className="px-2.5 py-1 text-[11px] font-semibold bg-white border border-gray-300 rounded-md hover:bg-gray-100 text-gray-700 transition-colors cursor-pointer"
                     title="Enable only S and L sizes"
                   >
-                    Only S & L
+                    Only S &amp; L
                   </button>
                   <button
                     type="button"
@@ -2271,7 +2326,7 @@ export default function CuratorSettingsPage() {
                   <span>Available / Size</span>
                   <span>Price (₹)</span>
                 </div>
-                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                   {editingSilSizes.map((item) => (
                     <div
                       key={item.size}
@@ -2324,6 +2379,85 @@ export default function CuratorSettingsPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Measurement Guide (Inches) */}
+              <div className="bg-white p-3.5 rounded-xl border border-gray-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-semibold text-gray-800 block">Measurement Guide (Inches)</span>
+                    <span className="text-[11px] text-gray-500">Custom garment dimensions for this silhouette cut</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResetMeasurements}
+                    className="text-[11px] text-[#79A7D3] hover:text-[#5a86b0] underline font-medium cursor-pointer"
+                  >
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto rounded-lg border border-gray-200">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 uppercase text-[10px]">
+                      <tr>
+                        <th className="py-2 px-3">Size</th>
+                        <th className="py-2 px-3">Chest</th>
+                        <th className="py-2 px-3">Shoulder</th>
+                        <th className="py-2 px-3">Length</th>
+                        <th className="py-2 px-3">Sleeve</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {editingSilSizes.map((szItem) => {
+                        const m = editingSilMeasurements.find((item) => item.size === szItem.size) || {
+                          size: szItem.size,
+                          chest: "40\"",
+                          shoulder: "18\"",
+                          length: "28\"",
+                          sleeve: "10\"",
+                        };
+                        return (
+                          <tr key={szItem.size} className={szItem.enabled ? "bg-white" : "bg-gray-50/50 opacity-60"}>
+                            <td className="py-1.5 px-3 font-bold text-gray-900">{szItem.size}</td>
+                            <td className="py-1.5 px-2">
+                              <input
+                                type="text"
+                                value={m.chest}
+                                onChange={(e) => handleMeasurementChange(szItem.size, "chest", e.target.value)}
+                                className="w-16 px-1.5 py-1 text-xs border border-gray-200 rounded focus:border-[#79A7D3] outline-none"
+                              />
+                            </td>
+                            <td className="py-1.5 px-2">
+                              <input
+                                type="text"
+                                value={m.shoulder}
+                                onChange={(e) => handleMeasurementChange(szItem.size, "shoulder", e.target.value)}
+                                className="w-16 px-1.5 py-1 text-xs border border-gray-200 rounded focus:border-[#79A7D3] outline-none"
+                              />
+                            </td>
+                            <td className="py-1.5 px-2">
+                              <input
+                                type="text"
+                                value={m.length}
+                                onChange={(e) => handleMeasurementChange(szItem.size, "length", e.target.value)}
+                                className="w-16 px-1.5 py-1 text-xs border border-gray-200 rounded focus:border-[#79A7D3] outline-none"
+                              />
+                            </td>
+                            <td className="py-1.5 px-2">
+                              <input
+                                type="text"
+                                value={m.sleeve}
+                                onChange={(e) => handleMeasurementChange(szItem.size, "sleeve", e.target.value)}
+                                className="w-16 px-1.5 py-1 text-xs border border-gray-200 rounded focus:border-[#79A7D3] outline-none"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 

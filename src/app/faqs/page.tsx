@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 
@@ -110,6 +111,9 @@ export default function FAQPage() {
       <Navbar variant="dark" />
       
       <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-36 md:pt-48 pb-32 max-w-7xl">
+        <div className="mb-4">
+          <BackButton fallbackHref="/" />
+        </div>
         <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-12 md:mb-16 text-center">FAQ'S</h1>
         
         <div className="flex flex-col md:flex-row gap-16 md:gap-24 relative">
