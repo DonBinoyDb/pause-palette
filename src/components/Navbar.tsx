@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { User, Search, ShoppingCart, Bookmark, Menu, X, LayoutDashboard, Package } from "lucide-react";
+import { User, Search, ShoppingCart, Bookmark, Menu, X, LayoutDashboard, Package, ArrowLeft } from "lucide-react";
 import { useShop } from "@/context/ShopContext";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -20,7 +20,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   const { cart, saved } = useShop();
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
   const savedItemCount = saved.length;
-  
+
   const { data: session, status } = useSession();
   const userRole = (session?.user as any)?.role?.toLowerCase();
   const isAdmin = status === "authenticated" && userRole === "admin";
@@ -59,7 +59,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
   return (
     <header suppressHydrationWarning className={`${positionClass} top-0 left-0 w-full z-50 ${headerBg} ${textColor} pt-6 pb-4 transition-all duration-300`}>
       <div className="relative w-full max-w-[1700px] mx-auto px-4 md:px-8 lg:px-16 flex items-start justify-between">
-        
+
         {/* Left Section (Desktop Links / Mobile Hamburger) */}
         <div className="flex items-center z-30">
           {/* Mobile Hamburger Menu */}
@@ -71,7 +71,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
 
           {/* Left Links (Desktop Only) */}
           <nav className={`hidden md:flex items-center gap-5 lg:gap-8 xl:gap-10 mt-2 text-xs tracking-[0.16em] uppercase ${navOptionsColor}`}>
-            
+
             {/* Shop Dropdown */}
             <div
               className="relative py-2"
@@ -90,16 +90,15 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               >
                 Shop
               </button>
-              
+
               <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "shop" ? "visible" : "invisible pointer-events-none"}`}>
-                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[200px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  activeDropdown === "shop"
+                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[200px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${activeDropdown === "shop"
                     ? "opacity-100 translate-y-0 pointer-events-auto"
                     : "opacity-0 -translate-y-8 pointer-events-none"
-                }`}>
-                  
-                  <Link 
-                    href="/shop/new-in" 
+                  }`}>
+
+                  <Link
+                    href="/shop/new-in"
                     onClick={() => setActiveDropdown(null)}
                     className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                   >
@@ -107,8 +106,8 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
-                  <Link 
-                    href="/shop/all" 
+                  <Link
+                    href="/shop/all"
                     onClick={() => setActiveDropdown(null)}
                     className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                   >
@@ -116,17 +115,17 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
-                  <Link 
-                    href="/collections" 
+                  <Link
+                    href="/collections"
                     onClick={() => setActiveDropdown(null)}
                     className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                   >
                     <span className="whitespace-nowrap">Collections</span>
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
-                  
-                  <Link 
-                    href="/categories/men" 
+
+                  <Link
+                    href="/categories/men"
                     onClick={() => setActiveDropdown(null)}
                     className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                   >
@@ -134,8 +133,8 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     <span className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-300">→</span>
                   </Link>
 
-                  <Link 
-                    href="/categories/women" 
+                  <Link
+                    href="/categories/women"
                     onClick={() => setActiveDropdown(null)}
                     className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                   >
@@ -145,8 +144,8 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
 
                   <div className={`h-px w-full my-1 ${borderColor}`}></div>
 
-                  <Link 
-                    href="/curate-your-piece" 
+                  <Link
+                    href="/curate-your-piece"
                     onClick={() => setActiveDropdown(null)}
                     className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                   >
@@ -157,7 +156,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                 </div>
               </div>
             </div>
-            
+
             {/* Discover Dropdown */}
             <div
               className="relative py-2"
@@ -176,14 +175,13 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               >
                 Discover
               </button>
-              
+
               {/* Dropdown wrapper with padding to bridge the hover gap */}
               <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "discover" ? "visible" : "invisible pointer-events-none"}`}>
-                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[260px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  activeDropdown === "discover"
+                <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[260px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${activeDropdown === "discover"
                     ? "opacity-100 translate-y-0 pointer-events-auto"
                     : "opacity-0 -translate-y-8 pointer-events-none"
-                }`}>
+                  }`}>
                   {[
                     { name: "The Story Ahead", href: "/discover/story-ahead" },
                     { name: "Our Story", href: "/discover/our-story" },
@@ -191,9 +189,9 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                     { name: "Worn Stories", href: "/worn-stories" },
                     { name: "Lookbook", href: "/discover/lookbook" }
                   ].map((item) => (
-                    <Link 
-                      key={item.name} 
-                      href={item.href} 
+                    <Link
+                      key={item.name}
+                      href={item.href}
                       onClick={() => setActiveDropdown(null)}
                       className={`group/item flex items-center justify-between px-4 py-3 ${hoverBg} hover:backdrop-blur-2xl rounded-sm ${childTextColor} ${hoverTextColor} transition-all duration-300`}
                     >
@@ -208,8 +206,8 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             </div>
 
             {/* Curate Your Piece Link */}
-            <Link 
-              href="/curate-your-piece" 
+            <Link
+              href="/curate-your-piece"
               onClick={() => setActiveDropdown(null)}
               onMouseEnter={() => setActiveDropdown(null)}
               className="py-2 hover:opacity-70 transition-opacity whitespace-nowrap text-current"
@@ -234,7 +232,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             />
           </Link>
         </div>
-        
+
         {/* Right Icons */}
         <div className={`flex items-center gap-4 sm:gap-5 md:gap-6 mt-1 z-30 ${iconColor}`}>
           {isAdmin ? (
@@ -267,8 +265,8 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               isAdmin
                 ? "/admin/orders"
                 : status === "authenticated"
-                ? "/profile?tab=orders"
-                : "/login?callbackUrl=/profile?tab=orders"
+                  ? "/profile?tab=orders"
+                  : "/login?callbackUrl=/profile?tab=orders"
             }
             suppressHydrationWarning
             className="hover:opacity-70 transition-opacity"
@@ -298,95 +296,107 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             )}
           </Link>
         </div>
-        
+
       </div>
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 top-0 left-0 w-full h-screen bg-white text-gray-900 z-40 flex flex-col pt-24 px-8 overflow-y-auto">
-          
-          {/* Logo inside mobile menu */}
-          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center mb-10 hover:opacity-85 transition-opacity">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/Pause.png"
-              alt="Pause Palette"
-              width={140}
-              height={97}
-              className="w-auto h-13 md:h-16 object-contain"
-            />
-          </Link>
+          <div className="md:hidden fixed inset-0 top-0 left-0 w-full h-screen bg-white text-gray-900 z-50 flex flex-col pt-8 px-6 pb-12 overflow-y-auto">
 
-          <nav className="flex flex-col gap-8 text-sm">
-            <div>
-              <div className="text-[#4A7DAF] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">SHOP</div>
-              <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
-                <Link href="/shop/new-in" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">New In</Link>
-                <Link href="/shop/all" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">All</Link>
-                <Link href="/collections" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Collections</Link>
-                <Link href="/categories/men" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Men</Link>
-                <Link href="/categories/women" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Women</Link>
-                <Link href="/curate-your-piece" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-black transition-colors">Curate Your Piece</Link>
-              </div>
-            </div>
-
-            <div>
-              <div className="text-[#4A7DAF] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">DISCOVER</div>
-              <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
-                <Link href="/discover/story-ahead" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Story Ahead</Link>
-                <Link href="/discover/our-story" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Our Story</Link>
-                <Link href="/discover/making-journal" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Making Journal</Link>
-                <Link href="/worn-stories" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Worn Stories</Link>
-                <Link href="/discover/lookbook" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Lookbook</Link>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-6 border-t border-gray-100 text-[15px] text-gray-700 flex flex-col gap-3.5">
-              <Link
-                href={
-                  isAdmin
-                    ? "/admin/orders"
-                    : status === "authenticated"
-                    ? "/profile?tab=orders"
-                    : "/login?callbackUrl=/profile?tab=orders"
-                }
+            {/* Back button (Mobile view only) */}
+            <div className="mb-4 flex items-center">
+              <button
+                type="button"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 hover:text-black transition-colors font-medium text-gray-900"
+                aria-label="Close mobile menu"
+                className="group p-1 text-gray-500 hover:text-[#79A7D3] inline-flex items-center justify-center transition-colors duration-200 cursor-pointer"
               >
-                <Package className="w-4 h-4 text-[#4A7DAF]" />
-                <span>Order History</span>
-              </Link>
-              {status === "authenticated" ? (
-                isAdmin ? (
-                  <Link
-                    href="/admin/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 hover:text-black transition-colors font-medium text-gray-900"
-                  >
-                    <LayoutDashboard className="w-4 h-4 text-[#4A7DAF]" /> Admin Dashboard
-                  </Link>
+                <ArrowLeft size={22} strokeWidth={1.5} className="group-hover:-translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+
+            {/* Logo inside mobile menu */}
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-center mb-10 hover:opacity-85 transition-opacity">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/Pause.png"
+                alt="Pause Palette"
+                width={140}
+                height={97}
+                className="w-auto h-13 md:h-16 object-contain"
+              />
+            </Link>
+
+            <nav className="flex flex-col gap-8 text-sm">
+              <div>
+                <div className="text-[#4A7DAF] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">SHOP</div>
+                <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
+                  <Link href="/shop/new-in" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">New In</Link>
+                  <Link href="/shop/all" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">All</Link>
+                  <Link href="/collections" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Collections</Link>
+                  <Link href="/categories/men" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Men</Link>
+                  <Link href="/categories/women" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Women</Link>
+                  <Link href="/curate-your-piece" onClick={() => setMobileMenuOpen(false)} className="text-gray-700 hover:text-black transition-colors">Curate Your Piece</Link>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[#4A7DAF] mb-4 text-xs font-semibold tracking-[0.2em] uppercase">DISCOVER</div>
+                <div className="flex flex-col gap-3.5 pl-4 border-l border-gray-100 text-[15px] text-gray-700">
+                  <Link href="/discover/story-ahead" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Story Ahead</Link>
+                  <Link href="/discover/our-story" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Our Story</Link>
+                  <Link href="/discover/making-journal" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">The Making Journal</Link>
+                  <Link href="/worn-stories" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Worn Stories</Link>
+                  <Link href="/discover/lookbook" onClick={() => setMobileMenuOpen(false)} className="hover:text-black transition-colors">Lookbook</Link>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-6 border-t border-gray-100 text-[15px] text-gray-700 flex flex-col gap-3.5">
+                <Link
+                  href={
+                    isAdmin
+                      ? "/admin/orders"
+                      : status === "authenticated"
+                        ? "/profile?tab=orders"
+                        : "/login?callbackUrl=/profile?tab=orders"
+                  }
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 hover:text-black transition-colors font-medium text-gray-900"
+                >
+                  <Package className="w-4 h-4 text-[#4A7DAF]" />
+                  <span>Order History</span>
+                </Link>
+                {status === "authenticated" ? (
+                  isAdmin ? (
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2.5 hover:text-black transition-colors font-medium text-gray-900"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-[#4A7DAF]" /> Admin Dashboard
+                    </Link>
+                  ) : (
+                    <Link
+                      href="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-2 hover:text-black transition-colors"
+                    >
+                      <User className="w-4 h-4" /> My Account
+                    </Link>
+                  )
                 ) : (
                   <Link
-                    href="/profile"
+                    href="/login"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-2 hover:text-black transition-colors"
                   >
-                    <User className="w-4 h-4" /> My Account
+                    <User className="w-4 h-4" /> Sign In
                   </Link>
-                )
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 hover:text-black transition-colors"
-                >
-                  <User className="w-4 h-4" /> Sign In
-                </Link>
-              )}
-            </div>
-          </nav>
-        </div>
+                )}
+              </div>
+            </nav>
+          </div>
       )}
-    </header>
-  );
+        </header>
+      );
 }
