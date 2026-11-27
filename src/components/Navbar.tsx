@@ -73,7 +73,12 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
           <nav className={`hidden md:flex items-center gap-5 lg:gap-8 xl:gap-10 mt-2 text-xs tracking-[0.16em] uppercase ${navOptionsColor}`}>
             
             {/* Shop Dropdown */}
-            <div className="relative group py-2" data-nav-dropdown>
+            <div
+              className="relative py-2"
+              data-nav-dropdown
+              onMouseEnter={() => setActiveDropdown("shop")}
+              onMouseLeave={() => setActiveDropdown((prev) => (prev === "shop" ? null : prev))}
+            >
               <button
                 type="button"
                 onClick={(e) => {
@@ -86,11 +91,11 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
                 Shop
               </button>
               
-              <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "shop" ? "visible" : "invisible group-hover:visible"}`}>
+              <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "shop" ? "visible" : "invisible pointer-events-none"}`}>
                 <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[200px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   activeDropdown === "shop"
                     ? "opacity-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 -translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto"
+                    : "opacity-0 -translate-y-8 pointer-events-none"
                 }`}>
                   
                   <Link 
@@ -154,7 +159,12 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             </div>
             
             {/* Discover Dropdown */}
-            <div className="relative group py-2" data-nav-dropdown>
+            <div
+              className="relative py-2"
+              data-nav-dropdown
+              onMouseEnter={() => setActiveDropdown("discover")}
+              onMouseLeave={() => setActiveDropdown((prev) => (prev === "discover" ? null : prev))}
+            >
               <button
                 type="button"
                 onClick={(e) => {
@@ -168,11 +178,11 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
               </button>
               
               {/* Dropdown wrapper with padding to bridge the hover gap */}
-              <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "discover" ? "visible" : "invisible group-hover:visible"}`}>
+              <div className={`absolute top-[100%] left-0 pt-3 z-50 ${activeDropdown === "discover" ? "visible" : "invisible pointer-events-none"}`}>
                 <div className={`flex flex-col p-2 ${bgColor} backdrop-blur-md rounded-md border ${borderColor} min-w-[260px] shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                   activeDropdown === "discover"
                     ? "opacity-100 translate-y-0 pointer-events-auto"
-                    : "opacity-0 -translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto"
+                    : "opacity-0 -translate-y-8 pointer-events-none"
                 }`}>
                   {[
                     { name: "The Story Ahead", href: "/discover/story-ahead" },
@@ -201,6 +211,7 @@ export default function Navbar({ variant = "light" }: { variant?: "light" | "dar
             <Link 
               href="/curate-your-piece" 
               onClick={() => setActiveDropdown(null)}
+              onMouseEnter={() => setActiveDropdown(null)}
               className="py-2 hover:opacity-70 transition-opacity whitespace-nowrap text-current"
             >
               Curate Your Piece

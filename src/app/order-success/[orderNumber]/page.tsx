@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import {
   ArrowLeft,
   Printer,
@@ -80,6 +81,9 @@ export default function OrderReceiptPage() {
       </div>
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 pt-24 sm:pt-32 pb-20 print:p-0 print:pt-4 print:max-w-none">
+        <div className="mb-4 print:hidden">
+          <BackButton fallbackHref="/profile" />
+        </div>
         {loading ? (
           <div className="py-24 text-center">
             <div className="w-9 h-9 border-2 border-[#79A7D3] border-t-transparent rounded-full animate-spin mx-auto mb-4" />

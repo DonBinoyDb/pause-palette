@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Configurator from "@/components/curate/Configurator";
+import BackButton from "@/components/BackButton";
 
 export default function CurateYourPiecePage() {
   return (
@@ -9,6 +10,9 @@ export default function CurateYourPiecePage() {
       
       <main className="flex-1 pt-24 md:pt-32 pb-16 md:pb-24">
         <div className="max-w-5xl mx-auto px-6 flex flex-col items-center">
+          <div className="w-full mb-4 md:mb-6 flex justify-start">
+            <BackButton fallbackHref="/" />
+          </div>
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase text-center mb-3">
             Curate Your Piece
           </h1>

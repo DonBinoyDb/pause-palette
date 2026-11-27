@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WornStoriesLayout from "@/components/WornStoriesLayout";
+import BackButton from "@/components/BackButton";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,10 @@ export default async function WornStoriesPage() {
       {/* Main Container */}
       <div className="pt-28 md:pt-36 pb-24 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
         
+        <div className="mb-4 md:mb-6">
+          <BackButton fallbackHref="/" />
+        </div>
+
         {/* Header Section */}
         <header className="text-center mb-10 md:mb-14 max-w-2xl mx-auto">
           <h1 className="font-garamond text-[14px] text-gray-500 font-medium tracking-[0.1em] uppercase mb-3">

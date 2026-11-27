@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
 import ProductGrid from "@/components/ProductGrid";
+import BackButton from "@/components/BackButton";
 import { notFound } from "next/navigation";
 
 export default async function CategoryInnerPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -45,6 +46,10 @@ export default async function CategoryInnerPage({ params }: { params: Promise<{ 
       
       <div className="pt-24 md:pt-32 pb-8 md:pb-16 px-4 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
         
+        <div className="mb-4 md:mb-6">
+          <BackButton fallbackHref="/shop/all" />
+        </div>
+
         {/* Category Hero Section */}
         <div className="flex flex-col md:flex-row gap-6 md:gap-12 lg:gap-20 mb-12 md:mb-24">
           

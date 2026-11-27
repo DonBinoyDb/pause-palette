@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { useShop } from "@/context/ShopContext";
 import { X, ArrowRight, Heart } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +27,7 @@ export default function SavedPage() {
       router.push("/login");
       return;
     }
-    
+
     addToCart({
       productId: item.productId,
       name: item.name,
@@ -43,21 +44,26 @@ export default function SavedPage() {
   return (
     <main className="flex min-h-screen flex-col bg-white">
       <Navbar variant="dark" />
-      
+
       {/* Hero Header */}
       <div className="pt-28 md:pt-36 pb-8 md:pb-12 px-6 bg-white border-b border-gray-100">
-        <div className="container mx-auto w-full max-w-[1200px] text-center">
-          <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-2">
-            Your Saved Pieces
-          </h1>
-          <p className="font-garamond text-[14px] md:text-[15px] italic text-gray-400">
-            {saved.length} {saved.length === 1 ? 'piece saved for later' : 'pieces saved for later'}.
-          </p>
+        <div className="container mx-auto w-full max-w-[1200px]">
+          <div className="mb-4">
+            <BackButton fallbackHref="/shop/all" />
+          </div>
+          <div className="text-center">
+            <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-2">
+              Your Saved Pieces
+            </h1>
+            <p className="font-garamond text-[14px] md:text-[15px] italic text-gray-400">
+              {saved.length} {saved.length === 1 ? 'piece saved for later' : 'pieces saved for later'}.
+            </p>
+          </div>
         </div>
       </div>
-      
+
       <div className="py-12 md:py-16 px-4 md:px-8 lg:px-16 container mx-auto w-full max-w-[1200px] flex-1">
-        
+
         {saved.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-6 text-center max-w-lg mx-auto">
             <div className="w-14 h-14 rounded-full bg-[#F4F8FB] border border-[#79A7D3]/20 flex items-center justify-center text-[#79A7D3] mb-5 shadow-2xs">
@@ -70,14 +76,14 @@ export default function SavedPage() {
               Explore our latest collections and save pieces you love to revisit or purchase anytime.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              <Link 
+              <Link
                 href="/shop/new-in"
                 className="w-full sm:w-auto bg-[#79A7D3] hover:bg-[#6895C2] text-white font-garamond uppercase tracking-widest text-[13px] md:text-[13.5px] py-3.5 px-8 rounded-sm shadow-xs transition-colors flex items-center justify-center gap-2 font-medium cursor-pointer"
               >
                 <span>Discover New In</span>
                 <ArrowRight size={14} />
               </Link>
-              <Link 
+              <Link
                 href="/collections"
                 className="w-full sm:w-auto border border-gray-300 hover:border-gray-900 text-gray-700 hover:text-gray-900 bg-white font-garamond uppercase tracking-widest text-[13px] md:text-[13.5px] py-3.5 px-8 rounded-sm transition-colors flex items-center justify-center font-medium cursor-pointer"
               >
@@ -89,26 +95,26 @@ export default function SavedPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-12">
             {saved.map((item) => (
               <div key={item.productId} className="flex flex-col group relative bg-white border border-gray-100/90 rounded-xs p-3 hover:shadow-sm transition-all duration-300">
-                
+
                 {/* Remove Button */}
-                <button 
+                <button
                   onClick={() => toggleSaved(item)}
                   className="absolute top-5 right-5 z-10 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-colors opacity-80 md:opacity-0 md:group-hover:opacity-100 shadow-2xs cursor-pointer"
                   title="Remove from saved"
                 >
                   <X size={13} />
                 </button>
-                
+
                 {/* Image */}
                 <Link href={`/product/${item.productId}`} className="w-full aspect-[3/4] bg-[#F7F6F4] overflow-hidden relative block mb-3 rounded-2xs">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                 </Link>
-                
+
                 {/* Details */}
                 <div className="flex flex-col flex-1">
                   <div className="flex justify-between items-start gap-2 mb-1">
@@ -121,20 +127,19 @@ export default function SavedPage() {
                       ₹{item.price.toLocaleString("en-IN")}
                     </p>
                   </div>
-                  
+
                   <p className="text-[12px] md:text-[13px] text-gray-400 font-garamond italic mb-3.5">
                     Signature fit
                   </p>
-                  
+
                   {/* Action */}
                   <div className="mt-auto pt-1">
-                    <button 
+                    <button
                       onClick={() => handleAddToCart(item)}
-                      className={`w-full border font-garamond tracking-widest text-[12px] md:text-[12.5px] uppercase py-2.5 transition-all duration-200 cursor-pointer rounded-xs shadow-2xs font-medium ${
-                        addingId === item.productId 
-                          ? 'border-green-600 bg-green-50 text-green-700' 
-                          : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3]'
-                      }`}
+                      className={`w-full border font-garamond tracking-widest text-[12px] md:text-[12.5px] uppercase py-2.5 transition-all duration-200 cursor-pointer rounded-xs shadow-2xs font-medium ${addingId === item.productId
+                        ? 'border-green-600 bg-green-50 text-green-700'
+                        : 'border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3]'
+                        }`}
                     >
                       {addingId === item.productId ? 'Added to Cart ✓' : 'Add to Cart'}
                     </button>
@@ -145,7 +150,7 @@ export default function SavedPage() {
           </div>
         )}
       </div>
-      
+
       <Footer />
     </main>
   );

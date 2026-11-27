@@ -39,7 +39,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     categories: product.categories || [],
     category: categoryDisplay,
     hasSilhouette: product.hasSilhouette,
-    fits: (product.fits as {name: string, iconUrl: string}[]) || [],
+    fits: (product.fits as Array<{
+      name: string;
+      iconUrl: string;
+      image?: string;
+      description?: string;
+      fitGuideDescription?: string;
+      fitGuideImage?: string;
+    }>) || [],
     accordions: (product.accordions as {title: string, content: string}[]) || [],
     gender: product.gender,
     sizes: product.sizes,

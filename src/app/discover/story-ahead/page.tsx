@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 
 export default function StoryAheadPage() {
   return (
@@ -8,6 +9,9 @@ export default function StoryAheadPage() {
       <Navbar variant="dark" />
       
       <div className="pt-32 pb-24 px-6 md:px-12 lg:px-24 container mx-auto w-full max-w-[1400px]">
+        <div className="mb-6">
+          <BackButton fallbackHref="/" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-y-24 gap-x-12 lg:gap-x-24 items-start">
           
           {/* --- Section 1: Canvas & Palette --- */}

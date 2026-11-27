@@ -1,8 +1,45 @@
+export type SilhouetteMeasurement = {
+  size: string;
+  chest: string;
+  shoulder: string;
+  length: string;
+  sleeve: string;
+};
+
+export const DEFAULT_SILHOUETTE_MEASUREMENTS: Record<string, SilhouetteMeasurement[]> = {
+  "classic-point-collar": [
+    { size: "XS", chest: "38\"", shoulder: "17.5\"", length: "27.5\"", sleeve: "9\"" },
+    { size: "S", chest: "40\"", shoulder: "18\"", length: "28\"", sleeve: "9.5\"" },
+    { size: "M", chest: "42\"", shoulder: "18.5\"", length: "28.5\"", sleeve: "10\"" },
+    { size: "L", chest: "44\"", shoulder: "19\"", length: "29\"", sleeve: "10.5\"" },
+    { size: "XL", chest: "46\"", shoulder: "19.5\"", length: "29.5\"", sleeve: "11\"" },
+    { size: "XXL", chest: "48\"", shoulder: "20\"", length: "30\"", sleeve: "11.5\"" },
+  ],
+  "cuban-collar": [
+    { size: "XS", chest: "39\"", shoulder: "18\"", length: "26.5\"", sleeve: "9\"" },
+    { size: "S", chest: "41\"", shoulder: "18.5\"", length: "27\"", sleeve: "9.5\"" },
+    { size: "M", chest: "43\"", shoulder: "19\"", length: "27.5\"", sleeve: "10\"" },
+    { size: "L", chest: "45\"", shoulder: "19.5\"", length: "28\"", sleeve: "10.5\"" },
+    { size: "XL", chest: "47\"", shoulder: "20\"", length: "28.5\"", sleeve: "11\"" },
+    { size: "XXL", chest: "49\"", shoulder: "20.5\"", length: "29\"", sleeve: "11.5\"" },
+  ],
+  "mandarin-collar": [
+    { size: "XS", chest: "38\"", shoulder: "17.5\"", length: "27.5\"", sleeve: "9\"" },
+    { size: "S", chest: "40\"", shoulder: "18\"", length: "28\"", sleeve: "9.5\"" },
+    { size: "M", chest: "42\"", shoulder: "18.5\"", length: "28.5\"", sleeve: "10\"" },
+    { size: "L", chest: "44\"", shoulder: "19\"", length: "29\"", sleeve: "10.5\"" },
+    { size: "XL", chest: "46\"", shoulder: "19.5\"", length: "29.5\"", sleeve: "11\"" },
+    { size: "XXL", chest: "48\"", shoulder: "20\"", length: "30\"", sleeve: "11.5\"" },
+  ],
+};
+
 export const DEFAULT_SILHOUETTES = [
   {
     id: "classic-point-collar",
     name: "Classic Point Collar",
     basePrice: 500,
+    fitDescription: "Tailored relaxed fit with structured point collar. Features a gently curved shirttail hem suitable for tucking or wearing loose.",
+    measurements: DEFAULT_SILHOUETTE_MEASUREMENTS["classic-point-collar"],
     sizes: [
       { size: "XS", price: 400, enabled: true },
       { size: "S", price: 500, enabled: true },
@@ -26,6 +63,8 @@ export const DEFAULT_SILHOUETTES = [
     id: "cuban-collar",
     name: "Cuban Collar",
     basePrice: 600,
+    fitDescription: "Relaxed boxy cut with an open notch resort collar. Designed with a clean straight hem and wider chest allowance for effortless drape.",
+    measurements: DEFAULT_SILHOUETTE_MEASUREMENTS["cuban-collar"],
     sizes: [
       { size: "XS", price: 500, enabled: true },
       { size: "S", price: 600, enabled: true },
@@ -48,6 +87,8 @@ export const DEFAULT_SILHOUETTES = [
     id: "mandarin-collar",
     name: "Mandarin Collar",
     basePrice: 700,
+    fitDescription: "Clean architectural cut with a standing band collar. Minimalist silhouette with an understated drape and classic hem.",
+    measurements: DEFAULT_SILHOUETTE_MEASUREMENTS["mandarin-collar"],
     sizes: [
       { size: "XS", price: 600, enabled: true },
       { size: "S", price: 700, enabled: true },
@@ -203,6 +244,29 @@ export function getSilhouettePriceForSize(
   const base = Number(sil.basePrice) || 500;
   const adj = globalSizeValues?.[size] ?? 0;
   return base + Number(adj);
+}
+
+export function getSilhouetteMeasurements(sil: any): SilhouetteMeasurement[] {
+  if (sil?.measurements && Array.isArray(sil.measurements) && sil.measurements.length > 0) {
+    return sil.measurements;
+  }
+  if (sil?.id && DEFAULT_SILHOUETTE_MEASUREMENTS[sil.id]) {
+    return DEFAULT_SILHOUETTE_MEASUREMENTS[sil.id];
+  }
+  return DEFAULT_SILHOUETTE_MEASUREMENTS["classic-point-collar"];
+}
+
+export function getSilhouetteFitDescription(sil: any): string {
+  if (sil?.fitDescription && typeof sil.fitDescription === "string" && sil.fitDescription.trim()) {
+    return sil.fitDescription.trim();
+  }
+  if (sil?.id === "cuban-collar") {
+    return "Relaxed boxy cut with an open notch resort collar. Designed with a clean straight hem and wider chest allowance for effortless drape.";
+  }
+  if (sil?.id === "mandarin-collar") {
+    return "Clean architectural cut with a standing band collar. Minimalist silhouette with an understated drape and classic hem.";
+  }
+  return "Tailored relaxed fit with structured point collar. Features a gently curved shirttail hem suitable for tucking or wearing loose.";
 }
 
 export function normalizeLinenColors(colors: any[]): LinenColorSwatch[] {

@@ -3,10 +3,12 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useState, useEffect } from "react";
-import { X, Check, Info, ShoppingBag } from "lucide-react";
+import { X, Check, Info, ShoppingBag, ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
 import { useShop } from "@/context/ShopContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { DEFAULT_SILHOUETTES } from "@/lib/curatorDefaults";
 
 type ProductDetails = {
   id: string;
@@ -18,7 +20,14 @@ type ProductDetails = {
   collectionName?: string | null;
   categories?: { id?: string; name: string; slug?: string }[];
   hasSilhouette: boolean;
-  fits: { name: string, iconUrl: string }[];
+  fits: {
+    name: string;
+    iconUrl: string;
+    image?: string;
+    description?: string;
+    fitGuideDescription?: string;
+    fitGuideImage?: string;
+  }[];
   accordions?: { title: string, content: string }[];
   gender: string[];
   sizes?: string[];
@@ -32,14 +41,54 @@ type ProductDetails = {
 export default function ProductDetailClient({ product }: { product: ProductDetails }) {
   const isContain = product.imageFit === "contain";
   const isLandscape = product.imageFit === "landscape";
-  const [selectedSize, setSelectedSize] = useState("S");
+  const defaultSilhouettes: {
+    name: string;
+    iconUrl: string;
+    image?: string;
+    description?: string;
+    fitGuideDescription?: string;
+    fitGuideImage?: string;
+  }[] = [
+    {
+      name: "Classic Point Collar",
+      iconUrl: "",
+      image: "",
+      description: "A timeless structured point collar cut tailored with traditional shoulder lines and a gentle curved hem. Perfect for both tucked and relaxed untucked wear.",
+      fitGuideDescription: "Tailored relaxed fit with structured point collar. Features a gently curved shirttail hem.",
+      fitGuideImage: "",
+    },
+    {
+      name: "Cuban Collar",
+      iconUrl: "",
+      image: "",
+      description: "A relaxed camp/resort collar cut with open notch lapels, dropped shoulder allowance, and a clean straight hem. Engineered for easygoing, fluid drape.",
+      fitGuideDescription: "Relaxed boxy cut with open notch resort collar. Designed with a clean straight hem and wider chest allowance.",
+      fitGuideImage: "",
+    },
+    {
+      name: "Mandarin Collar",
+      iconUrl: "",
+      image: "",
+      description: "A minimalist band standing collar silhouette with clean architectural seamlines. Offers an understated, refined modern Eastern tailoring aesthetic.",
+      fitGuideDescription: "Clean architectural cut with a standing band collar. Minimalist silhouette with an understated drape.",
+      fitGuideImage: "",
+    },
+  ];
+
+  const availableSilhouettes = product.fits && product.fits.length > 0
+    ? product.fits
+    : defaultSilhouettes;
+
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
-  const [isSilhouetteModalOpen, setIsSilhouetteModalOpen] = useState(false);
   const [isFitGuideOpen, setIsFitGuideOpen] = useState(false);
+  const [isSilhouetteDrawerOpen, setIsSilhouetteDrawerOpen] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [selectedSilhouette, setSelectedSilhouette] = useState(
-    product.fits && product.fits.length > 0 ? product.fits[0].name : "original"
-  );
+  const [selectedSilhouette, setSelectedSilhouette] = useState<string | null>(null);
+  const [selectionError, setSelectionError] = useState<{ size: boolean; silhouette: boolean }>({
+    size: false,
+    silhouette: false,
+  });
   const [isAdded, setIsAdded] = useState(false);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
 
@@ -47,15 +96,17 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const { data: session } = useSession();
   const router = useRouter();
 
-  // Close on ESC and lock body scroll when cart modal is open
+  // Close on ESC and lock body scroll when modal or side drawer is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsCartModalOpen(false);
+        setIsFitGuideOpen(false);
+        setIsSilhouetteDrawerOpen(false);
       }
     };
 
-    if (isCartModalOpen) {
+    if (isCartModalOpen || isFitGuideOpen || isSilhouetteDrawerOpen) {
       document.body.style.overflow = "hidden";
       window.addEventListener("keydown", handleKeyDown);
     } else {
@@ -66,7 +117,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isCartModalOpen]);
+  }, [isCartModalOpen, isFitGuideOpen, isSilhouetteDrawerOpen]);
 
   const colors = product.colors || [];
   const currentColorImages = (colors.length > 0 && selectedColorIndex !== null && selectedColorIndex < colors.length && colors[selectedColorIndex].images.length > 0)
@@ -81,6 +132,22 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
   const handleAddToCart = () => {
     if (!session) {
       router.push("/login");
+      return;
+    }
+
+    // Validation: Both size and silhouette are mandatory
+    const missingSize = !selectedSize;
+    const missingSilhouette = !selectedSilhouette;
+
+    if (missingSize || missingSilhouette) {
+      setSelectionError({ size: missingSize, silhouette: missingSilhouette });
+      if (missingSize && missingSilhouette) {
+        toast.error("Please select a Size and Silhouette before adding to cart.");
+      } else if (missingSize) {
+        toast.error("Please select a Size before adding to cart.");
+      } else {
+        toast.error("Please select a Silhouette before adding to cart.");
+      }
       return;
     }
 
@@ -121,6 +188,25 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
       <Navbar variant="dark" />
 
       <div className="pt-20 md:pt-32 pb-24 px-0 md:px-8 lg:px-16 w-full max-w-[1700px] mx-auto">
+
+        {/* Back Button */}
+        <div className="px-6 md:px-0 mb-4 md:mb-6">
+          <button
+            type="button"
+            suppressHydrationWarning
+            aria-label="Go back"
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/shop/all");
+              }
+            }}
+            className="group p-1 text-gray-500 hover:text-[#79A7D3] inline-flex items-center justify-center transition-colors duration-200 cursor-pointer"
+          >
+            <ArrowLeft size={22} strokeWidth={1.5} className="group-hover:-translate-x-0.5 transition-transform" />
+          </button>
+        </div>
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start">
 
@@ -230,45 +316,122 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
               )}
 
               {/* Sizes */}
-              <div className="flex justify-between items-end mb-4">
+              <div className="mb-5">
+                <div className="flex justify-between items-baseline mb-2">
+                  <span className="text-[12.5px] md:text-[13px] font-garamond uppercase tracking-wider text-gray-700 font-medium">
+                    Size:{" "}
+                    {selectedSize ? (
+                      <span className="text-gray-900 font-semibold">{selectedSize}</span>
+                    ) : (
+                      <span className={`text-xs italic ${selectionError.size ? "text-red-600 font-medium" : "text-gray-400"}`}>
+                        {selectionError.size ? "Please select a size *" : "Select size *"}
+                      </span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    suppressHydrationWarning
+                    onClick={() => setIsFitGuideOpen(true)}
+                    className="text-xs text-gray-500 hover:text-gray-800 tracking-wide underline font-garamond cursor-pointer"
+                  >
+                    Fit Guide {'>'}
+                  </button>
+                </div>
                 <div className="flex gap-2">
                   {sizes.map(size => (
                     <button
                       key={size}
+                      type="button"
                       suppressHydrationWarning
-                      onClick={() => setSelectedSize(size)}
-                      className={`w-11 h-11 flex items-center justify-center text-sm border transition-all ${selectedSize === size
-                          ? 'border-[#79A7D3] bg-white text-[#79A7D3] font-medium shadow-sm'
+                      onClick={() => {
+                        setSelectedSize(size);
+                        if (selectionError.size) {
+                          setSelectionError(prev => ({ ...prev, size: false }));
+                        }
+                      }}
+                      className={`w-11 h-11 flex items-center justify-center text-sm border transition-all cursor-pointer ${
+                        selectedSize === size
+                          ? 'border-[#79A7D3] bg-white text-[#79A7D3] font-medium shadow-sm ring-1 ring-[#79A7D3]'
+                          : selectionError.size
+                          ? 'border-red-300 text-gray-700 bg-red-50/20 hover:border-red-400'
                           : 'border-gray-200 text-gray-600 hover:border-gray-400 bg-white'
-                        }`}
+                      }`}
                     >
                       {size}
                     </button>
                   ))}
                 </div>
-                <button
-                  suppressHydrationWarning
-                  onClick={() => setIsFitGuideOpen(true)}
-                  className="text-sm text-gray-500 hover:text-gray-800 tracking-wide"
-                >
-                  Fit Guide {'>'}
-                </button>
               </div>
 
-              {/* Silhouette Dropdown */}
-              {product.hasSilhouette && product.fits?.length > 0 && (
-                <div className="mb-6">
-                  <p className="text-sm text-gray-500 italic mb-2">Prefer this illustration in another form? Choose from our available silhouettes.</p>
+              {/* Silhouette Selection */}
+              <div className="mb-6">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-[12.5px] md:text-[13px] font-garamond uppercase tracking-wider text-gray-700 font-medium">
+                    Silhouette:{" "}
+                    {selectedSilhouette ? (
+                      <span className="text-gray-900 font-semibold">{selectedSilhouette}</span>
+                    ) : (
+                      <span className={`text-xs italic ${selectionError.silhouette ? "text-red-600 font-medium" : "text-gray-400"}`}>
+                        {selectionError.silhouette ? "Please select a silhouette *" : "Select silhouette *"}
+                      </span>
+                    )}
+                  </span>
                   <button
+                    type="button"
                     suppressHydrationWarning
-                    onClick={() => setIsSilhouetteModalOpen(true)}
-                    className="w-full border border-gray-300 py-3 px-4 flex justify-between items-center text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsSilhouetteDrawerOpen(true)}
+                    className="text-xs text-gray-400 hover:text-gray-800 underline font-garamond cursor-pointer"
                   >
-                    <span className="mx-auto tracking-wide">
-                      {`Selected: ${selectedSilhouette}`}
-                    </span>
-                    <span className="text-gray-400">+</span>
+                    View cuts
                   </button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableSilhouettes.map((fitItem) => {
+                    const isSelected = selectedSilhouette === fitItem.name;
+                    return (
+                      <button
+                        key={fitItem.name}
+                        type="button"
+                        suppressHydrationWarning
+                        onClick={() => {
+                          setSelectedSilhouette(fitItem.name);
+                          if (selectionError.silhouette) {
+                            setSelectionError(prev => ({ ...prev, silhouette: false }));
+                          }
+                          setIsSilhouetteDrawerOpen(true);
+                        }}
+                        className={`min-w-[110px] px-4 py-3 rounded-sm border flex flex-col items-center justify-center gap-2 text-[13px] font-garamond tracking-wide transition-all cursor-pointer ${
+                          isSelected
+                            ? "border-[#79A7D3] ring-1 ring-[#79A7D3] bg-[#F4F8FB]/40 text-[#79A7D3] font-medium shadow-xs"
+                            : selectionError.silhouette
+                            ? "border-red-300 hover:border-red-400 bg-red-50/20 text-gray-700"
+                            : "border-gray-200 hover:border-gray-400 bg-white text-gray-600"
+                        }`}
+                      >
+                        {fitItem.iconUrl && (
+                          <div className="w-14 h-14 shrink-0 flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain mix-blend-multiply" />
+                          </div>
+                        )}
+                        <span className="text-center leading-tight">{fitItem.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Selection Reminder Banner */}
+              {(selectionError.size || selectionError.silhouette) && (
+                <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 text-red-700 text-xs font-garamond rounded-sm flex items-center gap-1.5 animate-in fade-in duration-200">
+                  <span className="font-semibold text-red-800">Please choose:</span>
+                  <span>
+                    {selectionError.size && selectionError.silhouette
+                      ? "Both your Size and Silhouette are required before adding to cart."
+                      : selectionError.size
+                      ? "Please select your Size above."
+                      : "Please select your Silhouette above."}
+                  </span>
                 </div>
               )}
 
@@ -334,71 +497,7 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
 
         <Footer />
 
-        {/* Silhouette Selection Modal */}
-        {isSilhouetteModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-            {/* Backdrop */}
-            <div
-              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-              onClick={() => setIsSilhouetteModalOpen(false)}
-            ></div>
-
-            {/* Modal Content */}
-            <div className="relative w-full max-w-2xl bg-[#FBF9F6] rounded-sm shadow-xl max-h-[90vh] overflow-y-auto flex flex-col">
-              <button
-                onClick={() => setIsSilhouetteModalOpen(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-              >
-                <X size={20} strokeWidth={1.5} />
-              </button>
-
-              <div className="px-8 py-10 flex-1">
-                <h2 className="text-center font-garamond text-xl tracking-widest text-gray-800 mb-2">CHOOSE YOUR SILHOUETTE</h2>
-                <p className="text-center text-sm text-gray-600 mb-10">Select the silhouette you prefer for this illustration.</p>
-
-                {/* Dynamic Fits */}
-                <div className="mb-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {product.fits.map((fitItem, idx) => (
-                      <div
-                        key={idx}
-                        onClick={() => setSelectedSilhouette(fitItem.name)}
-                        className={`border rounded-md p-4 flex flex-col items-center cursor-pointer transition-colors relative ${selectedSilhouette === fitItem.name ? 'border-gray-800 bg-white' : 'border-gray-200 hover:border-gray-300'}`}
-                      >
-                        <div className={`absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center border ${selectedSilhouette === fitItem.name ? 'bg-[#3A3831] border-[#3A3831] text-white' : 'border-gray-400'}`}>
-                          {selectedSilhouette === fitItem.name && <Check size={12} strokeWidth={3} />}
-                        </div>
-                        <div className="w-20 h-20 bg-white border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2 p-2">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
-                        </div>
-                        <p className="font-garamond text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Sticky Bottom Actions */}
-              <div className="px-8 pb-8 pt-4 bg-[#FBF9F6] sticky bottom-0 border-t border-gray-200">
-                <div className="flex items-start justify-center gap-2 mb-6">
-                  <Info size={14} className="text-gray-500 mt-0.5 shrink-0" strokeWidth={1.5} />
-                  <p className="text-xs text-gray-600 text-center max-w-sm">Illustration placement may vary slightly to complement the chosen silhouette.</p>
-                </div>
-                <button
-                  onClick={() => setIsSilhouetteModalOpen(false)}
-                  className="w-full bg-[#3A3831] hover:bg-[#2A2821] text-white py-4 font-garamond tracking-widest text-sm transition-colors"
-                >
-                  CONFIRM SILHOUETTE
-                </button>
-              </div>
-
-            </div>
-          </div>
-        )}
-
-        {/* Fit Guide Slide-over Drawer */}
+        {/* Fit Guide Slide-over Drawer (Garment Sizing S, M, L, XL, XXL) */}
         <div
           className={`fixed inset-0 z-50 transition-opacity duration-300 ${isFitGuideOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
@@ -408,33 +507,34 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
           />
 
           <div
-            className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out transform ${isFitGuideOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
+            className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out transform ${isFitGuideOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col z-20`}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="font-garamond text-xl tracking-widest text-gray-900">FIT GUIDE</h2>
               <button
+                type="button"
                 onClick={() => setIsFitGuideOpen(false)}
-                className="p-2 text-gray-400 hover:text-gray-800 transition-colors bg-gray-50 rounded-full"
+                className="p-2 text-gray-400 hover:text-gray-800 transition-colors bg-gray-50 rounded-full cursor-pointer"
               >
                 <X size={20} strokeWidth={1.5} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 overflow-y-auto p-6 md:p-8">
               {product.fitGuideDescription ? (
-                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-10">
+                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-8 font-serif">
                   {product.fitGuideDescription}
                 </p>
               ) : (
-                <p className="text-sm text-gray-500 italic mb-10">
+                <p className="text-sm text-gray-500 italic mb-8 font-serif">
                   Fit guide description is not available for this piece yet.
                 </p>
               )}
 
               {product.fitGuideImage && (
-                <div className="w-full bg-gray-50">
+                <div className="w-full bg-gray-50 rounded-sm overflow-hidden p-2 border border-gray-100">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={product.fitGuideImage}
@@ -444,6 +544,154 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Silhouette Slide-over Drawer */}
+        <div
+          className={`fixed inset-0 z-50 transition-opacity duration-300 ${isSilhouetteDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        >
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setIsSilhouetteDrawerOpen(false)}
+          />
+
+          <div
+            className={`absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out transform ${
+              isSilhouetteDrawerOpen ? 'translate-x-0' : 'translate-x-full'
+            } flex flex-col z-20`}
+          >
+            {(() => {
+              const activeFitName = selectedSilhouette || availableSilhouettes[0]?.name;
+              const activeFit = availableSilhouettes.find((f) => f.name === activeFitName) || availableSilhouettes[0];
+
+              const getFitDesc = () => {
+                if (activeFit?.description?.trim()) return activeFit.description.trim();
+                const lower = (activeFitName || "").toLowerCase();
+                if (lower.includes("point") || lower.includes("classic")) {
+                  return "A timeless structured point collar cut tailored with traditional shoulder lines and a gentle curved hem. Perfect for both tucked and relaxed untucked wear.";
+                }
+                if (lower.includes("cuban") || lower.includes("camp") || lower.includes("resort")) {
+                  return "A relaxed camp/resort collar cut with open notch lapels, dropped shoulder allowance, and a clean straight hem. Engineered for easygoing, fluid drape.";
+                }
+                if (lower.includes("mandarin") || lower.includes("band") || lower.includes("chinese")) {
+                  return "A minimalist band standing collar silhouette with clean architectural seamlines. Offers an understated, refined modern Eastern tailoring aesthetic.";
+                }
+                return "Thoughtfully tailored silhouette with mindful proportions and refined craftsmanship. Crafted for comfortable movement and effortless style.";
+              };
+
+              return (
+                <>
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                    <h2 className="font-garamond text-[14px] md:text-[15px] text-gray-500 font-medium tracking-[0.1em] uppercase">
+                      {activeFitName}
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setIsSilhouetteDrawerOpen(false)}
+                      className="p-2 text-gray-400 hover:text-gray-800 transition-colors bg-gray-50 rounded-full cursor-pointer"
+                      aria-label="Close drawer"
+                    >
+                      <X size={20} strokeWidth={1.5} />
+                    </button>
+                  </div>
+
+                  {/* Content Area - Stacked: Image -> Description -> Image */}
+                  <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                    {/* 1. First Image: Cut Image */}
+                    <div className="w-full bg-gray-50 rounded-sm overflow-hidden mb-8 border border-gray-100">
+                      {activeFit.image ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={activeFit.image}
+                          alt={`${activeFit.name} Cut Photo`}
+                          className="w-full h-auto object-cover"
+                        />
+                      ) : activeFit.iconUrl ? (
+                        <div className="w-full py-10 flex flex-col items-center justify-center">
+                          <div className="w-24 h-24 flex items-center justify-center">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={activeFit.iconUrl}
+                              alt={activeFit.name}
+                              className="max-w-full max-h-full object-contain"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        (() => {
+                          const lower = (activeFitName || "").toLowerCase();
+                          const matchedSvg =
+                            lower.includes("cuban") || lower.includes("camp") || lower.includes("resort")
+                              ? DEFAULT_SILHOUETTES.find((s) => s.id === "cuban-collar")?.svg
+                              : lower.includes("mandarin") || lower.includes("band") || lower.includes("chinese")
+                              ? DEFAULT_SILHOUETTES.find((s) => s.id === "mandarin-collar")?.svg
+                              : DEFAULT_SILHOUETTES.find((s) => s.id === "classic-point-collar")?.svg;
+
+                          return (
+                            <div className="w-full py-10 flex flex-col items-center justify-center text-gray-500">
+                              {matchedSvg && (
+                                <div
+                                  className="w-24 h-24 text-gray-700"
+                                  dangerouslySetInnerHTML={{ __html: matchedSvg }}
+                                />
+                              )}
+                              <span className="text-[11px] font-garamond uppercase tracking-widest text-gray-400 mt-3">
+                                {activeFit.name}
+                              </span>
+                            </div>
+                          );
+                        })()
+                      )}
+                    </div>
+
+                    {/* 2. Middle: Description Paragraph */}
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap mb-8 font-serif">
+                      {getFitDesc()}
+                    </p>
+
+                    {/* 3. Second Image: Fit Guide Image */}
+                    <div className="w-full bg-gray-50 rounded-sm overflow-hidden p-2 border border-gray-100">
+                      {activeFit.fitGuideImage || product.fitGuideImage ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={activeFit.fitGuideImage || product.fitGuideImage}
+                          alt={`${activeFit.name} Fit Guide`}
+                          className="w-full h-auto object-contain mix-blend-multiply"
+                        />
+                      ) : (
+                        <div className="w-full py-10 flex flex-col items-center justify-center text-center px-4">
+                          <span className="font-garamond text-sm uppercase tracking-widest text-gray-500 mb-1">
+                            Fit Guide
+                          </span>
+                          <span className="text-xs font-serif italic text-gray-400">
+                            Fit guide image not uploaded for this cut yet.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Sticky Bottom Actions */}
+                  <div className="p-6 border-t border-gray-100 bg-white shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedSilhouette(activeFitName);
+                        if (selectionError.silhouette) {
+                          setSelectionError((prev) => ({ ...prev, silhouette: false }));
+                        }
+                        setIsSilhouetteDrawerOpen(false);
+                      }}
+                      className="w-full border border-[#79A7D3] bg-white hover:bg-[#F4F8FB] text-[#79A7D3] font-serif text-lg tracking-wide py-3.5 px-4 transition-all duration-200 cursor-pointer shadow-xs active:scale-[0.99] font-medium"
+                    >
+                      Confirm Silhouette
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
 
@@ -498,8 +746,8 @@ export default function ProductDetailClient({ product }: { product: ProductDetai
                   </p>
                   <div className="text-[12px] text-gray-500 mt-0.5 space-y-0.5 font-light">
                     <p>Size: <span className="text-gray-800 font-normal">{selectedSize}</span></p>
-                    {product.hasSilhouette && selectedSilhouette && (
-                      <p className="truncate">Fit: <span className="text-gray-800 font-normal">{selectedSilhouette}</span></p>
+                    {selectedSilhouette && (
+                      <p className="truncate">Silhouette: <span className="text-gray-800 font-normal">{selectedSilhouette}</span></p>
                     )}
                   </div>
                   <p className="text-sm font-serif text-[#4A7DAF] font-semibold mt-1.5">

@@ -58,7 +58,14 @@ export default function EditProductForm({
 
   // Fits
   const [hasSilhouette, setHasSilhouette] = useState(product.hasSilhouette || false);
-  const [fits, setFits] = useState<{ name: string, iconUrl: string }[]>(
+  const [fits, setFits] = useState<{
+    name: string;
+    iconUrl: string;
+    image?: string;
+    description?: string;
+    fitGuideDescription?: string;
+    fitGuideImage?: string;
+  }[]>(
     Array.isArray(product.fits) ? product.fits : []
   );
 
@@ -92,6 +99,16 @@ export default function EditProductForm({
   const [isAddFromProductModalOpen, setIsAddFromProductModalOpen] = useState(false);
   const [newFitName, setNewFitName] = useState("");
   const [newFitIconUrl, setNewFitIconUrl] = useState("");
+  const [newFitImageUrl, setNewFitImageUrl] = useState("");
+  const [newFitGuideImageUrl, setNewFitGuideImageUrl] = useState("");
+  const [newFitDesc, setNewFitDesc] = useState("");
+  const [newFitNote, setNewFitNote] = useState("");
+  const [uploadingFitCardIndex, setUploadingFitCardIndex] = useState<number | null>(null);
+  const [uploadingFitCardFitGuideIndex, setUploadingFitCardFitGuideIndex] = useState<number | null>(null);
+  const [fitImageUploading, setFitImageUploading] = useState(false);
+  const [fitGuideImageUploading, setFitGuideImageUploading] = useState(false);
+  const fitImageInputRef = useRef<HTMLInputElement>(null);
+  const fitGuideImageInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddVariantFromExisting = (variant: {
     name: string;
@@ -199,14 +216,145 @@ export default function EditProductForm({
     }
   };
 
-  const addFit = () => {
-    if (!newFitName.trim() || !newFitIconUrl) {
-      toast.error("Please provide both a name and an uploaded icon for the new fit.");
+  const handleNewFitImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds the 2MB limit.");
+      if (fitImageInputRef.current) fitImageInputRef.current.value = "";
       return;
     }
-    setFits([...fits, { name: newFitName.trim(), iconUrl: newFitIconUrl }]);
+
+    setFitImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setNewFitImageUrl(data.url);
+        toast.success("Silhouette image uploaded!");
+      }
+    } catch (error) {
+      console.error("Silhouette image upload failed", error);
+      toast.error("Failed to upload silhouette image");
+    } finally {
+      setFitImageUploading(false);
+      if (fitImageInputRef.current) fitImageInputRef.current.value = "";
+    }
+  };
+
+  const handleNewFitGuideImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds the 2MB limit.");
+      if (fitGuideImageInputRef.current) fitGuideImageInputRef.current.value = "";
+      return;
+    }
+
+    setFitGuideImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setNewFitGuideImageUrl(data.url);
+        toast.success("Silhouette Fit Guide image uploaded!");
+      }
+    } catch (error) {
+      console.error("Fit Guide image upload failed", error);
+      toast.error("Failed to upload Fit Guide image");
+    } finally {
+      setFitGuideImageUploading(false);
+      if (fitGuideImageInputRef.current) fitGuideImageInputRef.current.value = "";
+    }
+  };
+
+  const handleUploadFitCardImage = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds the 2MB limit.");
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingFitCardIndex(index);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFits(prev => prev.map((item, i) => i === index ? { ...item, image: data.url } : item));
+        toast.success("Silhouette image updated!");
+      }
+    } catch (error) {
+      console.error("Silhouette card image upload failed", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploadingFitCardIndex(null);
+      e.target.value = "";
+    }
+  };
+
+  const handleUploadFitCardFitGuideImage = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds the 2MB limit.");
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingFitCardFitGuideIndex(index);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFits(prev => prev.map((item, i) => i === index ? { ...item, fitGuideImage: data.url } : item));
+        toast.success("Silhouette Fit Guide image updated!");
+      }
+    } catch (error) {
+      console.error("Fit guide image upload failed", error);
+      toast.error("Failed to upload Fit Guide image");
+    } finally {
+      setUploadingFitCardFitGuideIndex(null);
+      e.target.value = "";
+    }
+  };
+
+  const addFit = () => {
+    if (!newFitName.trim()) {
+      toast.error("Please provide a name for the new silhouette.");
+      return;
+    }
+    setFits([
+      ...fits,
+      {
+        name: newFitName.trim(),
+        iconUrl: newFitIconUrl || "",
+        image: newFitImageUrl || "",
+        fitGuideImage: newFitGuideImageUrl || "",
+        description: newFitDesc.trim(),
+        fitGuideDescription: newFitNote.trim(),
+      },
+    ]);
     setNewFitName("");
     setNewFitIconUrl("");
+    setNewFitImageUrl("");
+    setNewFitGuideImageUrl("");
+    setNewFitDesc("");
+    setNewFitNote("");
+    toast.success("Silhouette added!");
   };
 
   const removeFit = (index: number) => {
@@ -1350,55 +1498,135 @@ export default function EditProductForm({
 
               {/* Add New Fit Form */}
               <div className="mb-10 bg-white p-6 border border-gray-200 rounded-md shadow-sm">
-                <h3 className="text-[10px] font-medium tracking-widest text-gray-500 mb-4 uppercase">Add New Fit</h3>
-                <div className="flex items-start gap-6">
+                <h3 className="text-[10px] font-medium tracking-widest text-gray-500 mb-4 uppercase">Add New Silhouette</h3>
+                <div className="flex flex-col md:flex-row items-start gap-6">
 
-                  {/* Icon Uploader */}
-                  <div className="shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => iconInputRef.current?.click()}
-                      className="w-24 h-24 bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors relative overflow-hidden"
-                    >
-                      {newFitIconUrl ? (
-                        <>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={newFitIconUrl} alt="Icon" className="w-full h-full object-contain p-2" />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <Upload size={16} className="text-white" />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {iconUploading ? (
-                            <span className="text-[10px] uppercase text-gray-400">Wait...</span>
-                          ) : (
-                            <>
-                              <Upload size={16} className="text-gray-400 mb-2" />
-                              <span className="text-[9px] uppercase tracking-wider text-gray-400">Upload Icon</span>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </button>
-                    <input type="file" ref={iconInputRef} onChange={handleIconUpload} accept="image/*" className="hidden" />
+                  {/* Uploads: Icon & Full Silhouette Image */}
+                  <div className="flex items-center gap-4 shrink-0">
+                    {/* Small Icon / Badge */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => iconInputRef.current?.click()}
+                        className="w-20 h-20 bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors relative overflow-hidden"
+                      >
+                        {newFitIconUrl ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={newFitIconUrl} alt="Icon" className="w-full h-full object-contain p-2" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <Upload size={14} className="text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {iconUploading ? (
+                              <span className="text-[9px] uppercase text-gray-400">Wait...</span>
+                            ) : (
+                              <>
+                                <Upload size={14} className="text-gray-400 mb-1" />
+                                <span className="text-[8.5px] uppercase tracking-wider text-gray-400">Badge Icon</span>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </button>
+                      <span className="text-[10px] text-gray-400 mt-1">Collar Icon</span>
+                      <input type="file" ref={iconInputRef} onChange={handleIconUpload} accept="image/*" className="hidden" />
+                    </div>
+
+                    {/* 1st Image: Cut Photo */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => fitImageInputRef.current?.click()}
+                        className="w-20 h-20 bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors relative overflow-hidden"
+                      >
+                        {newFitImageUrl ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={newFitImageUrl} alt="Silhouette photo" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <Upload size={14} className="text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {fitImageUploading ? (
+                              <span className="text-[9px] uppercase text-gray-400">Wait...</span>
+                            ) : (
+                              <>
+                                <Upload size={14} className="text-gray-400 mb-1" />
+                                <span className="text-[8px] uppercase tracking-wider text-gray-500 font-medium">1st: Cut</span>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </button>
+                      <span className="text-[9.5px] text-gray-500 font-medium mt-1">1st Image (Cut)</span>
+                      <input type="file" ref={fitImageInputRef} onChange={handleNewFitImageUpload} accept="image/*" className="hidden" />
+                    </div>
+
+                    {/* 2nd Image: Fit Guide Photo */}
+                    <div className="flex flex-col items-center">
+                      <button
+                        type="button"
+                        onClick={() => fitGuideImageInputRef.current?.click()}
+                        className="w-20 h-20 bg-gray-50 border border-gray-200 border-dashed flex flex-col items-center justify-center hover:bg-gray-100 hover:border-gray-400 transition-colors relative overflow-hidden"
+                      >
+                        {newFitGuideImageUrl ? (
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={newFitGuideImageUrl} alt="Fit Guide photo" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                              <Upload size={14} className="text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {fitGuideImageUploading ? (
+                              <span className="text-[9px] uppercase text-gray-400">Wait...</span>
+                            ) : (
+                              <>
+                                <Upload size={14} className="text-gray-400 mb-1" />
+                                <span className="text-[8px] uppercase tracking-wider text-gray-500 font-medium">2nd: Fit Guide</span>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </button>
+                      <span className="text-[9.5px] text-gray-500 font-medium mt-1">2nd Image (Fit Guide)</span>
+                      <input type="file" ref={fitGuideImageInputRef} onChange={handleNewFitGuideImageUpload} accept="image/*" className="hidden" />
+                    </div>
                   </div>
 
-                  {/* Name Input & Submit */}
-                  <div className="flex-1 flex flex-col gap-4">
+                  {/* Text Inputs & Submit */}
+                  <div className="flex-1 w-full flex flex-col gap-3">
                     <input
                       type="text"
                       value={newFitName}
                       onChange={(e) => setNewFitName(e.target.value)}
-                      placeholder="e.g. Drop-Shoulder Shirt"
+                      placeholder="Silhouette Name (e.g. Cuban Collar, Classic Point Collar)"
                       className="w-full border-b border-gray-300 bg-transparent py-2 text-sm text-gray-800 focus:outline-none focus:border-gray-800 transition-colors placeholder:text-gray-400 font-serif"
                     />
+                    <div>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1 font-medium">
+                        Description Paragraph (Craftsmanship, styling, and cut drape):
+                      </span>
+                      <textarea
+                        rows={3}
+                        value={newFitDesc}
+                        onChange={(e) => setNewFitDesc(e.target.value)}
+                        placeholder="Write description paragraph for this silhouette..."
+                        className="w-full text-xs p-2 border border-gray-200 rounded font-serif placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={addFit}
-                      className="bg-[#2C2B29] text-white py-2 px-6 text-[10px] uppercase tracking-widest hover:bg-black self-start rounded-sm"
+                      className="bg-[#2C2B29] text-white py-2 px-6 text-[10px] uppercase tracking-widest hover:bg-black self-start rounded-sm cursor-pointer mt-1"
                     >
-                      Add Fit
+                      Add Silhouette
                     </button>
                   </div>
                 </div>
@@ -1406,27 +1634,159 @@ export default function EditProductForm({
 
               {/* Dynamic Fits List */}
               <div>
-                <h3 className="text-[10px] font-medium tracking-widest text-gray-500 mb-4 uppercase">Available Fits ({fits.length})</h3>
+                <h3 className="text-[10px] font-medium tracking-widest text-gray-500 mb-4 uppercase">Available Silhouettes ({fits.length})</h3>
                 {fits.length === 0 ? (
                   <div className="text-center py-10 border border-gray-200 border-dashed text-gray-400 text-sm">
-                    No fits added yet.
+                    No silhouettes added yet. Click &quot;Add Silhouette&quot; above to configure cuts.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     {fits.map((fitItem, idx) => (
-                      <div key={idx} className="bg-white border border-gray-200 rounded-md p-4 flex flex-col items-center relative group shadow-sm">
+                      <div key={idx} className="bg-white border border-gray-200 rounded-md p-5 flex flex-col gap-4 relative group shadow-xs">
                         <button
                           type="button"
                           onClick={() => removeFit(idx)}
-                          className="absolute top-2 right-2 p-1.5 bg-red-50 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-100"
+                          className="absolute top-3 right-3 p-1.5 bg-red-50 text-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-100 cursor-pointer"
+                          title="Delete this silhouette"
                         >
-                          <Trash2 size={12} />
+                          <Trash2 size={13} />
                         </button>
-                        <div className="w-20 h-20 bg-gray-50 border border-gray-100 flex items-center justify-center rounded-sm mb-4 mt-2 p-2">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
+
+                        <div className="flex flex-col sm:flex-row items-start gap-4">
+                          {/* 3 Thumbnails: Badge Icon, 1st Cut Image, 2nd Fit Guide Image */}
+                          <div className="flex flex-wrap items-center gap-3 shrink-0">
+                            {/* Badge Icon */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-16 h-16 bg-gray-50 border border-gray-200 flex items-center justify-center rounded-sm p-1.5 relative">
+                                {fitItem.iconUrl ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={fitItem.iconUrl} alt={fitItem.name} className="w-full h-full object-contain" />
+                                ) : (
+                                  <span className="text-[9px] text-gray-400 uppercase text-center">No Icon</span>
+                                )}
+                              </div>
+                              <span className="text-[9px] text-gray-400 mt-1">Badge</span>
+                            </div>
+
+                            {/* 1st Image: Cut Photo */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-16 h-16 bg-gray-50 border border-gray-200 flex items-center justify-center rounded-sm overflow-hidden relative">
+                                {fitItem.image ? (
+                                  <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={fitItem.image} alt="1st: Cut" className="w-full h-full object-cover" />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setFits(prev => prev.map((item, i) => i === idx ? { ...item, image: "" } : item));
+                                      }}
+                                      className="absolute top-0.5 right-0.5 bg-black/60 text-white p-0.5 rounded-full hover:bg-black text-[9px] cursor-pointer"
+                                      title="Remove cut photo"
+                                    >
+                                      ✕
+                                    </button>
+                                  </>
+                                ) : (
+                                  <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 text-gray-400 p-1 text-center">
+                                    <Upload size={12} className="mb-0.5" />
+                                    <span className="text-[7.5px] uppercase tracking-wider">1st: Cut</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleUploadFitCardImage(idx, e)}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                )}
+                              </div>
+                              <label className="text-[9px] text-[#79A7D3] hover:underline cursor-pointer mt-1 font-medium">
+                                {fitItem.image ? "Change 1st" : "+ 1st Image"}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleUploadFitCardImage(idx, e)}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+
+                            {/* 2nd Image: Fit Guide Photo */}
+                            <div className="flex flex-col items-center">
+                              <div className="w-16 h-16 bg-gray-50 border border-gray-200 flex items-center justify-center rounded-sm overflow-hidden relative">
+                                {fitItem.fitGuideImage ? (
+                                  <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={fitItem.fitGuideImage} alt="2nd: Fit Guide" className="w-full h-full object-cover" />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setFits(prev => prev.map((item, i) => i === idx ? { ...item, fitGuideImage: "" } : item));
+                                      }}
+                                      className="absolute top-0.5 right-0.5 bg-black/60 text-white p-0.5 rounded-full hover:bg-black text-[9px] cursor-pointer"
+                                      title="Remove fit guide photo"
+                                    >
+                                      ✕
+                                    </button>
+                                  </>
+                                ) : (
+                                  <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 text-gray-400 p-1 text-center">
+                                    <Upload size={12} className="mb-0.5" />
+                                    <span className="text-[7.5px] uppercase tracking-wider">2nd: Fit Guide</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={(e) => handleUploadFitCardFitGuideImage(idx, e)}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                )}
+                              </div>
+                              <label className="text-[9px] text-[#79A7D3] hover:underline cursor-pointer mt-1 font-medium">
+                                {fitItem.fitGuideImage ? "Change 2nd" : "+ 2nd Image"}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleUploadFitCardFitGuideImage(idx, e)}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Editable Silhouette Name & Description Paragraph */}
+                          <div className="flex-1 w-full space-y-2">
+                            <div>
+                              <span className="text-[10px] text-gray-400 uppercase tracking-wider block mb-0.5">Silhouette Name</span>
+                              <input
+                                type="text"
+                                value={fitItem.name}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFits(prev => prev.map((item, i) => i === idx ? { ...item, name: val } : item));
+                                }}
+                                className="font-serif text-gray-900 text-sm font-medium border-b border-gray-200 hover:border-gray-400 focus:border-gray-800 outline-none pb-0.5 w-full max-w-sm"
+                                placeholder="Silhouette name"
+                              />
+                            </div>
+
+                            {/* Description Paragraph Textarea */}
+                            <div>
+                              <span className="text-[10px] text-gray-500 uppercase tracking-wider block mb-1 font-medium">
+                                Description Paragraph (Shown in customer side popup)
+                              </span>
+                              <textarea
+                                rows={3}
+                                placeholder="Describe the cut, collar styling, drape and craftsmanship details..."
+                                value={fitItem.description || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setFits(prev => prev.map((item, i) => i === idx ? { ...item, description: val } : item));
+                                }}
+                                className="w-full text-xs p-2 border border-gray-200 rounded font-serif placeholder:text-gray-400 bg-gray-50/50 focus:bg-white focus:outline-none focus:border-gray-400 text-gray-800"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <p className="font-serif text-gray-800 text-sm text-center leading-tight mb-1">{fitItem.name}</p>
                       </div>
                     ))}
                   </div>

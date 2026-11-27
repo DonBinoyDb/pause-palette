@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { MessageCircle, Mail } from "lucide-react";
 import Link from "next/link";
 
@@ -28,6 +29,10 @@ export default function ContactPage() {
       <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-32 pb-24">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
           
+          <div className="w-full mb-4 flex justify-start">
+            <BackButton fallbackHref="/" />
+          </div>
+
           {/* Header */}
           <header className="mb-14 flex flex-col items-center text-center">
             <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-normal tracking-[0.2em] uppercase mb-3">

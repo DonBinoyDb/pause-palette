@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BackButton from "@/components/BackButton";
 import { DEFAULT_PRIVACY_POLICY, PolicyPageData } from "@/lib/policyDefaults";
 
 export default function PrivacyPolicyPage() {
@@ -24,6 +25,9 @@ export default function PrivacyPolicyPage() {
       <Navbar variant="dark" />
       
       <div className="flex-1 container mx-auto px-6 md:px-12 lg:px-24 pt-36 md:pt-48 pb-32 max-w-4xl text-center">
+        <div className="mb-4 flex justify-start">
+          <BackButton fallbackHref="/" />
+        </div>
         <h1 className="font-garamond text-[16px] md:text-[18px] text-gray-500 font-semibold tracking-[0.2em] uppercase mb-10 md:mb-12">
           {data.title}
         </h1>
